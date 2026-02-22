@@ -51,7 +51,7 @@ export function AppProvider({ children }: { children: ReactNode }): JSX.Element 
     try {
       const cleanup = window.api.onActivationProgress((msg: string) => {
         setStatus(msg);
-        if (msg === 'Done') {
+        if (msg.includes('Done')) {
           refreshWorkspaces();
           setTimeout(() => setStatus('Ready'), 2000);
         }

@@ -75,7 +75,7 @@ export default function WorkspaceDetail(): JSX.Element | null {
 
   // Reset activating flag when activation completes or workspace becomes active
   useEffect(() => {
-    if (activating && (status === 'Ready' || status === 'Done' || isActive)) {
+    if (activating && (status === 'Ready' || status.includes('Done') || isActive)) {
       setActivating(false);
     }
   }, [activating, status, isActive]);
