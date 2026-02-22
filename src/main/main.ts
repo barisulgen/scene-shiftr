@@ -7,6 +7,9 @@ import { setNircmdPath } from './services/audio-controller';
 import { setAssetsPath } from './services/sound-player';
 import { createTray, updateTrayMenu, destroyTray } from './tray';
 import { setTrayRefreshCallback } from './tray-bridge';
+import { setDryRunCheck } from './services/workspace-manager';
+import { setLogDir } from './services/dry-run-logger';
+import { getSettings } from './store';
 
 const isMinimized = process.argv.includes('--minimized');
 
@@ -67,6 +70,8 @@ app.whenReady().then(async () => {
   setSnapshotDir(appDataDir);
   setNircmdPath(join(app.getAppPath(), 'tools', 'nircmd.exe'));
   setAssetsPath(join(app.getAppPath(), 'assets', 'sounds'));
+  setLogDir(join(appDataDir, 'logs'));
+  setDryRunCheck(() => getSettings().dryRun);
 
   // Register all IPC handlers
   registerAllHandlers();

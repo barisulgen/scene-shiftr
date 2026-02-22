@@ -6,6 +6,7 @@ export const DEFAULT_SETTINGS: GlobalSettings = {
   confirmBeforeSwitching: false,
   gracefulCloseTimeout: 5,
   activeWorkspaceId: null,
+  dryRun: false,
 };
 
 export const BUILT_IN_SOUNDS = [

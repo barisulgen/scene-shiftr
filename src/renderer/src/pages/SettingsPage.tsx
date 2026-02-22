@@ -11,6 +11,7 @@ export default function SettingsPage(): JSX.Element {
   const [defaultTransitionSound, setDefaultTransitionSound] = useState<string | null>(null);
   const [confirmBeforeSwitching, setConfirmBeforeSwitching] = useState(false);
   const [gracefulCloseTimeout, setGracefulCloseTimeout] = useState(5);
+  const [dryRun, setDryRun] = useState(false);
   const [saving, setSaving] = useState(false);
 
   // Sync local state when settings load
@@ -20,6 +21,7 @@ export default function SettingsPage(): JSX.Element {
       setDefaultTransitionSound(settings.defaultTransitionSound);
       setConfirmBeforeSwitching(settings.confirmBeforeSwitching);
       setGracefulCloseTimeout(settings.gracefulCloseTimeout);
+      setDryRun(settings.dryRun);
     }
   }, [settings]);
 
@@ -31,6 +33,7 @@ export default function SettingsPage(): JSX.Element {
         defaultTransitionSound,
         confirmBeforeSwitching,
         gracefulCloseTimeout,
+        dryRun,
       });
       setCurrentView('main');
     } catch {
@@ -134,6 +137,40 @@ export default function SettingsPage(): JSX.Element {
               className="w-24 px-3 py-2 rounded-md bg-zinc-800 border border-zinc-700 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-indigo-500"
             />
           </div>
+
+          {/* Separator */}
+          <div className="border-t border-zinc-800" />
+
+          {/* Dry Run Mode */}
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="block text-sm text-zinc-300">Dry Run Mode</span>
+              <span className="block text-xs text-zinc-500 mt-0.5">
+                Log all actions to a JSON file instead of executing them.
+                Logs saved to %APPDATA%/scene-shiftr/logs/
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setDryRun(!dryRun)}
+              className={`relative w-9 h-5 rounded-full transition-colors duration-200 ${
+                dryRun ? 'bg-amber-600' : 'bg-zinc-700'
+              }`}
+            >
+              <span
+                className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform duration-200 ${
+                  dryRun ? 'translate-x-4' : 'translate-x-0'
+                }`}
+              />
+            </button>
+          </div>
+          {dryRun && (
+            <div className="rounded-md bg-amber-900/20 border border-amber-800/40 px-4 py-3">
+              <p className="text-xs text-amber-400">
+                Dry run is active. Workspace activations will be logged but no system changes will be made.
+              </p>
+            </div>
+          )}
         </div>
       </div>
 

@@ -64,6 +64,13 @@ export interface GlobalSettings {
   confirmBeforeSwitching: boolean;
   gracefulCloseTimeout: number;
   activeWorkspaceId: string | null;
+  dryRun: boolean;
+}
+
+export interface DryRunLogEntry {
+  timestamp: string;
+  action: string;
+  details: Record<string, unknown>;
 }
 
 export type IpcChannel =
