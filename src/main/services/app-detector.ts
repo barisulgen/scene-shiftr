@@ -22,22 +22,37 @@ async function scanStartMenuShortcuts(directory: string): Promise<string[]> {
 }
 
 /**
- * Resolves a .lnk shortcut to its target path using PowerShell.
- * Returns null if the shortcut cannot be resolved or does not point to an .exe.
+ * Resolves a batch of .lnk shortcuts to their target paths using a single
+ * PowerShell process. Returns a Map of lnkPath → targetPath (only .exe targets).
  */
-async function resolveShortcut(lnkPath: string): Promise<string | null> {
+async function resolveShortcutsBatch(lnkPaths: string[]): Promise<Map<string, string>> {
+  const results = new Map<string, string>();
+  if (lnkPaths.length === 0) return results;
+
+  // Build a single PowerShell script that resolves all shortcuts at once
+  const escapedPaths = lnkPaths.map((p) => p.replace(/'/g, "''"));
+  const lines = escapedPaths.map(
+    (p) => `try { $s = $wsh.CreateShortcut('${p}'); Write-Output "$($s.TargetPath)" } catch { Write-Output "" }`
+  );
+  const script = `$wsh = New-Object -ComObject WScript.Shell; ${lines.join('; ')}`;
+
   try {
-    const escapedPath = lnkPath.replace(/'/g, "''");
-    const cmd = `powershell -NoProfile -Command "(New-Object -ComObject WScript.Shell).CreateShortcut('${escapedPath}').TargetPath"`;
-    const { stdout } = await execAsync(cmd);
-    const targetPath = stdout.trim();
-    if (targetPath && targetPath.toLowerCase().endsWith('.exe')) {
-      return targetPath;
+    const { stdout } = await execAsync(`powershell -NoProfile -Command "${script}"`, {
+      maxBuffer: 10 * 1024 * 1024,
+    });
+    const outputLines = stdout.split('\n').map((l) => l.trim());
+
+    for (let i = 0; i < lnkPaths.length && i < outputLines.length; i++) {
+      const target = outputLines[i];
+      if (target && target.toLowerCase().endsWith('.exe')) {
+        results.set(lnkPaths[i], target);
+      }
     }
-    return null;
   } catch {
-    return null;
+    // If the batch fails, return empty — don't crash
   }
+
+  return results;
 }
 
 /**
@@ -94,13 +109,48 @@ async function scanRegistryAppPaths(): Promise<AppEntry[]> {
   }
 }
 
+// Cache for detected apps — avoids re-scanning on every call
+let cachedApps: AppEntry[] | null = null;
+let cacheTimestamp = 0;
+const CACHE_TTL_MS = 60_000; // 1 minute
+let pendingDetection: Promise<AppEntry[]> | null = null;
+
+export function resetCache(): void {
+  cachedApps = null;
+  cacheTimestamp = 0;
+  pendingDetection = null;
+}
+
 /**
  * Detects installed applications by scanning Start Menu shortcuts
  * and Windows Registry App Paths.
  *
  * Returns a deduplicated, alphabetically sorted array of AppEntry objects.
+ * Results are cached for 1 minute to avoid redundant scanning.
  */
 export async function detectInstalledApps(): Promise<AppEntry[]> {
+  // Return cache if fresh
+  if (cachedApps && Date.now() - cacheTimestamp < CACHE_TTL_MS) {
+    return cachedApps;
+  }
+
+  // If a detection is already in progress, wait for it (dedup concurrent calls)
+  if (pendingDetection) {
+    return pendingDetection;
+  }
+
+  pendingDetection = detectInstalledAppsUncached();
+  try {
+    const result = await pendingDetection;
+    cachedApps = result;
+    cacheTimestamp = Date.now();
+    return result;
+  } finally {
+    pendingDetection = null;
+  }
+}
+
+async function detectInstalledAppsUncached(): Promise<AppEntry[]> {
   const appEntries: AppEntry[] = [];
 
   // Source 1: Start Menu shortcuts
@@ -126,21 +176,11 @@ export async function detectInstalledApps(): Promise<AppEntry[]> {
 
   const allLnks = [...userLnks, ...publicLnks];
 
-  // Resolve shortcuts in parallel
-  const shortcutResults = await Promise.all(
-    allLnks.map(async (lnkPath) => {
-      const target = await resolveShortcut(lnkPath);
-      if (target) {
-        return { name: nameFromLnk(lnkPath), path: target } as AppEntry;
-      }
-      return null;
-    })
-  );
+  // Resolve all shortcuts in a single PowerShell process
+  const resolved = await resolveShortcutsBatch(allLnks);
 
-  for (const entry of shortcutResults) {
-    if (entry) {
-      appEntries.push(entry);
-    }
+  for (const [lnkPath, targetPath] of resolved) {
+    appEntries.push({ name: nameFromLnk(lnkPath), path: targetPath });
   }
 
   // Source 2: Registry App Paths
