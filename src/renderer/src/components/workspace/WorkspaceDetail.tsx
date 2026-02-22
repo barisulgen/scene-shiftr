@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { useWorkspaces } from '../../hooks/useWorkspaces';
 import CollapsibleSection from '../common/CollapsibleSection';
@@ -62,17 +63,37 @@ function hasAudio(workspace: Workspace): boolean {
 }
 
 export default function WorkspaceDetail(): JSX.Element | null {
-  const { activeWorkspaceId, setCurrentView } = useApp();
-  const { selectedWorkspace, activateWorkspace, deleteWorkspace } =
+  const { activeWorkspaceId, status, setCurrentView } = useApp();
+  const { selectedWorkspace, activateWorkspace, deactivateWorkspace, deleteWorkspace } =
     useWorkspaces();
+  const [activating, setActivating] = useState(false);
 
   if (!selectedWorkspace) return null;
 
   const workspace = selectedWorkspace;
   const isActive = workspace.id === activeWorkspaceId;
 
-  const handleActivate = (): void => {
-    activateWorkspace(workspace.id);
+  // Track activation progress: activating starts on click, ends when status returns to "Ready"
+  const isActivating = activating && status !== 'Ready';
+
+  // Reset activating flag when status returns to Ready
+  useEffect(() => {
+    if (activating && status === 'Ready') {
+      setActivating(false);
+    }
+  }, [activating, status]);
+
+  const handleActivate = async (): Promise<void> => {
+    setActivating(true);
+    try {
+      await activateWorkspace(workspace.id);
+    } catch {
+      setActivating(false);
+    }
+  };
+
+  const handleDeactivate = async (): Promise<void> => {
+    await deactivateWorkspace();
   };
 
   const handleDelete = (): void => {
@@ -99,12 +120,28 @@ export default function WorkspaceDetail(): JSX.Element | null {
         <div className="w-full h-px bg-zinc-800 my-4" />
 
         {/* Activate / Active badge */}
-        <div className="mb-6">
+        <div className="flex items-center gap-3 mb-6">
           {isActive ? (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-emerald-950/50 text-emerald-400 text-sm font-medium border border-emerald-800/40">
-              <span className="w-2 h-2 rounded-full bg-emerald-400" />
-              Active
-            </span>
+            <>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-emerald-950/50 text-emerald-400 text-sm font-medium border border-emerald-800/40">
+                <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                Active
+              </span>
+              <button
+                onClick={handleDeactivate}
+                className="px-4 py-2 rounded-md border border-zinc-700 text-sm text-zinc-300 font-medium hover:border-zinc-600 hover:text-zinc-100 transition-colors duration-150"
+              >
+                Deactivate
+              </button>
+            </>
+          ) : isActivating ? (
+            <button
+              disabled
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-indigo-600/50 text-white/70 text-sm font-medium cursor-not-allowed"
+            >
+              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              Activating...
+            </button>
           ) : (
             <button
               onClick={handleActivate}
