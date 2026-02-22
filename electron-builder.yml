@@ -1,0 +1,23 @@
+appId: com.sceneshiftr.app
+productName: Scene Shiftr
+directories:
+  output: dist
+  buildResources: build
+files:
+  - '!**/.vscode/*'
+  - '!docs/*'
+  - '!src/*'
+  - '!tests/*'
+  - '!**/*.test.*'
+win:
+  target:
+    - nsis
+  icon: build/icon.ico
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+extraResources:
+  - from: tools/
+    to: tools/
+  - from: assets/sounds/
+    to: assets/sounds/

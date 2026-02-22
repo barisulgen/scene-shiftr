@@ -5,9 +5,13 @@ import { setStorageDir } from './services/workspace-storage';
 import { setSnapshotDir } from './services/state-snapshot';
 import { setNircmdPath } from './services/audio-controller';
 import { setAssetsPath } from './services/sound-player';
+import { createTray, updateTrayMenu, destroyTray } from './tray';
+import { setTrayRefreshCallback } from './tray-bridge';
 
-function createWindow(): void {
-  const mainWindow = new BrowserWindow({
+const isMinimized = process.argv.includes('--minimized');
+
+function createWindow(): BrowserWindow {
+  const win = new BrowserWindow({
     width: 1280,
     height: 800,
     minWidth: 900,
@@ -21,11 +25,19 @@ function createWindow(): void {
     },
   });
 
-  mainWindow.on('ready-to-show', () => {
-    mainWindow.show();
+  win.on('ready-to-show', () => {
+    if (!isMinimized) {
+      win.show();
+    }
   });
 
-  mainWindow.webContents.setWindowOpenHandler((details) => {
+  // Hide to tray instead of closing
+  win.on('close', (e) => {
+    e.preventDefault();
+    win.hide();
+  });
+
+  win.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url);
     return { action: 'deny' };
   });
@@ -33,15 +45,17 @@ function createWindow(): void {
   // HMR for renderer based on electron-vite CLI.
   // Load the remote URL for development or the local html file for production.
   if (!app.isPackaged && process.env['ELECTRON_RENDERER_URL']) {
-    mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL']);
+    win.loadURL(process.env['ELECTRON_RENDERER_URL']);
   } else {
-    mainWindow.loadFile(join(__dirname, '../renderer/index.html'));
+    win.loadFile(join(__dirname, '../renderer/index.html'));
   }
+
+  return win;
 }
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   // Set app user model id for windows
   if (process.platform === 'win32') {
     app.setAppUserModelId(!app.isPackaged ? process.execPath : 'com.scene-shiftr');
@@ -57,7 +71,13 @@ app.whenReady().then(() => {
   // Register all IPC handlers
   registerAllHandlers();
 
-  createWindow();
+  const win = createWindow();
+
+  // Register tray refresh callback (breaks circular dependency via tray-bridge)
+  setTrayRefreshCallback(() => updateTrayMenu(win));
+
+  // Create system tray
+  await createTray(win);
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
@@ -66,10 +86,14 @@ app.whenReady().then(() => {
   });
 });
 
-// On Windows, don't quit when all windows are closed — we'll add tray support later.
+// On Windows, don't quit when all windows are closed — app lives in the tray.
 // On macOS, it's common to keep the app running until the user quits explicitly.
 app.on('window-all-closed', () => {
   if (process.platform !== 'win32' && process.platform !== 'darwin') {
     app.quit();
   }
+});
+
+app.on('before-quit', () => {
+  destroyTray();
 });
