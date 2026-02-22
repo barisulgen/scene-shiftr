@@ -79,7 +79,7 @@ export async function getWorkspace(id: string): Promise<Workspace> {
  * Generates a UUID, fills in defaults, assigns order, and persists to disk.
  */
 export async function createWorkspace(
-  data: Partial<Pick<Workspace, 'name' | 'icon'>>,
+  data: Partial<Workspace>,
 ): Promise<Workspace> {
   await ensureWorkspaceDir();
 
@@ -91,11 +91,15 @@ export async function createWorkspace(
   const jsonFiles = entries.filter((f) => f.endsWith('.json'));
   const order = jsonFiles.length;
 
-  const workspace = createEmptyWorkspace(id, data.name ?? 'Untitled', order);
-
-  if (data.icon !== undefined) {
-    workspace.icon = data.icon;
-  }
+  // Start from empty defaults, then merge in all provided data
+  const workspace: Workspace = {
+    ...createEmptyWorkspace(id, data.name ?? 'Untitled', order),
+    ...data,
+    id, // Always use generated id
+    order, // Always use computed order
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
 
   const filePath = path.join(dir, `${id}.json`);
   await fs.writeFile(filePath, JSON.stringify(workspace, null, 2), 'utf-8');

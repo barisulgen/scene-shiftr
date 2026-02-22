@@ -4,6 +4,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 vi.mock('fs', () => ({
   promises: {
     readdir: vi.fn(),
+    writeFile: vi.fn().mockResolvedValue(undefined),
+    unlink: vi.fn().mockResolvedValue(undefined),
   },
 }));
 
@@ -84,7 +86,7 @@ describe('app-detector', () => {
 
       mockExecImpl((cmd: string) => {
         // Batch PowerShell call resolving shortcuts
-        if (cmd.includes('WScript.Shell') && cmd.includes('Notepad.lnk')) {
+        if (cmd.includes('powershell')) {
           return { stdout: 'C:\\Windows\\notepad.exe\r\n', stderr: '' };
         }
         if (cmd.includes('reg query')) {
@@ -138,7 +140,7 @@ describe('app-detector', () => {
 
       mockExecImpl((cmd: string) => {
         // Batch resolves Chrome.lnk
-        if (cmd.includes('WScript.Shell') && cmd.includes('Chrome.lnk')) {
+        if (cmd.includes('powershell')) {
           return {
             stdout: 'C:\\Program Files\\Google\\Chrome\\Application\\Chrome.exe\r\n',
             stderr: '',
@@ -165,7 +167,7 @@ describe('app-detector', () => {
 
       mockExecImpl((cmd: string) => {
         // Batch call resolves both shortcuts — output is one line per shortcut
-        if (cmd.includes('WScript.Shell')) {
+        if (cmd.includes('powershell')) {
           // The batch script processes Zulu.lnk first, then Alpha.lnk (order matches allLnks)
           return { stdout: 'C:\\Apps\\zulu.exe\r\nC:\\Apps\\alpha.exe\r\n', stderr: '' };
         }
@@ -224,7 +226,7 @@ describe('app-detector', () => {
 
       mockExecImpl((cmd: string) => {
         // Batch resolves both: Document.lnk → .docx, App.lnk → .exe
-        if (cmd.includes('WScript.Shell')) {
+        if (cmd.includes('powershell')) {
           return { stdout: 'C:\\Docs\\report.docx\r\nC:\\Apps\\myapp.exe\r\n', stderr: '' };
         }
         if (cmd.includes('reg query')) {
@@ -248,7 +250,7 @@ describe('app-detector', () => {
         .mockResolvedValueOnce([] as any);
 
       mockExecImpl((cmd: string) => {
-        if (cmd.includes('WScript.Shell')) {
+        if (cmd.includes('powershell')) {
           throw new Error('PowerShell failed');
         }
         if (cmd.includes('reg query')) {
@@ -277,7 +279,7 @@ describe('app-detector', () => {
       ].join('\r\n');
 
       mockExecImpl((cmd: string) => {
-        if (cmd.includes('WScript.Shell')) {
+        if (cmd.includes('powershell')) {
           return { stdout: 'C:\\Windows\\notepad.exe\r\n', stderr: '' };
         }
         if (cmd.includes('reg query')) {

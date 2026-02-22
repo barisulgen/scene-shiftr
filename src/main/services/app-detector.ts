@@ -23,23 +23,32 @@ async function scanStartMenuShortcuts(directory: string): Promise<string[]> {
 
 /**
  * Resolves a batch of .lnk shortcuts to their target paths using a single
- * PowerShell process. Returns a Map of lnkPath → targetPath (only .exe targets).
+ * PowerShell process with a temp script file. Returns a Map of lnkPath → targetPath
+ * (only .exe targets).
  */
 async function resolveShortcutsBatch(lnkPaths: string[]): Promise<Map<string, string>> {
   const results = new Map<string, string>();
   if (lnkPaths.length === 0) return results;
 
-  // Build a single PowerShell script that resolves all shortcuts at once
-  const escapedPaths = lnkPaths.map((p) => p.replace(/'/g, "''"));
-  const lines = escapedPaths.map(
-    (p) => `try { $s = $wsh.CreateShortcut('${p}'); Write-Output "$($s.TargetPath)" } catch { Write-Output "" }`
-  );
-  const script = `$wsh = New-Object -ComObject WScript.Shell; ${lines.join('; ')}`;
+  // Write a PowerShell script to a temp file to avoid command-line length limits
+  const os = await import('os');
+  const scriptPath = path.join(os.tmpdir(), `scene-shiftr-resolve-${Date.now()}.ps1`);
+
+  const scriptLines = [
+    '$wsh = New-Object -ComObject WScript.Shell',
+    ...lnkPaths.map((p) => {
+      const escaped = p.replace(/'/g, "''");
+      return `try { $s = $wsh.CreateShortcut('${escaped}'); Write-Output $s.TargetPath } catch { Write-Output '' }`;
+    }),
+  ];
 
   try {
-    const { stdout } = await execAsync(`powershell -NoProfile -Command "${script}"`, {
-      maxBuffer: 10 * 1024 * 1024,
-    });
+    await fs.writeFile(scriptPath, scriptLines.join('\n'), 'utf-8');
+
+    const { stdout } = await execAsync(
+      `powershell -NoProfile -ExecutionPolicy Bypass -File "${scriptPath}"`,
+      { maxBuffer: 10 * 1024 * 1024 }
+    );
     const outputLines = stdout.split('\n').map((l) => l.trim());
 
     for (let i = 0; i < lnkPaths.length && i < outputLines.length; i++) {
@@ -50,6 +59,9 @@ async function resolveShortcutsBatch(lnkPaths: string[]): Promise<Map<string, st
     }
   } catch {
     // If the batch fails, return empty — don't crash
+  } finally {
+    // Clean up temp script
+    try { await fs.unlink(scriptPath); } catch { /* ignore */ }
   }
 
   return results;

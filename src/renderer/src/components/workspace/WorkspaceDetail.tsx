@@ -73,15 +73,12 @@ export default function WorkspaceDetail(): JSX.Element | null {
   const workspace = selectedWorkspace;
   const isActive = workspace.id === activeWorkspaceId;
 
-  // Track activation progress: activating starts on click, ends when status returns to "Ready"
-  const isActivating = activating && status !== 'Ready';
-
-  // Reset activating flag when status returns to Ready
+  // Reset activating flag when activation completes or workspace becomes active
   useEffect(() => {
-    if (activating && status === 'Ready') {
+    if (activating && (status === 'Ready' || status === 'Done' || isActive)) {
       setActivating(false);
     }
-  }, [activating, status]);
+  }, [activating, status, isActive]);
 
   const handleActivate = async (): Promise<void> => {
     setActivating(true);
@@ -134,7 +131,7 @@ export default function WorkspaceDetail(): JSX.Element | null {
                 Deactivate
               </button>
             </>
-          ) : isActivating ? (
+          ) : activating ? (
             <button
               disabled
               className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-indigo-600/50 text-white/70 text-sm font-medium cursor-not-allowed"
