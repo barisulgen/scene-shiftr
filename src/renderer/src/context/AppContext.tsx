@@ -28,10 +28,18 @@ export function AppProvider({ children }: { children: ReactNode }): JSX.Element 
   const [currentView, setCurrentView] = useState<'main' | 'settings' | 'create' | 'edit'>('main');
 
   const refreshWorkspaces = useCallback(async () => {
-    const list = await window.api.listWorkspaces();
-    setWorkspaces(list);
-    const settings = await window.api.getSettings();
-    setActiveWorkspaceId(settings.activeWorkspaceId);
+    try {
+      const list = await window.api.listWorkspaces();
+      setWorkspaces(list);
+    } catch (err) {
+      console.error('Failed to load workspaces:', err);
+    }
+    try {
+      const settings = await window.api.getSettings();
+      setActiveWorkspaceId(settings.activeWorkspaceId);
+    } catch (err) {
+      console.error('Failed to load settings:', err);
+    }
   }, []);
 
   useEffect(() => {
@@ -40,14 +48,19 @@ export function AppProvider({ children }: { children: ReactNode }): JSX.Element 
 
   // Listen for activation progress
   useEffect(() => {
-    const cleanup = window.api.onActivationProgress((msg: string) => {
-      setStatus(msg);
-      if (msg === 'Done') {
-        refreshWorkspaces();
-        setTimeout(() => setStatus('Ready'), 2000);
-      }
-    });
-    return cleanup;
+    try {
+      const cleanup = window.api.onActivationProgress((msg: string) => {
+        setStatus(msg);
+        if (msg === 'Done') {
+          refreshWorkspaces();
+          setTimeout(() => setStatus('Ready'), 2000);
+        }
+      });
+      return cleanup;
+    } catch (err) {
+      console.error('Failed to register activation progress listener:', err);
+      return undefined;
+    }
   }, [refreshWorkspaces]);
 
   const value: AppContextValue = {

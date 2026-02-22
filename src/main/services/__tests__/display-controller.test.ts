@@ -12,7 +12,7 @@ import {
   captureMonitorLayout,
   restoreMonitorLayout,
 } from '../display-controller';
-import { MonitorLayout } from '../../../../shared/types';
+import { MonitorLayout } from '../../../shared/types';
 
 const mockExec = vi.mocked(exec);
 
@@ -32,16 +32,6 @@ function mockExecRejects(error: Error): void {
   });
 }
 
-// Helper to create a mock exec that resolves differently on each successive call
-function mockExecResolvesSequence(stdouts: string[]): void {
-  let callIndex = 0;
-  mockExec.mockImplementation((_cmd: string, callback: any) => {
-    const stdout = callIndex < stdouts.length ? stdouts[callIndex] : '';
-    callIndex++;
-    callback(null, { stdout, stderr: '' });
-    return {} as any;
-  });
-}
 
 describe('display-controller', () => {
   beforeEach(() => {

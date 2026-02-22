@@ -49,9 +49,13 @@ export async function listWorkspaces(): Promise<Workspace[]> {
 
   const workspaces: Workspace[] = [];
   for (const file of jsonFiles) {
-    const filePath = path.join(dir, file);
-    const content = await fs.readFile(filePath, 'utf-8');
-    workspaces.push(JSON.parse(content) as Workspace);
+    try {
+      const filePath = path.join(dir, file);
+      const content = await fs.readFile(filePath, 'utf-8');
+      workspaces.push(JSON.parse(content) as Workspace);
+    } catch (err) {
+      console.error(`Failed to read workspace file ${file}, skipping:`, err);
+    }
   }
 
   workspaces.sort((a, b) => a.order - b.order);

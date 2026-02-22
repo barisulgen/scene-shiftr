@@ -66,8 +66,8 @@ const mockDisplayController = vi.mocked(displayController);
 const mockSoundPlayer = vi.mocked(soundPlayer);
 const mockShell = vi.mocked(shell);
 
-function createMockSender(): { send: ReturnType<typeof vi.fn> } {
-  return { send: vi.fn() };
+function createMockSender(): { send: ReturnType<typeof vi.fn<(channel: string, ...args: unknown[]) => void>> } {
+  return { send: vi.fn<(channel: string, ...args: unknown[]) => void>() };
 }
 
 function createTestWorkspace(overrides: Partial<Workspace> = {}): Workspace {

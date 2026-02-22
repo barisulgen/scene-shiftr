@@ -35,70 +35,121 @@ export async function activateWorkspace(
   sender: ProgressSender | null
 ): Promise<void> {
   // 1. Capture snapshot (only on first activation — captureSnapshot itself guards against overwrites)
-  sendProgress(sender, 'Saving current state...');
-  await stateSnapshot.captureSnapshot();
+  try {
+    sendProgress(sender, 'Saving current state...');
+    await stateSnapshot.captureSnapshot();
+  } catch (err) {
+    sendProgress(sender, 'Failed to save current state, continuing...');
+    console.error('Snapshot capture error:', err);
+  }
 
   // 2. Play transition sound
-  if (workspace.audio.transitionSound && sender) {
-    soundPlayer.playSound(workspace.audio.transitionSound, sender);
+  try {
+    if (workspace.audio.transitionSound && sender) {
+      soundPlayer.playSound(workspace.audio.transitionSound, sender);
+    }
+  } catch (err) {
+    console.error('Transition sound error:', err);
   }
 
   // 3. Close apps from close list
   for (const app of workspace.apps.close) {
-    const processName = app.path.split('\\').pop() || app.name;
-    sendProgress(sender, `Closing ${app.name}...`);
-    await processManager.closeApp(processName);
+    try {
+      const processName = app.path.split('\\').pop() || app.name;
+      sendProgress(sender, `Closing ${app.name}...`);
+      await processManager.closeApp(processName);
+    } catch (err) {
+      sendProgress(sender, `Failed to close ${app.name}, continuing...`);
+      console.error(`Close app error (${app.name}):`, err);
+    }
   }
 
   // 4. Set wallpaper
-  if (workspace.display.wallpaper) {
-    sendProgress(sender, 'Setting wallpaper...');
-    await displayController.setWallpaper(workspace.display.wallpaper);
+  try {
+    if (workspace.display.wallpaper) {
+      sendProgress(sender, 'Setting wallpaper...');
+      await displayController.setWallpaper(workspace.display.wallpaper);
+    }
+  } catch (err) {
+    sendProgress(sender, 'Failed to set wallpaper, continuing...');
+    console.error('Wallpaper error:', err);
   }
 
   // 5. Restore monitor layout
-  if (workspace.display.monitorLayout) {
-    sendProgress(sender, 'Restoring monitor layout...');
-    await displayController.restoreMonitorLayout(workspace.display.monitorLayout);
+  try {
+    if (workspace.display.monitorLayout) {
+      sendProgress(sender, 'Restoring monitor layout...');
+      await displayController.restoreMonitorLayout(workspace.display.monitorLayout);
+    }
+  } catch (err) {
+    sendProgress(sender, 'Failed to restore monitor layout, continuing...');
+    console.error('Monitor layout error:', err);
   }
 
   // 6. Apply system settings (nightLight, focusAssist)
-  sendProgress(sender, 'Applying system settings...');
-  await systemSettings.applySystemSettings({
-    nightLight: workspace.system.nightLight,
-    focusAssist: workspace.system.focusAssist,
-  });
+  try {
+    sendProgress(sender, 'Applying system settings...');
+    await systemSettings.applySystemSettings({
+      nightLight: workspace.system.nightLight,
+      focusAssist: workspace.system.focusAssist,
+    });
+  } catch (err) {
+    sendProgress(sender, 'Failed to apply system settings, continuing...');
+    console.error('System settings error:', err);
+  }
 
   // 7. Audio device and volume
-  if (workspace.system.audioDevice) {
-    sendProgress(sender, `Switching audio to ${workspace.system.audioDevice}...`);
-    await audioController.setAudioDevice(workspace.system.audioDevice);
-  }
-  if (workspace.system.volume !== null) {
-    await audioController.setVolume(workspace.system.volume);
+  try {
+    if (workspace.system.audioDevice) {
+      sendProgress(sender, `Switching audio to ${workspace.system.audioDevice}...`);
+      await audioController.setAudioDevice(workspace.system.audioDevice);
+    }
+    if (workspace.system.volume !== null) {
+      await audioController.setVolume(workspace.system.volume);
+    }
+  } catch (err) {
+    sendProgress(sender, 'Failed to set audio, continuing...');
+    console.error('Audio error:', err);
   }
 
   // 8. Launch apps from open list
   openedApps.clear();
   for (const app of workspace.apps.open) {
-    sendProgress(sender, `Launching ${app.name}...`);
-    await processManager.launchApp(app);
-    openedApps.add(app.path);
+    try {
+      sendProgress(sender, `Launching ${app.name}...`);
+      await processManager.launchApp(app);
+      openedApps.add(app.path);
+    } catch (err) {
+      sendProgress(sender, `Failed to launch ${app.name}, continuing...`);
+      console.error(`Launch app error (${app.name}):`, err);
+    }
   }
 
   // 9. Open folders
   for (const folder of workspace.folders) {
-    shell.openPath(folder);
+    try {
+      shell.openPath(folder);
+    } catch (err) {
+      console.error(`Open folder error (${folder}):`, err);
+    }
   }
 
   // 10. Open URLs
   for (const url of workspace.urls) {
-    shell.openExternal(url);
+    try {
+      shell.openExternal(url);
+    } catch (err) {
+      console.error(`Open URL error (${url}):`, err);
+    }
   }
 
   // 11. Music — open playlist URI if both musicApp and playlistUri are set
-  if (workspace.audio.musicApp && workspace.audio.playlistUri) {
-    shell.openExternal(workspace.audio.playlistUri);
+  try {
+    if (workspace.audio.musicApp && workspace.audio.playlistUri) {
+      shell.openExternal(workspace.audio.playlistUri);
+    }
+  } catch (err) {
+    console.error('Music launch error:', err);
   }
 
   activeWorkspaceId = workspace.id;
@@ -112,14 +163,23 @@ export async function deactivateWorkspace(
 
   // Close apps that were opened by the workspace
   for (const appPath of openedApps) {
-    const processName = appPath.split('\\').pop() || '';
-    sendProgress(sender, `Closing ${processName}...`);
-    await processManager.closeApp(processName);
+    try {
+      const processName = appPath.split('\\').pop() || '';
+      sendProgress(sender, `Closing ${processName}...`);
+      await processManager.closeApp(processName);
+    } catch (err) {
+      console.error(`Close app error (${appPath}):`, err);
+    }
   }
 
   // Restore snapshot
-  sendProgress(sender, 'Restoring previous state...');
-  await stateSnapshot.restoreSnapshot();
+  try {
+    sendProgress(sender, 'Restoring previous state...');
+    await stateSnapshot.restoreSnapshot();
+  } catch (err) {
+    sendProgress(sender, 'Failed to restore previous state, continuing...');
+    console.error('Snapshot restore error:', err);
+  }
 
   openedApps.clear();
   activeWorkspaceId = null;
@@ -138,66 +198,113 @@ export async function switchWorkspace(
     );
     for (const app of currentWorkspace.apps.open) {
       if (!newOpenPaths.has(app.path.toLowerCase())) {
-        const processName = app.path.split('\\').pop() || '';
-        sendProgress(sender, `Closing ${app.name}...`);
-        await processManager.closeApp(processName);
+        try {
+          const processName = app.path.split('\\').pop() || '';
+          sendProgress(sender, `Closing ${app.name}...`);
+          await processManager.closeApp(processName);
+        } catch (err) {
+          sendProgress(sender, `Failed to close ${app.name}, continuing...`);
+          console.error(`Close app error (${app.name}):`, err);
+        }
       }
     }
   }
 
   // Process new workspace's close list
   for (const app of newWorkspace.apps.close) {
-    const processName = app.path.split('\\').pop() || app.name;
-    sendProgress(sender, `Closing ${app.name}...`);
-    await processManager.closeApp(processName);
+    try {
+      const processName = app.path.split('\\').pop() || app.name;
+      sendProgress(sender, `Closing ${app.name}...`);
+      await processManager.closeApp(processName);
+    } catch (err) {
+      sendProgress(sender, `Failed to close ${app.name}, continuing...`);
+      console.error(`Close app error (${app.name}):`, err);
+    }
   }
 
   // Apply settings (do NOT capture new snapshot — preserve original)
 
   // Set wallpaper
-  if (newWorkspace.display.wallpaper) {
-    await displayController.setWallpaper(newWorkspace.display.wallpaper);
+  try {
+    if (newWorkspace.display.wallpaper) {
+      await displayController.setWallpaper(newWorkspace.display.wallpaper);
+    }
+  } catch (err) {
+    sendProgress(sender, 'Failed to set wallpaper, continuing...');
+    console.error('Wallpaper error:', err);
   }
 
   // Restore monitor layout
-  if (newWorkspace.display.monitorLayout) {
-    await displayController.restoreMonitorLayout(newWorkspace.display.monitorLayout);
+  try {
+    if (newWorkspace.display.monitorLayout) {
+      await displayController.restoreMonitorLayout(newWorkspace.display.monitorLayout);
+    }
+  } catch (err) {
+    sendProgress(sender, 'Failed to restore monitor layout, continuing...');
+    console.error('Monitor layout error:', err);
   }
 
   // System settings
-  await systemSettings.applySystemSettings({
-    nightLight: newWorkspace.system.nightLight,
-    focusAssist: newWorkspace.system.focusAssist,
-  });
+  try {
+    await systemSettings.applySystemSettings({
+      nightLight: newWorkspace.system.nightLight,
+      focusAssist: newWorkspace.system.focusAssist,
+    });
+  } catch (err) {
+    sendProgress(sender, 'Failed to apply system settings, continuing...');
+    console.error('System settings error:', err);
+  }
 
   // Audio
-  if (newWorkspace.system.audioDevice) {
-    await audioController.setAudioDevice(newWorkspace.system.audioDevice);
-  }
-  if (newWorkspace.system.volume !== null) {
-    await audioController.setVolume(newWorkspace.system.volume);
+  try {
+    if (newWorkspace.system.audioDevice) {
+      await audioController.setAudioDevice(newWorkspace.system.audioDevice);
+    }
+    if (newWorkspace.system.volume !== null) {
+      await audioController.setVolume(newWorkspace.system.volume);
+    }
+  } catch (err) {
+    sendProgress(sender, 'Failed to set audio, continuing...');
+    console.error('Audio error:', err);
   }
 
   // Launch new apps
   openedApps.clear();
   for (const app of newWorkspace.apps.open) {
-    await processManager.launchApp(app);
-    openedApps.add(app.path);
+    try {
+      await processManager.launchApp(app);
+      openedApps.add(app.path);
+    } catch (err) {
+      sendProgress(sender, `Failed to launch ${app.name}, continuing...`);
+      console.error(`Launch app error (${app.name}):`, err);
+    }
   }
 
   // Open folders
   for (const folder of newWorkspace.folders) {
-    shell.openPath(folder);
+    try {
+      shell.openPath(folder);
+    } catch (err) {
+      console.error(`Open folder error (${folder}):`, err);
+    }
   }
 
   // Open URLs
   for (const url of newWorkspace.urls) {
-    shell.openExternal(url);
+    try {
+      shell.openExternal(url);
+    } catch (err) {
+      console.error(`Open URL error (${url}):`, err);
+    }
   }
 
   // Transition sound
-  if (newWorkspace.audio.transitionSound && sender) {
-    soundPlayer.playSound(newWorkspace.audio.transitionSound, sender);
+  try {
+    if (newWorkspace.audio.transitionSound && sender) {
+      soundPlayer.playSound(newWorkspace.audio.transitionSound, sender);
+    }
+  } catch (err) {
+    console.error('Transition sound error:', err);
   }
 
   activeWorkspaceId = newWorkspace.id;

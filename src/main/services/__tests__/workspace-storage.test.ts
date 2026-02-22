@@ -30,7 +30,7 @@ import {
 } from '../workspace-storage';
 
 const mockedFs = vi.mocked(fs);
-const mockedUuid = vi.mocked(uuidv4);
+const mockedUuid = vi.mocked(uuidv4) as unknown as ReturnType<typeof vi.fn<() => string>>;
 
 function makeWorkspace(overrides: Partial<Workspace> = {}): Workspace {
   return {

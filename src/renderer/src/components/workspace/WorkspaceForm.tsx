@@ -66,9 +66,13 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
 
   // --- Handlers ---
   const handleAddFolder = async (): Promise<void> => {
-    const folderPath = await window.api.openFolderDialog();
-    if (folderPath && !folders.includes(folderPath)) {
-      setFolders([...folders, folderPath]);
+    try {
+      const folderPath = await window.api.openFolderDialog();
+      if (folderPath && !folders.includes(folderPath)) {
+        setFolders([...folders, folderPath]);
+      }
+    } catch (err) {
+      console.error('Failed to open folder dialog:', err);
     }
   };
 
@@ -96,11 +100,15 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
   };
 
   const handleBrowseWallpaper = async (): Promise<void> => {
-    const filePath = await window.api.openFileDialog([
-      { name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'bmp', 'gif', 'webp'] },
-    ]);
-    if (filePath) {
-      setWallpaper(filePath);
+    try {
+      const filePath = await window.api.openFileDialog([
+        { name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'bmp', 'gif', 'webp'] },
+      ]);
+      if (filePath) {
+        setWallpaper(filePath);
+      }
+    } catch (err) {
+      console.error('Failed to open file dialog:', err);
     }
   };
 
