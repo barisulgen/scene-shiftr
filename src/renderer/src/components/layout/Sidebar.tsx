@@ -1,4 +1,5 @@
 import { useApp } from '../../context/AppContext';
+import WorkspaceList from '../workspace/WorkspaceList';
 
 export default function Sidebar(): JSX.Element {
   const { setCurrentView, currentView } = useApp();
@@ -22,10 +23,7 @@ export default function Sidebar(): JSX.Element {
             Workspaces
           </span>
         </div>
-        {/* Workspace items will be populated in Task 20 */}
-        <div className="flex flex-col items-center justify-center py-8 text-zinc-600 text-xs">
-          <span>No workspaces yet</span>
-        </div>
+        <WorkspaceList />
       </div>
 
       {/* Bottom actions */}
