@@ -3,6 +3,10 @@ dist
 out
 .DS_Store
 *.local
+*.tsbuildinfo
+
+# Docs/plans (design artifacts, not shipped)
+docs/
 
 # Editor directories and files
 .vscode/*
