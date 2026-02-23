@@ -9,6 +9,17 @@ import * as soundPlayer from './sound-player';
 import * as dryRunLogger from './dry-run-logger';
 import { shell } from 'electron';
 
+const ALLOWED_URL_SCHEMES = ['http:', 'https:', 'spotify:'];
+
+function isSafeUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return ALLOWED_URL_SCHEMES.includes(parsed.protocol);
+  } catch {
+    return false;
+  }
+}
+
 // In-memory state
 let activeWorkspaceId: string | null = null;
 let openedApps: Set<string> = new Set(); // paths of apps opened by current workspace
@@ -152,7 +163,11 @@ export async function activateWorkspace(
   // 10. Open URLs
   for (const url of workspace.urls) {
     try {
-      await shell.openExternal(url);
+      if (isSafeUrl(url)) {
+        await shell.openExternal(url);
+      } else {
+        console.error(`Blocked unsafe URL: ${url}`);
+      }
     } catch (err) {
       console.error(`Open URL error (${url}):`, err);
     }
@@ -160,7 +175,7 @@ export async function activateWorkspace(
 
   // 11. Music — open playlist URI if both musicApp and playlistUri are set
   try {
-    if (workspace.audio.musicApp && workspace.audio.playlistUri) {
+    if (workspace.audio.musicApp && workspace.audio.playlistUri && isSafeUrl(workspace.audio.playlistUri)) {
       await shell.openExternal(workspace.audio.playlistUri);
     }
   } catch (err) {
@@ -411,7 +426,11 @@ export async function switchWorkspace(
   // Open URLs
   for (const url of newWorkspace.urls) {
     try {
-      await shell.openExternal(url);
+      if (isSafeUrl(url)) {
+        await shell.openExternal(url);
+      } else {
+        console.error(`Blocked unsafe URL: ${url}`);
+      }
     } catch (err) {
       console.error(`Open URL error (${url}):`, err);
     }

@@ -5,6 +5,16 @@ import { assertSafeToKill } from './safety';
 
 const execAsync = promisify(exec);
 
+// Only allow safe characters in process names to prevent command injection
+const SAFE_PROCESS_NAME = /^[\w\-. ]+$/;
+
+function sanitizeProcessName(name: string): string {
+  if (!SAFE_PROCESS_NAME.test(name)) {
+    throw new Error(`Invalid process name: ${name}`);
+  }
+  return name;
+}
+
 export async function launchApp(entry: AppEntry): Promise<void> {
   const args = entry.args ? entry.args.split(' ') : [];
   const child = spawn(entry.path, args, {
@@ -41,7 +51,7 @@ export async function closeApp(processName: string, timeoutMs: number = 5000): P
 
   try {
     // Use taskkill without /F first (graceful)
-    await execAsync(`taskkill /IM "${processName}"`);
+    await execAsync(`taskkill /IM "${sanitizeProcessName(processName)}"`);
   } catch {
     // Process might not exist or already closed
     return 'closed';
@@ -61,7 +71,7 @@ export async function closeApp(processName: string, timeoutMs: number = 5000): P
 
 export async function isRunning(processName: string): Promise<boolean> {
   try {
-    const { stdout } = await execAsync(`tasklist /FI "IMAGENAME eq ${processName}" /NH`);
+    const { stdout } = await execAsync(`tasklist /FI "IMAGENAME eq ${sanitizeProcessName(processName)}" /NH`);
     return !stdout.includes('INFO:') && stdout.toLowerCase().includes(processName.toLowerCase());
   } catch {
     return false;
