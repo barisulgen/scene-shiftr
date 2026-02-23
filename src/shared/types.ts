@@ -72,23 +72,3 @@ export interface DryRunLogEntry {
   action: string;
   details: Record<string, unknown>;
 }
-
-export type IpcChannel =
-  | 'workspace:list'
-  | 'workspace:get'
-  | 'workspace:create'
-  | 'workspace:update'
-  | 'workspace:delete'
-  | 'workspace:activate'
-  | 'workspace:deactivate'
-  | 'workspace:reorder'
-  | 'process:detect-apps'
-  | 'process:is-running'
-  | 'system:get-audio-devices'
-  | 'system:get-current-state'
-  | 'display:capture-layout'
-  | 'audio:preview-sound'
-  | 'dialog:open-file'
-  | 'dialog:open-folder'
-  | 'settings:get'
-  | 'settings:update';

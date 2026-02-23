@@ -25,5 +25,3 @@ export function getActiveWorkspaceId(): string | null {
 export function setActiveWorkspaceId(id: string | null): void {
   store.set('activeWorkspaceId', id);
 }
-
-export default store;
