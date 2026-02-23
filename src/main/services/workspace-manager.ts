@@ -33,6 +33,10 @@ export function setDryRunCheck(fn: () => boolean): void {
 
 type ProgressSender = { send: (channel: string, ...args: unknown[]) => void };
 
+function getProcessName(appPath: string, fallback?: string): string {
+  return appPath.split('\\').pop() || fallback || '';
+}
+
 function sendProgress(sender: ProgressSender | null, message: string): void {
   sender?.send('activation:progress', message);
 }
@@ -81,7 +85,7 @@ export async function activateWorkspace(
   // 3. Close apps from close list
   for (const app of workspace.apps.close) {
     try {
-      const processName = app.path.split('\\').pop() || app.name;
+      const processName = getProcessName(app.path, app.name);
       sendProgress(sender, `Closing ${app.name}...`);
       await processManager.closeApp(processName);
     } catch (err) {
@@ -268,7 +272,7 @@ export async function deactivateWorkspace(
   // Close apps that were opened by the workspace
   for (const appPath of openedApps) {
     try {
-      const processName = appPath.split('\\').pop() || '';
+      const processName = getProcessName(appPath);
       sendProgress(sender, `Closing ${processName}...`);
       await processManager.closeApp(processName);
     } catch (err) {
@@ -299,7 +303,7 @@ async function deactivateWorkspaceDryRun(
   sendProgress(sender, '[DRY RUN] Simulating deactivation...');
 
   for (const appPath of openedApps) {
-    const processName = appPath.split('\\').pop() || '';
+    const processName = getProcessName(appPath);
     sendProgress(sender, `[DRY RUN] Would close ${processName}`);
     actions.push({ timestamp: now(), action: 'app:close', details: { path: appPath, process: processName } });
   }
@@ -333,7 +337,7 @@ export async function switchWorkspace(
     for (const app of currentWorkspace.apps.open) {
       if (!newOpenPaths.has(app.path.toLowerCase())) {
         try {
-          const processName = app.path.split('\\').pop() || '';
+          const processName = getProcessName(app.path);
           sendProgress(sender, `Closing ${app.name}...`);
           await processManager.closeApp(processName);
         } catch (err) {
@@ -347,7 +351,7 @@ export async function switchWorkspace(
   // Process new workspace's close list
   for (const app of newWorkspace.apps.close) {
     try {
-      const processName = app.path.split('\\').pop() || app.name;
+      const processName = getProcessName(app.path, app.name);
       sendProgress(sender, `Closing ${app.name}...`);
       await processManager.closeApp(processName);
     } catch (err) {
