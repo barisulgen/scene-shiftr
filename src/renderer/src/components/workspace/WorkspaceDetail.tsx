@@ -91,7 +91,11 @@ export default function WorkspaceDetail(): JSX.Element | null {
   };
 
   const handleDeactivate = async (): Promise<void> => {
-    await deactivateWorkspace();
+    try {
+      await deactivateWorkspace();
+    } catch (err) {
+      console.error('Failed to deactivate workspace:', err);
+    }
   };
 
   const handleDelete = (): void => {

@@ -18,11 +18,15 @@ export default function TransitionSoundPicker({
     if (selected === '') {
       onChange(null);
     } else if (selected === 'custom') {
-      const filePath = await window.api.openFileDialog([
-        { name: 'Audio Files', extensions: ['mp3', 'wav', 'ogg', 'flac'] },
-      ]);
-      if (filePath) {
-        onChange(filePath);
+      try {
+        const filePath = await window.api.openFileDialog([
+          { name: 'Audio Files', extensions: ['mp3', 'wav', 'ogg', 'flac'] },
+        ]);
+        if (filePath) {
+          onChange(filePath);
+        }
+      } catch (err) {
+        console.error('Failed to browse for audio file:', err);
       }
     } else {
       onChange(selected);
@@ -42,11 +46,15 @@ export default function TransitionSoundPicker({
   };
 
   const handleBrowseCustom = async (): Promise<void> => {
-    const filePath = await window.api.openFileDialog([
-      { name: 'Audio Files', extensions: ['mp3', 'wav', 'ogg', 'flac'] },
-    ]);
-    if (filePath) {
-      onChange(filePath);
+    try {
+      const filePath = await window.api.openFileDialog([
+        { name: 'Audio Files', extensions: ['mp3', 'wav', 'ogg', 'flac'] },
+      ]);
+      if (filePath) {
+        onChange(filePath);
+      }
+    } catch (err) {
+      console.error('Failed to browse for audio file:', err);
     }
   };
 

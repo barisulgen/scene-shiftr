@@ -5,8 +5,12 @@ export function useSettings() {
   const [settings, setSettings] = useState<GlobalSettings | null>(null);
 
   const loadSettings = useCallback(async () => {
-    const s = await window.api.getSettings();
-    setSettings(s);
+    try {
+      const s = await window.api.getSettings();
+      setSettings(s);
+    } catch (err) {
+      console.error('Failed to load settings:', err);
+    }
   }, []);
 
   useEffect(() => {
@@ -14,9 +18,14 @@ export function useSettings() {
   }, [loadSettings]);
 
   const updateSettings = async (data: Partial<GlobalSettings>) => {
-    const updated = await window.api.updateSettings(data);
-    setSettings(updated);
-    return updated;
+    try {
+      const updated = await window.api.updateSettings(data);
+      setSettings(updated);
+      return updated;
+    } catch (err) {
+      console.error('Failed to update settings:', err);
+      throw err;
+    }
   };
 
   return { settings, updateSettings, loadSettings };

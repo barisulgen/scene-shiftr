@@ -65,17 +65,20 @@ export default function AppSelector({ value, onChange, label }: AppSelectorProps
   };
 
   const handleBrowseExe = async (): Promise<void> => {
-    const filePath = await window.api.openFileDialog([
-      { name: 'Executables', extensions: ['exe'] },
-    ]);
-    if (filePath) {
-      // Extract name from path
-      const segments = filePath.replace(/\\/g, '/').split('/');
-      const fileName = segments[segments.length - 1].replace(/\.exe$/i, '');
-      const newApp: AppEntry = { name: fileName, path: filePath };
-      if (!value.some((v) => v.path === filePath)) {
-        onChange([...value, newApp]);
+    try {
+      const filePath = await window.api.openFileDialog([
+        { name: 'Executables', extensions: ['exe'] },
+      ]);
+      if (filePath) {
+        const segments = filePath.replace(/\\/g, '/').split('/');
+        const fileName = segments[segments.length - 1].replace(/\.exe$/i, '');
+        const newApp: AppEntry = { name: fileName, path: filePath };
+        if (!value.some((v) => v.path === filePath)) {
+          onChange([...value, newApp]);
+        }
       }
+    } catch (err) {
+      console.error('Failed to browse for exe:', err);
     }
   };
 
