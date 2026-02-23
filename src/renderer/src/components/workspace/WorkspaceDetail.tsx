@@ -68,10 +68,7 @@ export default function WorkspaceDetail(): JSX.Element | null {
     useWorkspaces();
   const [activating, setActivating] = useState(false);
 
-  if (!selectedWorkspace) return null;
-
-  const workspace = selectedWorkspace;
-  const isActive = workspace.id === activeWorkspaceId;
+  const isActive = selectedWorkspace ? selectedWorkspace.id === activeWorkspaceId : false;
 
   // Reset activating flag when activation completes or workspace becomes active
   useEffect(() => {
@@ -79,6 +76,10 @@ export default function WorkspaceDetail(): JSX.Element | null {
       setActivating(false);
     }
   }, [activating, status, isActive]);
+
+  if (!selectedWorkspace) return null;
+
+  const workspace = selectedWorkspace;
 
   const handleActivate = async (): Promise<void> => {
     setActivating(true);

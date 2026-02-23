@@ -143,7 +143,7 @@ export async function activateWorkspace(
   // 9. Open folders
   for (const folder of workspace.folders) {
     try {
-      shell.openPath(folder);
+      await shell.openPath(folder);
     } catch (err) {
       console.error(`Open folder error (${folder}):`, err);
     }
@@ -152,7 +152,7 @@ export async function activateWorkspace(
   // 10. Open URLs
   for (const url of workspace.urls) {
     try {
-      shell.openExternal(url);
+      await shell.openExternal(url);
     } catch (err) {
       console.error(`Open URL error (${url}):`, err);
     }
@@ -161,7 +161,7 @@ export async function activateWorkspace(
   // 11. Music — open playlist URI if both musicApp and playlistUri are set
   try {
     if (workspace.audio.musicApp && workspace.audio.playlistUri) {
-      shell.openExternal(workspace.audio.playlistUri);
+      await shell.openExternal(workspace.audio.playlistUri);
     }
   } catch (err) {
     console.error('Music launch error:', err);
@@ -402,7 +402,7 @@ export async function switchWorkspace(
   // Open folders
   for (const folder of newWorkspace.folders) {
     try {
-      shell.openPath(folder);
+      await shell.openPath(folder);
     } catch (err) {
       console.error(`Open folder error (${folder}):`, err);
     }
@@ -411,7 +411,7 @@ export async function switchWorkspace(
   // Open URLs
   for (const url of newWorkspace.urls) {
     try {
-      shell.openExternal(url);
+      await shell.openExternal(url);
     } catch (err) {
       console.error(`Open URL error (${url}):`, err);
     }
