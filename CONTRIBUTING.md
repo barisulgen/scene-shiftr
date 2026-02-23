@@ -112,7 +112,3 @@ These are non-negotiable for any contribution:
 5. **Null means don't touch** — never change a setting the user didn't configure
 
 PRs that violate these will be rejected.
-
-## Questions?
-
-Open a [discussion](../../discussions) or comment on an existing issue. I'm happy to help you get started.
