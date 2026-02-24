@@ -4,34 +4,119 @@ import { useWorkspaces } from '../../hooks/useWorkspaces';
 import CollapsibleSection from '../common/CollapsibleSection';
 import type { Workspace, AppEntry } from '../../../../shared/types';
 
-function AppChip({ app }: { app: AppEntry }): JSX.Element {
+/* ─── SVG Icons ─── */
+
+function GridIcon(): JSX.Element {
   return (
-    <span className="inline-flex items-center px-2 py-0.5 rounded bg-zinc-800 text-xs text-zinc-300">
-      {app.name}
-    </span>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+      <path
+        fillRule="evenodd"
+        d="M4.25 2A2.25 2.25 0 0 0 2 4.25v2.5A2.25 2.25 0 0 0 4.25 9h2.5A2.25 2.25 0 0 0 9 6.75v-2.5A2.25 2.25 0 0 0 6.75 2h-2.5Zm0 9A2.25 2.25 0 0 0 2 13.25v2.5A2.25 2.25 0 0 0 4.25 18h2.5A2.25 2.25 0 0 0 9 15.75v-2.5A2.25 2.25 0 0 0 6.75 11h-2.5Zm9-9A2.25 2.25 0 0 0 11 4.25v2.5A2.25 2.25 0 0 0 13.25 9h2.5A2.25 2.25 0 0 0 18 6.75v-2.5A2.25 2.25 0 0 0 15.75 2h-2.5Zm0 9A2.25 2.25 0 0 0 11 13.25v2.5A2.25 2.25 0 0 0 13.25 18h2.5A2.25 2.25 0 0 0 18 15.75v-2.5A2.25 2.25 0 0 0 15.75 11h-2.5Z"
+        clipRule="evenodd"
+      />
+    </svg>
   );
 }
 
-function KeyValue({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}): JSX.Element {
+function GearIcon(): JSX.Element {
   return (
-    <div className="flex items-baseline justify-between gap-4 py-1">
-      <span className="text-xs text-zinc-500 shrink-0">{label}</span>
-      <span className="text-xs text-zinc-300 text-right truncate">{value}</span>
-    </div>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+      <path
+        fillRule="evenodd"
+        d="M7.84 1.804A1 1 0 0 1 8.82 1h2.36a1 1 0 0 1 .98.804l.331 1.652a6.993 6.993 0 0 1 1.929 1.115l1.598-.54a1 1 0 0 1 1.186.447l1.18 2.044a1 1 0 0 1-.205 1.251l-1.267 1.113a7.047 7.047 0 0 1 0 2.228l1.267 1.113a1 1 0 0 1 .206 1.25l-1.18 2.045a1 1 0 0 1-1.187.447l-1.598-.54a6.993 6.993 0 0 1-1.929 1.115l-.33 1.652a1 1 0 0 1-.98.804H8.82a1 1 0 0 1-.98-.804l-.331-1.652a6.993 6.993 0 0 1-1.929-1.115l-1.598.54a1 1 0 0 1-1.186-.447l-1.18-2.044a1 1 0 0 1 .205-1.251l1.267-1.114a7.05 7.05 0 0 1 0-2.227L1.821 7.773a1 1 0 0 1-.206-1.25l1.18-2.045a1 1 0 0 1 1.187-.447l1.598.54A6.992 6.992 0 0 1 7.51 3.456l.33-1.652ZM10 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"
+        clipRule="evenodd"
+      />
+    </svg>
   );
 }
 
-function truncatePath(path: string, maxLen = 40): string {
-  if (path.length <= maxLen) return path;
+function MonitorIcon(): JSX.Element {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+      <path d="M15.5 2A1.5 1.5 0 0 1 17 3.5v9a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 3 12.5v-9A1.5 1.5 0 0 1 4.5 2h11ZM6 17.5a.75.75 0 0 1 .75-.75h6.5a.75.75 0 0 1 0 1.5h-6.5a.75.75 0 0 1-.75-.75Z" />
+    </svg>
+  );
+}
+
+function MusicNoteIcon(): JSX.Element {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+      <path
+        fillRule="evenodd"
+        d="M17.721 1.599a.75.75 0 0 1 .279.584v11.29a2.5 2.5 0 1 1-1.5-2.29V5.598l-10 1.72v8.156a2.5 2.5 0 1 1-1.5-2.29V3.833a.75.75 0 0 1 .63-.74l11.25-1.935a.75.75 0 0 1 .841.44Z"
+        clipRule="evenodd"
+      />
+    </svg>
+  );
+}
+
+function PencilIcon(): JSX.Element {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+      <path d="m5.433 13.917 1.262-3.155A4 4 0 0 1 7.58 9.42l6.92-6.918a2.121 2.121 0 0 1 3 3l-6.92 6.918c-.383.383-.84.685-1.343.886l-3.154 1.262a.5.5 0 0 1-.65-.65Z" />
+      <path d="M3.5 5.75c0-.69.56-1.25 1.25-1.25H10A.75.75 0 0 0 10 3H4.75A2.75 2.75 0 0 0 2 5.75v9.5A2.75 2.75 0 0 0 4.75 18h9.5A2.75 2.75 0 0 0 17 15.25V10a.75.75 0 0 0-1.5 0v5.25c0 .69-.56 1.25-1.25 1.25h-9.5c-.69 0-1.25-.56-1.25-1.25v-9.5Z" />
+    </svg>
+  );
+}
+
+function TrashIcon(): JSX.Element {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+      <path
+        fillRule="evenodd"
+        d="M8.75 1A2.75 2.75 0 0 0 6 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 1 0 .23 1.482l.149-.022.841 10.518A2.75 2.75 0 0 0 7.596 19h4.807a2.75 2.75 0 0 0 2.742-2.53l.841-10.52.149.023a.75.75 0 0 0 .23-1.482A41.03 41.03 0 0 0 14 4.193V3.75A2.75 2.75 0 0 0 11.25 1h-2.5ZM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4ZM8.58 7.72a.75.75 0 0 1 .7.798l-.35 5.25a.75.75 0 0 1-1.497-.1l.35-5.25a.75.75 0 0 1 .797-.699Zm2.84 0a.75.75 0 0 1 .798.698l.35 5.25a.75.75 0 0 1-1.498.1l-.35-5.25a.75.75 0 0 1 .7-.798Z"
+        clipRule="evenodd"
+      />
+    </svg>
+  );
+}
+
+function MoonIcon(): JSX.Element {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5">
+      <path
+        fillRule="evenodd"
+        d="M7.455 2.004a.75.75 0 0 1 .26.77 7 7 0 0 0 9.958 7.967.75.75 0 0 1 1.067.853A8.5 8.5 0 1 1 6.647 1.921a.75.75 0 0 1 .808.083Z"
+        clipRule="evenodd"
+      />
+    </svg>
+  );
+}
+
+function BellIcon(): JSX.Element {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5">
+      <path
+        fillRule="evenodd"
+        d="M10 2a6 6 0 0 0-6 6c0 1.887-.454 3.665-1.257 5.234a.75.75 0 0 0 .515 1.076 32.91 32.91 0 0 0 3.256.508 3.5 3.5 0 0 0 6.972 0 32.903 32.903 0 0 0 3.256-.508.75.75 0 0 0 .515-1.076A11.448 11.448 0 0 1 16 8a6 6 0 0 0-6-6Zm0 14.5a2 2 0 0 1-1.95-1.557 33.54 33.54 0 0 0 3.9 0A2 2 0 0 1 10 16.5Z"
+        clipRule="evenodd"
+      />
+    </svg>
+  );
+}
+
+function HeadphonesIcon(): JSX.Element {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5">
+      <path d="M10 3.75a6.25 6.25 0 0 0-6.25 6.25v.894l-.476.17A2.25 2.25 0 0 0 1.75 13.25v1.5A2.25 2.25 0 0 0 4 17h.75a.75.75 0 0 0 .75-.75v-5.5a.75.75 0 0 0-.75-.75H4a.25.25 0 0 1-.25-.25V10a6.25 6.25 0 0 1 12.5 0v.75a.25.25 0 0 1-.25.25h-.75a.75.75 0 0 0-.75.75v5.5c0 .414.336.75.75.75H16a2.25 2.25 0 0 0 2.25-2.25v-1.5a2.25 2.25 0 0 0-1.524-2.186l-.476-.17V10A6.25 6.25 0 0 0 10 3.75Z" />
+    </svg>
+  );
+}
+
+function SpeakerIcon(): JSX.Element {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5">
+      <path d="M10.5 3.75a.75.75 0 0 0-1.264-.546L5.203 7H2.667a.75.75 0 0 0-.7.48A6.985 6.985 0 0 0 1.5 10c0 .887.165 1.737.468 2.52.111.29.39.48.7.48h2.535l4.033 3.796a.75.75 0 0 0 1.264-.546V3.75ZM15.95 5.05a.75.75 0 0 0-1.06 1.061 5.5 5.5 0 0 1 0 7.778.75.75 0 0 0 1.06 1.06 7 7 0 0 0 0-9.899Z" />
+      <path d="M13.829 7.172a.75.75 0 0 0-1.061 1.06 2.5 2.5 0 0 1 0 3.536.75.75 0 0 0 1.06 1.06 4 4 0 0 0 0-5.656Z" />
+    </svg>
+  );
+}
+
+/* ─── Helpers ─── */
+
+function getFilename(path: string): string {
   const parts = path.replace(/\\/g, '/').split('/');
-  if (parts.length <= 2) return '...' + path.slice(-maxLen);
-  return parts[0] + '/.../' + parts.slice(-2).join('/');
+  return parts[parts.length - 1] || path;
 }
 
 function hasApps(workspace: Workspace): boolean {
@@ -61,6 +146,113 @@ function hasAudio(workspace: Workspace): boolean {
     workspace.audio.playlistUri !== null
   );
 }
+
+function countSettings(workspace: Workspace): number {
+  let n = 0;
+  if (workspace.system.nightLight !== null) n++;
+  if (workspace.system.focusAssist !== null) n++;
+  if (workspace.system.audioDevice !== null) n++;
+  if (workspace.system.volume !== null) n++;
+  if (workspace.display.wallpaper !== null) n++;
+  if (workspace.display.monitorLayout !== null) n++;
+  if (workspace.audio.transitionSound !== null) n++;
+  if (workspace.audio.playlistUri !== null) n++;
+  return n;
+}
+
+/* ─── Sub-components ─── */
+
+function AppChip({ app, variant }: { app: AppEntry; variant: 'open' | 'close' }): JSX.Element {
+  return (
+    <span
+      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs"
+      style={{
+        backgroundColor: variant === 'close' ? 'var(--accent-soft)' : 'var(--bg-elevated)',
+        color: 'var(--text-primary)',
+      }}
+    >
+      <span
+        className="w-2 h-2 rounded-sm shrink-0"
+        style={{ backgroundColor: 'var(--accent)' }}
+      />
+      {app.name}
+    </span>
+  );
+}
+
+function SettingRow({
+  icon,
+  label,
+  children,
+}: {
+  icon: JSX.Element;
+  label: string;
+  children: React.ReactNode;
+}): JSX.Element {
+  return (
+    <div className="flex items-center justify-between gap-4 py-1.5">
+      <div className="flex items-center gap-2">
+        <span style={{ color: 'var(--text-muted)' }}>{icon}</span>
+        <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+          {label}
+        </span>
+      </div>
+      <div>{children}</div>
+    </div>
+  );
+}
+
+function PillBadge({ children }: { children: React.ReactNode }): JSX.Element {
+  return (
+    <span
+      className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs"
+      style={{
+        backgroundColor: 'var(--bg-elevated)',
+        color: 'var(--text-secondary)',
+      }}
+    >
+      {children}
+    </span>
+  );
+}
+
+function OnOffBadge({ value }: { value: boolean }): JSX.Element {
+  return (
+    <PillBadge>
+      {value && (
+        <span
+          className="w-1.5 h-1.5 rounded-full shrink-0"
+          style={{ backgroundColor: 'var(--green)' }}
+        />
+      )}
+      {value ? 'On' : 'Off'}
+    </PillBadge>
+  );
+}
+
+function VolumeBadge({ value }: { value: number }): JSX.Element {
+  return (
+    <PillBadge>
+      <span className="flex items-center gap-1.5">
+        <span
+          className="w-10 h-1.5 rounded-full overflow-hidden"
+          style={{ backgroundColor: 'var(--bg-card)' }}
+        >
+          <span
+            className="block h-full rounded-full"
+            style={{
+              width: `${value}%`,
+              background: 'linear-gradient(90deg, var(--green), var(--accent))',
+            }}
+          />
+        </span>
+        {value}%
+      </span>
+    </PillBadge>
+  );
+}
+
+/* ─── Main Component ─── */
 
 export default function WorkspaceDetail(): JSX.Element | null {
   const { activeWorkspaceId, status, setCurrentView } = useApp();
@@ -108,79 +300,186 @@ export default function WorkspaceDetail(): JSX.Element | null {
     setCurrentView('edit');
   };
 
+  const totalApps = workspace.apps.open.length + workspace.apps.close.length;
+  const settingsCount = countSettings(workspace);
+
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-y-auto px-8 py-6">
-        {/* Header */}
-        <div className="flex items-center gap-3 mb-1">
-          <span className="text-3xl">{workspace.icon}</span>
-          <h1 className="text-xl font-semibold text-zinc-100 tracking-tight">
-            {workspace.name}
-          </h1>
+      <div className="flex-1 overflow-y-auto px-6 py-6">
+        {/* ── Header ── */}
+        <div className="flex items-start justify-between mb-5">
+          <div className="flex items-center gap-4">
+            {/* Emoji container */}
+            <div
+              className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 text-4xl"
+              style={{ backgroundColor: 'var(--bg-card)' }}
+            >
+              {workspace.icon}
+            </div>
+            <div>
+              <h1
+                className="text-2xl font-bold leading-tight"
+                style={{ color: 'var(--text-primary)' }}
+              >
+                {workspace.name}
+              </h1>
+              {/* Status line */}
+              <div className="flex items-center gap-2 mt-1">
+                {isActive ? (
+                  <>
+                    <span
+                      className="uppercase text-[10px] font-bold tracking-wider rounded-full px-2.5 py-0.5"
+                      style={{
+                        backgroundColor: 'var(--accent)',
+                        color: '#fff',
+                      }}
+                    >
+                      Active
+                    </span>
+                    <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                      {totalApps} app{totalApps !== 1 ? 's' : ''} &middot; {settingsCount} setting{settingsCount !== 1 ? 's' : ''}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span
+                      className="text-[10px] font-medium tracking-wider rounded-full px-2.5 py-0.5"
+                      style={{
+                        border: '1px solid var(--border-light)',
+                        color: 'var(--text-muted)',
+                      }}
+                    >
+                      Inactive
+                    </span>
+                    <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                      {totalApps} app{totalApps !== 1 ? 's' : ''} configured
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+          {/* Edit / Delete buttons */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleEdit}
+              className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors duration-150"
+              style={{ backgroundColor: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}
+              title="Edit"
+            >
+              <PencilIcon />
+            </button>
+            <button
+              onClick={handleDelete}
+              className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors duration-150 group"
+              style={{ backgroundColor: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}
+              title="Delete"
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--accent-soft)';
+                e.currentTarget.style.color = 'var(--accent)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--bg-elevated)';
+                e.currentTarget.style.color = 'var(--text-secondary)';
+              }}
+            >
+              <TrashIcon />
+            </button>
+          </div>
         </div>
 
-        <div className="w-full h-px bg-zinc-800 my-4" />
-
-        {/* Activate / Active badge */}
-        <div className="flex items-center gap-3 mb-6">
+        {/* ── Activate / Deactivate Button ── */}
+        <div className="mb-6">
           {isActive ? (
-            <>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-emerald-950/50 text-emerald-400 text-sm font-medium border border-emerald-800/40">
-                <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                Active
-              </span>
-              <button
-                onClick={handleDeactivate}
-                className="px-4 py-2 rounded-md border border-zinc-700 text-sm text-zinc-300 font-medium hover:border-zinc-600 hover:text-zinc-100 transition-colors duration-150"
-              >
-                Deactivate
-              </button>
-            </>
+            <button
+              onClick={handleDeactivate}
+              className="w-full h-12 rounded-xl flex items-center justify-center gap-2 text-sm font-medium transition-colors duration-150"
+              style={{
+                backgroundColor: 'var(--bg-card)',
+                border: '1px solid var(--border)',
+                color: 'var(--text-secondary)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--bg-card)';
+              }}
+            >
+              {/* Stop square icon */}
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+                <path
+                  fillRule="evenodd"
+                  d="M2 10a8 8 0 1 1 16 0 8 8 0 0 1-16 0Zm5-2.25A.75.75 0 0 1 7.75 7h4.5a.75.75 0 0 1 .75.75v4.5a.75.75 0 0 1-.75.75h-4.5a.75.75 0 0 1-.75-.75v-4.5Z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              Deactivate Scene
+            </button>
           ) : activating ? (
             <button
               disabled
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-indigo-600/50 text-white/70 text-sm font-medium cursor-not-allowed"
+              className="w-full h-12 rounded-xl flex items-center justify-center gap-2 text-sm font-medium cursor-not-allowed"
+              style={{
+                backgroundColor: 'var(--bg-elevated)',
+                color: 'var(--text-muted)',
+              }}
             >
-              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <div className="w-4 h-4 border-2 rounded-full animate-spin" style={{ borderColor: 'var(--text-muted)', borderTopColor: 'var(--text-primary)' }} />
               Activating...
             </button>
           ) : (
             <button
               onClick={handleActivate}
-              className="px-4 py-2 rounded-md bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-500 transition-colors duration-150"
+              className="w-full h-12 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold text-white transition-all duration-150 hover:brightness-110"
+              style={{
+                background: 'var(--gradient-activate)',
+              }}
             >
-              Activate
+              {/* Play triangle icon */}
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+                <path d="M6.3 2.84A1.5 1.5 0 0 0 4 4.11v11.78a1.5 1.5 0 0 0 2.3 1.27l9.344-5.891a1.5 1.5 0 0 0 0-2.538L6.3 2.841Z" />
+              </svg>
+              Activate Scene
             </button>
           )}
         </div>
 
-        {/* Sections */}
+        {/* ── Sections ── */}
         <div className="flex flex-col">
           {/* Apps & Programs */}
           <CollapsibleSection
             title="Apps & Programs"
+            icon={<GridIcon />}
+            count={totalApps}
             isEmpty={!hasApps(workspace)}
           >
             {workspace.apps.open.length > 0 && (
-              <div className="mb-2">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500 mb-1 block">
+              <div className="mb-3">
+                <span
+                  className="text-[10px] font-bold uppercase tracking-wider mb-2 block"
+                  style={{ color: 'var(--accent)' }}
+                >
                   Open
                 </span>
                 <div className="flex flex-wrap gap-1.5">
                   {workspace.apps.open.map((app) => (
-                    <AppChip key={app.path} app={app} />
+                    <AppChip key={app.path} app={app} variant="open" />
                   ))}
                 </div>
               </div>
             )}
             {workspace.apps.close.length > 0 && (
               <div>
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500 mb-1 block">
+                <span
+                  className="text-[10px] font-bold uppercase tracking-wider mb-2 block"
+                  style={{ color: 'var(--accent)' }}
+                >
                   Close
                 </span>
                 <div className="flex flex-wrap gap-1.5">
                   {workspace.apps.close.map((app) => (
-                    <AppChip key={app.path} app={app} />
+                    <AppChip key={app.path} app={app} variant="close" />
                   ))}
                 </div>
               </div>
@@ -190,86 +489,90 @@ export default function WorkspaceDetail(): JSX.Element | null {
           {/* System Settings */}
           <CollapsibleSection
             title="System Settings"
+            icon={<GearIcon />}
+            count={
+              [
+                workspace.system.nightLight,
+                workspace.system.focusAssist,
+                workspace.system.audioDevice,
+                workspace.system.volume,
+              ].filter((v) => v !== null).length
+            }
             isEmpty={!hasSystem(workspace)}
           >
             {workspace.system.nightLight !== null && (
-              <KeyValue
-                label="Night light"
-                value={workspace.system.nightLight ? 'On' : 'Off'}
-              />
+              <SettingRow icon={<MoonIcon />} label="Night light">
+                <OnOffBadge value={workspace.system.nightLight} />
+              </SettingRow>
             )}
             {workspace.system.focusAssist !== null && (
-              <KeyValue
-                label="Focus assist"
-                value={workspace.system.focusAssist ? 'On' : 'Off'}
-              />
+              <SettingRow icon={<BellIcon />} label="Focus assist">
+                <OnOffBadge value={workspace.system.focusAssist} />
+              </SettingRow>
             )}
             {workspace.system.audioDevice !== null && (
-              <KeyValue label="Audio" value={workspace.system.audioDevice} />
+              <SettingRow icon={<HeadphonesIcon />} label="Audio device">
+                <PillBadge>{workspace.system.audioDevice}</PillBadge>
+              </SettingRow>
             )}
             {workspace.system.volume !== null && (
-              <KeyValue label="Volume" value={`${workspace.system.volume}%`} />
+              <SettingRow icon={<SpeakerIcon />} label="Volume">
+                <VolumeBadge value={workspace.system.volume} />
+              </SettingRow>
             )}
           </CollapsibleSection>
 
           {/* Display */}
-          <CollapsibleSection title="Display" isEmpty={!hasDisplay(workspace)}>
+          <CollapsibleSection
+            title="Display"
+            icon={<MonitorIcon />}
+            count={
+              [workspace.display.wallpaper, workspace.display.monitorLayout].filter(
+                (v) => v !== null
+              ).length
+            }
+            isEmpty={!hasDisplay(workspace)}
+          >
             {workspace.display.wallpaper !== null && (
-              <KeyValue
-                label="Wallpaper"
-                value={truncatePath(workspace.display.wallpaper)}
-              />
+              <SettingRow icon={<MonitorIcon />} label="Wallpaper">
+                <PillBadge>{getFilename(workspace.display.wallpaper)}</PillBadge>
+              </SettingRow>
             )}
             {workspace.display.monitorLayout !== null && (
-              <KeyValue
-                label="Monitor layout"
-                value={`${workspace.display.monitorLayout.monitors.length} monitor${
-                  workspace.display.monitorLayout.monitors.length !== 1
-                    ? 's'
-                    : ''
-                } saved`}
-              />
+              <SettingRow icon={<MonitorIcon />} label="Monitor layout">
+                <PillBadge>
+                  {workspace.display.monitorLayout.monitors.length} monitor
+                  {workspace.display.monitorLayout.monitors.length !== 1 ? 's' : ''}
+                </PillBadge>
+              </SettingRow>
             )}
           </CollapsibleSection>
 
           {/* Audio & Vibes */}
           <CollapsibleSection
             title="Audio & Vibes"
+            icon={<MusicNoteIcon />}
+            count={
+              [
+                workspace.audio.transitionSound,
+                workspace.audio.musicApp,
+                workspace.audio.playlistUri,
+              ].filter((v) => v !== null).length
+            }
             isEmpty={!hasAudio(workspace)}
           >
             {workspace.audio.transitionSound !== null && (
-              <KeyValue
-                label="Transition sound"
-                value={workspace.audio.transitionSound}
-              />
-            )}
-            {workspace.audio.musicApp !== null && (
-              <KeyValue label="Music app" value={workspace.audio.musicApp} />
+              <SettingRow icon={<SpeakerIcon />} label="Transition sound">
+                <PillBadge>{workspace.audio.transitionSound}</PillBadge>
+              </SettingRow>
             )}
             {workspace.audio.playlistUri !== null && (
-              <KeyValue
-                label="Playlist"
-                value={workspace.audio.playlistUri}
-              />
+              <SettingRow icon={<MusicNoteIcon />} label="Playlist">
+                <PillBadge>Spotify: {workspace.audio.playlistUri}</PillBadge>
+              </SettingRow>
             )}
           </CollapsibleSection>
         </div>
-      </div>
-
-      {/* Bottom actions */}
-      <div className="flex items-center gap-3 px-8 py-4 border-t border-zinc-800/60">
-        <button
-          onClick={handleEdit}
-          className="px-4 py-2 rounded-md border border-zinc-700 text-sm text-zinc-300 font-medium hover:border-zinc-600 hover:text-zinc-100 transition-colors duration-150"
-        >
-          Edit
-        </button>
-        <button
-          onClick={handleDelete}
-          className="px-4 py-2 rounded-md bg-red-900/30 text-sm text-red-400 font-medium hover:bg-red-800/50 transition-colors duration-150"
-        >
-          Delete
-        </button>
       </div>
     </div>
   );
