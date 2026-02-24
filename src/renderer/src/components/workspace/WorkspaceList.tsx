@@ -48,7 +48,7 @@ export default function WorkspaceList(): JSX.Element {
 
   if (workspaces.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-8 text-zinc-600 text-xs">
+      <div className="flex flex-col items-center justify-center py-8 text-xs" style={{ color: 'var(--text-muted)' }}>
         <span>No workspaces yet</span>
       </div>
     );

@@ -9,6 +9,13 @@ interface WorkspaceListItemProps {
   onSelect: (id: string) => void;
 }
 
+function getSubtitle(workspace: Workspace, isActive: boolean): string {
+  if (isActive) return 'Active';
+  const appNames = workspace.apps.open.map((a) => a.name).slice(0, 3);
+  if (appNames.length === 0) return 'No apps configured';
+  return appNames.join(', ');
+}
+
 export default function WorkspaceListItem({
   workspace,
   isSelected,
@@ -24,51 +31,66 @@ export default function WorkspaceListItem({
     isDragging,
   } = useSortable({ id: workspace.id });
 
-  const style = {
+  const subtitle = getSubtitle(workspace, isActive);
+
+  const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
+    backgroundColor: isSelected ? 'var(--bg-card-hover)' : 'transparent',
+    borderLeft: isSelected ? '3px solid var(--accent)' : '3px solid transparent',
   };
 
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className={`group flex items-center gap-2 px-2 py-1.5 rounded-md cursor-pointer transition-colors duration-100 ${
+      className={`flex items-center gap-3 px-2 py-1.5 rounded-md cursor-pointer transition-colors duration-100 ${
         isDragging ? 'opacity-50' : ''
-      } ${
-        isSelected
-          ? 'bg-zinc-800 text-zinc-100'
-          : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-200'
       }`}
       onClick={() => onSelect(workspace.id)}
+      onMouseEnter={(e) => {
+        if (!isSelected) {
+          e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)';
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!isSelected) {
+          e.currentTarget.style.backgroundColor = 'transparent';
+        }
+      }}
+      {...attributes}
+      {...listeners}
     >
-      {/* Drag handle */}
-      <button
-        className="flex items-center justify-center w-4 h-4 shrink-0 cursor-grab opacity-0 group-hover:opacity-50 hover:!opacity-100 transition-opacity duration-100"
-        {...attributes}
-        {...listeners}
+      {/* Icon in colored square */}
+      <div
+        className="flex items-center justify-center w-9 h-9 rounded-lg shrink-0 text-base"
+        style={{ backgroundColor: 'var(--bg-elevated)' }}
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 16 16"
-          fill="currentColor"
-          className="w-3.5 h-3.5"
+        {workspace.icon}
+      </div>
+
+      {/* Name + subtitle */}
+      <div className="flex flex-col flex-1 min-w-0">
+        <span
+          className="text-sm font-semibold truncate"
+          style={{ color: 'var(--text-primary)' }}
         >
-          <path d="M2 4.75A.75.75 0 0 1 2.75 4h10.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 4.75Zm0 3A.75.75 0 0 1 2.75 7h10.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 7.75Zm0 3a.75.75 0 0 1 .75-.75h10.5a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1-.75-.75Z" />
-        </svg>
-      </button>
+          {workspace.name}
+        </span>
+        <span
+          className="text-xs truncate"
+          style={{ color: isActive ? 'var(--accent)' : 'var(--text-muted)' }}
+        >
+          {subtitle}
+        </span>
+      </div>
 
-      {/* Icon */}
-      <span className="text-sm leading-none shrink-0">{workspace.icon}</span>
-
-      {/* Name */}
-      <span className="text-sm font-medium truncate flex-1">
-        {workspace.name}
-      </span>
-
-      {/* Active indicator */}
+      {/* Active dot */}
       {isActive && (
-        <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0" />
+        <span
+          className="w-2 h-2 rounded-full shrink-0"
+          style={{ backgroundColor: 'var(--accent)' }}
+        />
       )}
     </div>
   );

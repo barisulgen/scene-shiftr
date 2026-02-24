@@ -5,13 +5,25 @@ export default function Sidebar(): JSX.Element {
   const { setCurrentView, currentView } = useApp();
 
   return (
-    <aside className="flex flex-col w-64 bg-zinc-900 border-r border-zinc-800 shrink-0">
-      {/* App logo / title */}
-      <div className="flex items-center gap-2.5 px-5 py-4 border-b border-zinc-800/50">
-        <div className="flex items-center justify-center w-7 h-7 rounded-md bg-indigo-600 text-white text-xs font-bold tracking-tight">
-          SS
+    <aside
+      className="flex flex-col w-64 shrink-0"
+      style={{
+        backgroundColor: 'var(--bg-card)',
+        borderRight: '1px solid var(--border)',
+      }}
+    >
+      {/* Logo area */}
+      <div
+        className="flex items-center gap-2.5 px-5 py-4"
+        style={{ borderBottom: '1px solid var(--border)' }}
+      >
+        <div
+          className="flex items-center justify-center w-7 h-7 rounded-md text-white text-xs font-bold"
+          style={{ backgroundColor: 'var(--accent)' }}
+        >
+          S
         </div>
-        <span className="text-sm font-semibold tracking-wide text-zinc-100">
+        <span className="text-sm font-semibold tracking-wide" style={{ color: 'var(--text-primary)' }}>
           Scene Shiftr
         </span>
       </div>
@@ -19,7 +31,10 @@ export default function Sidebar(): JSX.Element {
       {/* Workspace list area */}
       <div className="flex-1 overflow-y-auto px-3 py-3">
         <div className="px-2 pb-2">
-          <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
+          <span
+            className="text-[10px] font-semibold uppercase tracking-widest"
+            style={{ color: 'var(--text-muted)', letterSpacing: '0.1em' }}
+          >
             Workspaces
           </span>
         </div>
@@ -27,10 +42,17 @@ export default function Sidebar(): JSX.Element {
       </div>
 
       {/* Bottom actions */}
-      <div className="flex flex-col gap-1 px-3 pb-3">
+      <div className="flex flex-col gap-1 px-3 pb-3" style={{ borderTop: '1px solid var(--border)' }}>
         <button
           onClick={() => setCurrentView('create')}
-          className="flex items-center gap-2 w-full px-3 py-2 rounded-md text-sm text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors duration-150"
+          className="flex items-center gap-2 w-full px-3 py-2.5 rounded-md text-sm font-medium transition-colors duration-150"
+          style={{ color: 'var(--accent)' }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'var(--accent-soft)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent';
+          }}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -44,11 +66,24 @@ export default function Sidebar(): JSX.Element {
         </button>
         <button
           onClick={() => setCurrentView(currentView === 'settings' ? 'main' : 'settings')}
-          className={`flex items-center gap-2 w-full px-3 py-2 rounded-md text-sm transition-colors duration-150 ${
-            currentView === 'settings'
-              ? 'text-zinc-100 bg-zinc-800'
-              : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800'
-          }`}
+          className="flex items-center gap-2 w-full px-3 py-2.5 rounded-md text-sm font-medium transition-colors duration-150 relative"
+          style={{
+            color: currentView === 'settings' ? 'var(--text-primary)' : 'var(--text-secondary)',
+            backgroundColor: currentView === 'settings' ? 'var(--bg-card-hover)' : 'transparent',
+            borderLeft: currentView === 'settings' ? '3px solid var(--accent)' : '3px solid transparent',
+          }}
+          onMouseEnter={(e) => {
+            if (currentView !== 'settings') {
+              e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)';
+              e.currentTarget.style.color = 'var(--text-primary)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (currentView !== 'settings') {
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.color = 'var(--text-secondary)';
+            }
+          }}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
