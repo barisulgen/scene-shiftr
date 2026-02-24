@@ -70,12 +70,23 @@ export default function TransitionSoundPicker({
 
   return (
     <div className="space-y-2">
-      <label className="block text-sm text-zinc-400">Transition Sound</label>
+      <label className="block text-sm" style={{ color: 'var(--text-muted)' }}>
+        Transition Sound
+      </label>
       <div className="flex gap-2">
         <select
           value={selectValue}
           onChange={(e) => handleSelectChange(e.target.value)}
-          className="flex-1 px-3 py-2 rounded-md bg-zinc-800 border border-zinc-700 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          className="flex-1 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-1"
+          style={{
+            backgroundColor: 'var(--bg-elevated)',
+            borderWidth: '1px',
+            borderStyle: 'solid',
+            borderColor: 'var(--border)',
+            color: 'var(--text-primary)',
+            // @ts-expect-error CSS custom property for Tailwind ring color
+            '--tw-ring-color': 'var(--accent)',
+          }}
         >
           <option value="">None</option>
           {BUILT_IN_SOUNDS.map((sound) => (
@@ -89,10 +100,24 @@ export default function TransitionSoundPicker({
           type="button"
           onClick={handlePreview}
           disabled={!value || previewing}
-          className="shrink-0 px-3 py-2 rounded-md border border-zinc-700 text-sm text-zinc-300 hover:border-zinc-600 hover:text-zinc-100 transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
+          className="shrink-0 px-3 py-2 rounded-md text-sm transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
+          style={{
+            borderWidth: '1px',
+            borderStyle: 'solid',
+            borderColor: 'var(--border)',
+            color: 'var(--text-secondary)',
+          }}
         >
           {previewing ? (
-            <div className="w-4 h-4 border-2 border-zinc-600 border-t-zinc-400 rounded-full animate-spin" />
+            <div
+              className="w-4 h-4 rounded-full animate-spin"
+              style={{
+                borderWidth: '2px',
+                borderStyle: 'solid',
+                borderColor: 'var(--border)',
+                borderTopColor: 'var(--text-muted)',
+              }}
+            />
           ) : (
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -109,13 +134,28 @@ export default function TransitionSoundPicker({
       {/* Show custom file path and browse button when custom is selected */}
       {isCustom && (
         <div className="flex items-center gap-2">
-          <span className="flex-1 px-3 py-1.5 rounded-md bg-zinc-800/50 border border-zinc-700/50 text-xs text-zinc-400 truncate">
+          <span
+            className="flex-1 px-3 py-1.5 rounded-md text-xs truncate"
+            style={{
+              backgroundColor: 'var(--bg-elevated)',
+              borderWidth: '1px',
+              borderStyle: 'solid',
+              borderColor: 'var(--border-light)',
+              color: 'var(--text-muted)',
+            }}
+          >
             {value}
           </span>
           <button
             type="button"
             onClick={handleBrowseCustom}
-            className="shrink-0 px-2 py-1.5 rounded-md border border-zinc-700 text-xs text-zinc-400 hover:text-zinc-200 transition-colors"
+            className="shrink-0 px-2 py-1.5 rounded-md text-xs transition-colors"
+            style={{
+              borderWidth: '1px',
+              borderStyle: 'solid',
+              borderColor: 'var(--border)',
+              color: 'var(--text-muted)',
+            }}
           >
             Change
           </button>

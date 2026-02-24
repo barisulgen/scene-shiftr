@@ -84,7 +84,7 @@ export default function AppSelector({ value, onChange, label }: AppSelectorProps
 
   return (
     <div ref={containerRef} className="space-y-2">
-      <label className="block text-sm text-zinc-400">{label}</label>
+      <label className="block text-sm" style={{ color: 'var(--text-muted)' }}>{label}</label>
 
       {/* Search input and browse button */}
       <div className="flex gap-2">
@@ -98,18 +98,41 @@ export default function AppSelector({ value, onChange, label }: AppSelectorProps
             }}
             onFocus={() => setIsOpen(true)}
             placeholder="Search detected apps..."
-            className="w-full px-3 py-2 rounded-md bg-zinc-800 border border-zinc-700 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            className="w-full px-3 py-2 rounded-md text-sm placeholder:text-zinc-500 focus:outline-none focus:ring-1"
+            style={{
+              backgroundColor: 'var(--bg-elevated)',
+              borderWidth: '1px',
+              borderStyle: 'solid',
+              borderColor: 'var(--border)',
+              color: 'var(--text-primary)',
+              // @ts-expect-error CSS custom property for Tailwind ring color
+              '--tw-ring-color': 'var(--accent)',
+            }}
           />
           {loading && (
             <div className="absolute right-3 top-1/2 -translate-y-1/2">
-              <div className="w-4 h-4 border-2 border-zinc-600 border-t-zinc-400 rounded-full animate-spin" />
+              <div
+                className="w-4 h-4 rounded-full animate-spin"
+                style={{
+                  borderWidth: '2px',
+                  borderStyle: 'solid',
+                  borderColor: 'var(--border)',
+                  borderTopColor: 'var(--text-muted)',
+                }}
+              />
             </div>
           )}
         </div>
         <button
           type="button"
           onClick={handleBrowseExe}
-          className="shrink-0 px-3 py-2 rounded-md border border-zinc-700 text-sm text-zinc-300 hover:border-zinc-600 hover:text-zinc-100 transition-colors duration-150"
+          className="shrink-0 px-3 py-2 rounded-md text-sm transition-colors duration-150"
+          style={{
+            borderWidth: '1px',
+            borderStyle: 'solid',
+            borderColor: 'var(--border)',
+            color: 'var(--text-secondary)',
+          }}
         >
           Browse .exe
         </button>
@@ -117,20 +140,44 @@ export default function AppSelector({ value, onChange, label }: AppSelectorProps
 
       {/* Dropdown list */}
       {isOpen && filteredApps.length > 0 && (
-        <div className="max-h-48 overflow-y-auto rounded-md border border-zinc-700 bg-zinc-800">
+        <div
+          className="max-h-48 overflow-y-auto rounded-md"
+          style={{
+            borderWidth: '1px',
+            borderStyle: 'solid',
+            borderColor: 'var(--border)',
+            backgroundColor: 'var(--bg-elevated)',
+          }}
+        >
           {filteredApps.map((app) => (
             <button
               key={app.path}
               type="button"
               onClick={() => toggleApp(app)}
-              className="flex items-center gap-2 w-full px-3 py-1.5 text-left text-sm hover:bg-zinc-700/50 transition-colors duration-100"
+              className="flex items-center gap-2 w-full px-3 py-1.5 text-left text-sm transition-colors duration-100"
+              style={{ backgroundColor: 'transparent' }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)')
+              }
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
             >
               <span
-                className={`flex items-center justify-center w-4 h-4 rounded border ${
+                className="flex items-center justify-center w-4 h-4 rounded"
+                style={
                   isSelected(app)
-                    ? 'bg-indigo-600 border-indigo-500'
-                    : 'border-zinc-600 bg-zinc-900'
-                }`}
+                    ? {
+                        backgroundColor: 'var(--accent)',
+                        borderWidth: '1px',
+                        borderStyle: 'solid',
+                        borderColor: 'var(--accent-hover)',
+                      }
+                    : {
+                        backgroundColor: 'var(--bg-card)',
+                        borderWidth: '1px',
+                        borderStyle: 'solid',
+                        borderColor: 'var(--border)',
+                      }
+                }
               >
                 {isSelected(app) && (
                   <svg
@@ -147,8 +194,13 @@ export default function AppSelector({ value, onChange, label }: AppSelectorProps
                   </svg>
                 )}
               </span>
-              <span className="text-zinc-200 truncate">{app.name}</span>
-              <span className="ml-auto text-[11px] text-zinc-500 truncate max-w-[200px]">
+              <span className="truncate" style={{ color: 'var(--text-primary)' }}>
+                {app.name}
+              </span>
+              <span
+                className="ml-auto text-[11px] truncate max-w-[200px]"
+                style={{ color: 'var(--text-muted)' }}
+              >
                 {app.path}
               </span>
             </button>
@@ -157,7 +209,16 @@ export default function AppSelector({ value, onChange, label }: AppSelectorProps
       )}
 
       {isOpen && !loading && filteredApps.length === 0 && search && (
-        <div className="px-3 py-2 rounded-md border border-zinc-700 bg-zinc-800 text-sm text-zinc-500">
+        <div
+          className="px-3 py-2 rounded-md text-sm"
+          style={{
+            borderWidth: '1px',
+            borderStyle: 'solid',
+            borderColor: 'var(--border)',
+            backgroundColor: 'var(--bg-elevated)',
+            color: 'var(--text-muted)',
+          }}
+        >
           No apps found matching &quot;{search}&quot;
         </div>
       )}
@@ -168,13 +229,27 @@ export default function AppSelector({ value, onChange, label }: AppSelectorProps
           {value.map((app) => (
             <span
               key={app.path}
-              className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-zinc-800 border border-zinc-700 text-xs text-zinc-300"
+              className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs"
+              style={{
+                backgroundColor: 'var(--bg-elevated)',
+                borderWidth: '1px',
+                borderStyle: 'solid',
+                borderColor: 'var(--border)',
+                color: 'var(--text-secondary)',
+              }}
             >
               {app.name}
               <button
                 type="button"
                 onClick={() => removeApp(app)}
-                className="ml-0.5 text-zinc-500 hover:text-zinc-200 transition-colors"
+                className="ml-0.5 transition-colors"
+                style={{ color: 'var(--text-muted)' }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.color = 'var(--text-primary)')
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.color = 'var(--text-muted)')
+                }
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
