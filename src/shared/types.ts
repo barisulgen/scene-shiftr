@@ -65,6 +65,7 @@ export interface GlobalSettings {
   gracefulCloseTimeout: number;
   activeWorkspaceId: string | null;
   dryRun: boolean;
+  appScale: number;
 }
 
 export interface DryRunLogEntry {

@@ -1,4 +1,4 @@
-import { contextBridge, ipcRenderer } from 'electron';
+import { contextBridge, ipcRenderer, webFrame } from 'electron';
 
 const api = {
   // Workspace CRUD
@@ -43,6 +43,9 @@ const api = {
   windowMinimize: () => ipcRenderer.invoke('window:minimize'),
   windowMaximize: () => ipcRenderer.invoke('window:maximize'),
   windowClose: () => ipcRenderer.invoke('window:close'),
+
+  // Zoom
+  setZoomFactor: (factor: number) => webFrame.setZoomFactor(factor),
 
   // Events from main process
   onActivationProgress: (cb: (msg: string) => void) => {

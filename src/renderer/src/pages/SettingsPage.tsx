@@ -12,6 +12,7 @@ export default function SettingsPage(): JSX.Element {
   const [confirmBeforeSwitching, setConfirmBeforeSwitching] = useState(false);
   const [gracefulCloseTimeout, setGracefulCloseTimeout] = useState(5);
   const [dryRun, setDryRun] = useState(false);
+  const [appScale, setAppScale] = useState(100);
   const [saving, setSaving] = useState(false);
 
   // Sync local state when settings load
@@ -22,6 +23,7 @@ export default function SettingsPage(): JSX.Element {
       setConfirmBeforeSwitching(settings.confirmBeforeSwitching);
       setGracefulCloseTimeout(settings.gracefulCloseTimeout);
       setDryRun(settings.dryRun);
+      setAppScale(settings.appScale ?? 100);
     }
   }, [settings]);
 
@@ -34,7 +36,10 @@ export default function SettingsPage(): JSX.Element {
         confirmBeforeSwitching,
         gracefulCloseTimeout,
         dryRun,
+        appScale,
       });
+      // Apply zoom factor on save
+      window.api.setZoomFactor(appScale / 100);
       setCurrentView('main');
     } catch {
       /* save error */
@@ -187,6 +192,61 @@ export default function SettingsPage(): JSX.Element {
                 }`}
               />
             </button>
+          </div>
+
+          {/* Card 3 — App Scale */}
+          <div
+            className="rounded-xl p-5"
+            style={{
+              backgroundColor: 'var(--bg-card)',
+              border: '1px solid var(--border)',
+            }}
+          >
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div
+                  className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                  style={{ backgroundColor: 'rgba(59,130,246,0.15)' }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4" style={{ color: '#3B82F6' }}>
+                    <path d="M10 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" />
+                    <path fillRule="evenodd" d="M.664 10.59a1.651 1.651 0 0 1 0-1.186A10.004 10.004 0 0 1 10 3c4.257 0 7.893 2.66 9.336 6.41.147.381.146.804 0 1.186A10.004 10.004 0 0 1 10 17c-4.257 0-7.893-2.66-9.336-6.41ZM14 10a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div>
+                  <span className="block text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+                    App Scale
+                  </span>
+                  <span className="block text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                    Scale the entire app interface
+                  </span>
+                </div>
+              </div>
+              <span
+                className="text-sm font-semibold rounded-full px-3 py-0.5"
+                style={{ backgroundColor: 'var(--bg-elevated)', color: 'var(--accent)' }}
+              >
+                {appScale}%
+              </span>
+            </div>
+            <div className="mt-4">
+              <input
+                type="range"
+                min={100}
+                max={150}
+                step={10}
+                value={appScale}
+                onChange={(e) => setAppScale(Number(e.target.value))}
+                className="w-full settings-slider"
+                style={{
+                  '--slider-pct': `${((appScale - 100) / 50) * 100}%`,
+                } as React.CSSProperties}
+              />
+              <div className="flex justify-between mt-1">
+                <span className="text-[10px] uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>100%</span>
+                <span className="text-[10px] uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>150%</span>
+              </div>
+            </div>
           </div>
 
           {/* BEHAVIOR & AUDIO section label */}
