@@ -42,7 +42,7 @@ function AppShell(): JSX.Element {
   }, [forceCloseApp]);
 
   return (
-    <div className="flex flex-col h-screen bg-zinc-950 text-zinc-100 select-none">
+    <div className="flex flex-col h-screen select-none" style={{ backgroundColor: 'var(--bg-base)', color: 'var(--text-primary)' }}>
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />
         <MainPanel />
