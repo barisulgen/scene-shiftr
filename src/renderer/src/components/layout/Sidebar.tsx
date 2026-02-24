@@ -83,6 +83,29 @@ export default function Sidebar(): JSX.Element {
           </svg>
           Settings
         </button>
+        <button
+          onClick={() => window.open('https://github.com/barisulgen/scene-shiftr/issues/new/choose', '_blank')}
+          className="flex items-center gap-2 w-full px-3 py-2.5 rounded-md text-sm font-medium transition-colors duration-150"
+          style={{ color: 'var(--text-secondary)' }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)';
+            e.currentTarget.style.color = 'var(--text-primary)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent';
+            e.currentTarget.style.color = 'var(--text-secondary)';
+          }}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 16 16"
+            fill="currentColor"
+            className="w-4 h-4"
+          >
+            <path fillRule="evenodd" d="M1 8.74c0 .983.713 1.825 1.69 1.943.764.092 1.534.164 2.31.216v2.351a.75.75 0 0 0 1.28.53l2.51-2.51c.182-.181.427-.29.684-.31a41.72 41.72 0 0 0 2.836-.26c.977-.118 1.69-.96 1.69-1.943V4.26c0-.983-.713-1.825-1.69-1.943A44.73 44.73 0 0 0 8 2a44.73 44.73 0 0 0-5.31.317C1.713 2.435 1 3.277 1 4.26v4.48ZM5.5 6a.75.75 0 0 0 0 1.5h5a.75.75 0 0 0 0-1.5h-5Zm0 2.5a.75.75 0 0 0 0 1.5h2.5a.75.75 0 0 0 0-1.5H5.5Z" clipRule="evenodd" />
+          </svg>
+          Feedback
+        </button>
       </div>
     </aside>
   );
