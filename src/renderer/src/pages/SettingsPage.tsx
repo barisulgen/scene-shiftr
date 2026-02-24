@@ -224,7 +224,7 @@ export default function SettingsPage(): JSX.Element {
                 className="text-sm font-semibold rounded-full px-3 py-0.5"
                 style={{ backgroundColor: 'var(--bg-elevated)', color: 'var(--accent)' }}
               >
-                {appScale}%
+                {appScale - 20}%
               </span>
             </div>
             <div className="mt-4">
@@ -247,8 +247,8 @@ export default function SettingsPage(): JSX.Element {
                 } as React.CSSProperties}
               />
               <div className="flex justify-between mt-1">
-                <span className="text-[10px] uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>100%</span>
-                <span className="text-[10px] uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>150%</span>
+                <span className="text-[10px] uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>80%</span>
+                <span className="text-[10px] uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>130%</span>
               </div>
             </div>
           </div>

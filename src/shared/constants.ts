@@ -7,7 +7,7 @@ export const DEFAULT_SETTINGS: GlobalSettings = {
   gracefulCloseTimeout: 5,
   activeWorkspaceId: null,
   dryRun: false,
-  appScale: 100,
+  appScale: 120,
 };
 
 export const BUILT_IN_SOUNDS = [
