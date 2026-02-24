@@ -31,7 +31,7 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
   const [focusAssist, setFocusAssistRaw] = useState<TriState>(workspace?.system.focusAssist ?? null);
   const [audioDevice, setAudioDeviceRaw] = useState<string | null>(workspace?.system.audioDevice ?? null);
   const [volume, setVolumeRaw] = useState<number>(workspace?.system.volume ?? 50);
-  const [volumeEnabled, setVolumeEnabledRaw] = useState(workspace?.system.volume !== null);
+  const [volumeEnabled, setVolumeEnabledRaw] = useState(workspace?.system.volume != null);
   const [audioDevices, setAudioDevices] = useState<string[]>([]);
   const [wallpaper, setWallpaper] = useState<string | null>(workspace?.display.wallpaper ?? null);
   const [monitorLayout, setMonitorLayout] = useState<MonitorLayout | null>(workspace?.display.monitorLayout ?? null);
