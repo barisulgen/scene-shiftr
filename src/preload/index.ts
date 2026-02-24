@@ -39,6 +39,11 @@ const api = {
   updateSettings: (data: Record<string, unknown>) =>
     ipcRenderer.invoke('settings:update', data),
 
+  // Window controls
+  windowMinimize: () => ipcRenderer.invoke('window:minimize'),
+  windowMaximize: () => ipcRenderer.invoke('window:maximize'),
+  windowClose: () => ipcRenderer.invoke('window:close'),
+
   // Events from main process
   onActivationProgress: (cb: (msg: string) => void) => {
     const handler = (_e: Electron.IpcRendererEvent, msg: string): void => cb(msg);

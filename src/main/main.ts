@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow } from 'electron';
+import { app, shell, BrowserWindow, ipcMain } from 'electron';
 import { join } from 'path';
 import { registerAllHandlers } from './ipc';
 import { setStorageDir } from './services/workspace-storage';
@@ -20,6 +20,7 @@ function createWindow(): BrowserWindow {
     minWidth: 900,
     minHeight: 600,
     show: false,
+    frame: false,
     autoHideMenuBar: true,
     backgroundColor: '#09090b',
     icon: join(__dirname, '../../build/icon.ico'),
@@ -76,6 +77,22 @@ app.whenReady().then(async () => {
 
   // Register all IPC handlers
   registerAllHandlers();
+
+  // Window control handlers
+  ipcMain.handle('window:minimize', (e) => {
+    BrowserWindow.fromWebContents(e.sender)?.minimize();
+  });
+  ipcMain.handle('window:maximize', (e) => {
+    const win = BrowserWindow.fromWebContents(e.sender);
+    if (win?.isMaximized()) {
+      win.unmaximize();
+    } else {
+      win?.maximize();
+    }
+  });
+  ipcMain.handle('window:close', (e) => {
+    BrowserWindow.fromWebContents(e.sender)?.close();
+  });
 
   const win = createWindow();
 

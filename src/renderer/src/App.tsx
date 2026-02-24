@@ -6,6 +6,7 @@ import StatusBar from './components/layout/StatusBar';
 import ForceCloseDialog from './components/common/ForceCloseDialog';
 import UnsavedChangesDialog from './components/common/UnsavedChangesDialog';
 import SplashScreen from './components/SplashScreen';
+import TitleBar from './components/layout/TitleBar';
 
 function AppShell(): JSX.Element {
   const { pendingNavigation, confirmNavigation, cancelNavigation } = useApp();
@@ -45,6 +46,7 @@ function AppShell(): JSX.Element {
 
   return (
     <div className="flex flex-col h-screen select-none" style={{ backgroundColor: 'var(--bg-base)', color: 'var(--text-primary)' }}>
+      <TitleBar />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />
         <MainPanel />
