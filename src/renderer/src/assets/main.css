@@ -43,3 +43,36 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
 }
+
+/* Settings slider (range input) */
+.settings-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    var(--accent) 0%,
+    var(--accent) var(--slider-pct, 0%),
+    var(--bg-elevated) var(--slider-pct, 0%),
+    var(--bg-elevated) 100%
+  );
+  outline: none;
+  cursor: pointer;
+}
+
+.settings-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: white;
+  border: 2px solid var(--accent);
+  cursor: pointer;
+  transition: box-shadow 0.15s;
+}
+
+.settings-slider::-webkit-slider-thumb:hover {
+  box-shadow: 0 0 0 4px var(--accent-soft);
+}
