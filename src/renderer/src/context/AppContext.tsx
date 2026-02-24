@@ -80,25 +80,32 @@ export function AppProvider({ children }: { children: ReactNode }): JSX.Element 
     }
   }, [refreshWorkspaces]);
 
-  const isInForm = currentView === 'create' || currentView === 'edit';
+  // Clear dirty flag whenever we leave a form view
+  useEffect(() => {
+    if (currentView !== 'create' && currentView !== 'edit') {
+      hasUnsavedRef.current = false;
+    }
+  }, [currentView]);
 
   const setCurrentView = useCallback((view: ViewType) => {
-    if (isInForm && hasUnsavedRef.current && view !== currentView) {
+    const inForm = currentView === 'create' || currentView === 'edit';
+    if (inForm && hasUnsavedRef.current && view !== currentView) {
       setPendingNavigation({ type: 'view', view });
       return;
     }
     hasUnsavedRef.current = false;
     setCurrentViewRaw(view);
-  }, [isInForm, currentView]);
+  }, [currentView]);
 
   const selectWorkspace = useCallback((id: string | null) => {
-    if (isInForm && hasUnsavedRef.current) {
+    const inForm = currentView === 'create' || currentView === 'edit';
+    if (inForm && hasUnsavedRef.current) {
       setPendingNavigation({ type: 'select', workspaceId: id });
       return;
     }
     hasUnsavedRef.current = false;
     setSelectedWorkspaceId(id);
-  }, [isInForm]);
+  }, [currentView]);
 
   // Force navigation without guard — used by form save/cancel
   const navigateAway = useCallback((view: ViewType) => {
@@ -107,8 +114,11 @@ export function AppProvider({ children }: { children: ReactNode }): JSX.Element 
   }, []);
 
   const setHasUnsavedChanges = useCallback((dirty: boolean) => {
+    // Only allow setting dirty when actually in a form
+    const inForm = currentView === 'create' || currentView === 'edit';
+    if (!inForm) return;
     hasUnsavedRef.current = dirty;
-  }, []);
+  }, [currentView]);
 
   const confirmNavigation = useCallback(() => {
     if (!pendingNavigation) return;
