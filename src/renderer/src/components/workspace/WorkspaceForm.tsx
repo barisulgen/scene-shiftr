@@ -12,7 +12,7 @@ interface WorkspaceFormProps {
 type TriState = true | false | null;
 
 export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.Element {
-  const { setCurrentView, setHasUnsavedChanges } = useApp();
+  const { navigateAway, setHasUnsavedChanges } = useApp();
   const { createWorkspace, updateWorkspace } = useWorkspaces();
   const mountedRef = useRef(false);
 
@@ -171,8 +171,7 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
       } else {
         await createWorkspace(data as Record<string, unknown>);
       }
-      setHasUnsavedChanges(false);
-      setCurrentView('main');
+      navigateAway('main');
     } catch {
       /* save error */
     } finally {
@@ -181,8 +180,7 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
   };
 
   const handleCancel = (): void => {
-    setHasUnsavedChanges(false);
-    setCurrentView('main');
+    navigateAway('main');
   };
 
   // --- Shared style constants ---

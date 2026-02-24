@@ -26,6 +26,7 @@ interface AppContextValue {
   selectWorkspace: (id: string | null) => void;
   setStatus: (msg: string) => void;
   setCurrentView: (view: ViewType) => void;
+  navigateAway: (view: ViewType) => void;
   refreshWorkspaces: () => Promise<void>;
   setHasUnsavedChanges: (dirty: boolean) => void;
   confirmNavigation: () => void;
@@ -99,6 +100,12 @@ export function AppProvider({ children }: { children: ReactNode }): JSX.Element 
     setSelectedWorkspaceId(id);
   }, [isInForm]);
 
+  // Force navigation without guard — used by form save/cancel
+  const navigateAway = useCallback((view: ViewType) => {
+    hasUnsavedRef.current = false;
+    setCurrentViewRaw(view);
+  }, []);
+
   const setHasUnsavedChanges = useCallback((dirty: boolean) => {
     hasUnsavedRef.current = dirty;
   }, []);
@@ -131,6 +138,7 @@ export function AppProvider({ children }: { children: ReactNode }): JSX.Element 
     selectWorkspace,
     setStatus,
     setCurrentView,
+    navigateAway,
     refreshWorkspaces,
     setHasUnsavedChanges,
     confirmNavigation,
