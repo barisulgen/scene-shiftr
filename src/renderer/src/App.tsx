@@ -72,6 +72,17 @@ function AppShell(): JSX.Element {
 export default function App(): JSX.Element {
   const [showSplash, setShowSplash] = useState(true);
 
+  // Apply saved zoom before anything renders (including splash)
+  useEffect(() => {
+    window.api.getSettings().then((settings) => {
+      if (settings.appScale && settings.appScale !== 100) {
+        const factor = settings.appScale / 100;
+        window.api.setZoomFactor(factor);
+        window.api.resizeWindow(960 * factor, 700 * factor);
+      }
+    }).catch(() => { /* settings may not be available yet */ });
+  }, []);
+
   if (showSplash) {
     return <SplashScreen onComplete={() => setShowSplash(false)} />;
   }
