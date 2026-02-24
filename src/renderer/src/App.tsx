@@ -1,12 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
-import { AppProvider } from './context/AppContext';
+import { AppProvider, useApp } from './context/AppContext';
 import Sidebar from './components/layout/Sidebar';
 import MainPanel from './components/layout/MainPanel';
 import StatusBar from './components/layout/StatusBar';
 import ForceCloseDialog from './components/common/ForceCloseDialog';
+import UnsavedChangesDialog from './components/common/UnsavedChangesDialog';
 import SplashScreen from './components/SplashScreen';
 
 function AppShell(): JSX.Element {
+  const { pendingNavigation, confirmNavigation, cancelNavigation } = useApp();
   const [forceCloseApp, setForceCloseApp] = useState<string | null>(null);
 
   // Sound playback listener
@@ -53,6 +55,12 @@ function AppShell(): JSX.Element {
           appName={forceCloseApp}
           onForceClose={handleForceClose}
           onSkip={handleSkip}
+        />
+      )}
+      {pendingNavigation && (
+        <UnsavedChangesDialog
+          onDiscard={confirmNavigation}
+          onKeepEditing={cancelNavigation}
         />
       )}
     </div>

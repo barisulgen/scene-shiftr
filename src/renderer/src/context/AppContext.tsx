@@ -1,5 +1,13 @@
-import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react';
 import type { Workspace } from '../../../shared/types';
+
+type ViewType = 'main' | 'settings' | 'create' | 'edit';
+
+interface PendingNavigation {
+  type: 'view' | 'select';
+  view?: ViewType;
+  workspaceId?: string | null;
+}
 
 interface AppContextValue {
   // Workspace state
@@ -9,13 +17,19 @@ interface AppContextValue {
 
   // UI state
   status: string;
-  currentView: 'main' | 'settings' | 'create' | 'edit';
+  currentView: ViewType;
+
+  // Unsaved changes guard
+  pendingNavigation: PendingNavigation | null;
 
   // Actions
   selectWorkspace: (id: string | null) => void;
   setStatus: (msg: string) => void;
-  setCurrentView: (view: 'main' | 'settings' | 'create' | 'edit') => void;
+  setCurrentView: (view: ViewType) => void;
   refreshWorkspaces: () => Promise<void>;
+  setHasUnsavedChanges: (dirty: boolean) => void;
+  confirmNavigation: () => void;
+  cancelNavigation: () => void;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -25,7 +39,9 @@ export function AppProvider({ children }: { children: ReactNode }): JSX.Element 
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string | null>(null);
   const [activeWorkspaceId, setActiveWorkspaceId] = useState<string | null>(null);
   const [status, setStatus] = useState('Ready');
-  const [currentView, setCurrentView] = useState<'main' | 'settings' | 'create' | 'edit'>('main');
+  const [currentView, setCurrentViewRaw] = useState<ViewType>('main');
+  const [pendingNavigation, setPendingNavigation] = useState<PendingNavigation | null>(null);
+  const hasUnsavedRef = useRef(false);
 
   const refreshWorkspaces = useCallback(async () => {
     try {
@@ -63,16 +79,62 @@ export function AppProvider({ children }: { children: ReactNode }): JSX.Element 
     }
   }, [refreshWorkspaces]);
 
+  const isInForm = currentView === 'create' || currentView === 'edit';
+
+  const setCurrentView = useCallback((view: ViewType) => {
+    if (isInForm && hasUnsavedRef.current && view !== currentView) {
+      setPendingNavigation({ type: 'view', view });
+      return;
+    }
+    hasUnsavedRef.current = false;
+    setCurrentViewRaw(view);
+  }, [isInForm, currentView]);
+
+  const selectWorkspace = useCallback((id: string | null) => {
+    if (isInForm && hasUnsavedRef.current) {
+      setPendingNavigation({ type: 'select', workspaceId: id });
+      return;
+    }
+    hasUnsavedRef.current = false;
+    setSelectedWorkspaceId(id);
+  }, [isInForm]);
+
+  const setHasUnsavedChanges = useCallback((dirty: boolean) => {
+    hasUnsavedRef.current = dirty;
+  }, []);
+
+  const confirmNavigation = useCallback(() => {
+    if (!pendingNavigation) return;
+    hasUnsavedRef.current = false;
+
+    if (pendingNavigation.type === 'view' && pendingNavigation.view) {
+      setCurrentViewRaw(pendingNavigation.view);
+    } else if (pendingNavigation.type === 'select') {
+      setSelectedWorkspaceId(pendingNavigation.workspaceId ?? null);
+      setCurrentViewRaw('main');
+    }
+
+    setPendingNavigation(null);
+  }, [pendingNavigation]);
+
+  const cancelNavigation = useCallback(() => {
+    setPendingNavigation(null);
+  }, []);
+
   const value: AppContextValue = {
     workspaces,
     selectedWorkspaceId,
     activeWorkspaceId,
     status,
     currentView,
-    selectWorkspace: setSelectedWorkspaceId,
+    pendingNavigation,
+    selectWorkspace,
     setStatus,
     setCurrentView,
     refreshWorkspaces,
+    setHasUnsavedChanges,
+    confirmNavigation,
+    cancelNavigation,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

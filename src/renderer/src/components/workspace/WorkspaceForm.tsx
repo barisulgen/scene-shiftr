@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { Workspace, AppEntry, MonitorLayout } from '../../../../shared/types';
 import { useApp } from '../../context/AppContext';
 import { useWorkspaces } from '../../hooks/useWorkspaces';
@@ -12,8 +12,9 @@ interface WorkspaceFormProps {
 type TriState = true | false | null;
 
 export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.Element {
-  const { setCurrentView } = useApp();
+  const { setCurrentView, setHasUnsavedChanges } = useApp();
   const { createWorkspace, updateWorkspace } = useWorkspaces();
+  const mountedRef = useRef(false);
 
   const isEdit = !!workspace;
 
@@ -53,6 +54,22 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
   const [playlistUri, setPlaylistUri] = useState(workspace?.audio.playlistUri ?? '');
 
   const [saving, setSaving] = useState(false);
+
+  // Track dirty state — mark as dirty when any field changes after initial mount
+  useEffect(() => {
+    if (!mountedRef.current) {
+      mountedRef.current = true;
+      return;
+    }
+    setHasUnsavedChanges(true);
+  }, [name, icon, appsToOpen, appsToClose, folders, urls, nightLight, focusAssist,
+      audioDevice, volume, volumeEnabled, wallpaper, monitorLayout, transitionSound,
+      musicEnabled, musicApp, playlistUri, setHasUnsavedChanges]);
+
+  // Clear dirty flag on unmount
+  useEffect(() => {
+    return () => setHasUnsavedChanges(false);
+  }, [setHasUnsavedChanges]);
 
   // Load audio devices on mount
   useEffect(() => {
@@ -154,6 +171,7 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
       } else {
         await createWorkspace(data as Record<string, unknown>);
       }
+      setHasUnsavedChanges(false);
       setCurrentView('main');
     } catch {
       /* save error */
@@ -163,6 +181,7 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
   };
 
   const handleCancel = (): void => {
+    setHasUnsavedChanges(false);
     setCurrentView('main');
   };
 
