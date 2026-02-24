@@ -310,6 +310,7 @@ export default function WorkspaceDetail(): JSX.Element | null {
   return (
     <div className="flex flex-col h-full">
       <div className="flex-1 overflow-y-auto px-6 py-6">
+        <div className="max-w-2xl">
         {/* ── Header ── */}
         <div className="flex items-start justify-between mb-5">
           <div className="flex items-center gap-4">
@@ -576,6 +577,7 @@ export default function WorkspaceDetail(): JSX.Element | null {
               </SettingRow>
             )}
           </CollapsibleSection>
+        </div>
         </div>
       </div>
     </div>

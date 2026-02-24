@@ -15,10 +15,9 @@ const isMinimized = process.argv.includes('--minimized');
 
 function createWindow(): BrowserWindow {
   const win = new BrowserWindow({
-    width: 1280,
-    height: 800,
-    minWidth: 900,
-    minHeight: 600,
+    width: 960,
+    height: 700,
+    resizable: false,
     show: false,
     frame: false,
     autoHideMenuBar: true,

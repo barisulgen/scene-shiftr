@@ -16,7 +16,7 @@ export default function Sidebar(): JSX.Element {
       <div className="flex-1 overflow-y-auto px-3 py-3">
         <div className="px-2 pb-2">
           <span
-            className="text-[10px] font-semibold uppercase tracking-widest"
+            className="text-xs font-semibold uppercase tracking-widest"
             style={{ color: 'var(--text-muted)', letterSpacing: '0.1em' }}
           >
             Workspaces

@@ -45,21 +45,6 @@ export default function TitleBar(): JSX.Element {
           </svg>
         </button>
         <button
-          onClick={() => window.api.windowMaximize()}
-          className="flex items-center justify-center w-12 h-full transition-colors duration-100"
-          style={{ color: 'var(--text-secondary)' }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'transparent';
-          }}
-        >
-          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1">
-            <rect x="0.5" y="0.5" width="9" height="9" />
-          </svg>
-        </button>
-        <button
           onClick={() => window.api.windowClose()}
           className="flex items-center justify-center w-12 h-full transition-colors duration-100"
           style={{ color: 'var(--text-secondary)' }}
