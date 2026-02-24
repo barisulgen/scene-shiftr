@@ -1,16 +1,20 @@
 import { Tray, Menu, nativeImage, BrowserWindow, app } from 'electron';
+import path from 'path';
 import * as workspaceStorage from './services/workspace-storage';
 import * as workspaceManager from './services/workspace-manager';
 
 let tray: Tray | null = null;
 
-export async function createTray(mainWindow: BrowserWindow): Promise<void> {
-  // Create a small 16x16 tray icon from a data URL
-  const icon = nativeImage.createFromDataURL(
-    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAAdgAAAHYBTnsmCAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAABhSURBVDiN7dMxDoAgEETRP2hjYeH9j+AFLCzEwsJoYUK0YoOJ7mYnM5tMsUP+FvBqFkjSMdmUdErSJtkfAEhaqG6SmWLGhjUbHLpRXGI9Bq/LKO4Bp68CPz77nyLFAHcW2BcFfheU8QAAAABJRU5ErkJggg=='
-  );
+function getTrayIconPath(): string {
+  if (app.isPackaged) {
+    return path.join(process.resourcesPath, 'assets', 'tray-icon.png');
+  }
+  return path.join(app.getAppPath(), 'assets', 'tray-icon.png');
+}
 
-  tray = new Tray(icon);
+export async function createTray(mainWindow: BrowserWindow): Promise<void> {
+  const icon = nativeImage.createFromPath(getTrayIconPath());
+  tray = new Tray(icon.isEmpty() ? nativeImage.createEmpty() : icon);
   tray.setToolTip('Scene Shiftr');
   tray.on('click', () => mainWindow.show());
   await updateTrayMenu(mainWindow);

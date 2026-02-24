@@ -21,3 +21,5 @@ extraResources:
     to: tools/
   - from: assets/sounds/
     to: assets/sounds/
+  - from: assets/tray-icon.png
+    to: assets/tray-icon.png

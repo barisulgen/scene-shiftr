@@ -4,6 +4,7 @@ import Sidebar from './components/layout/Sidebar';
 import MainPanel from './components/layout/MainPanel';
 import StatusBar from './components/layout/StatusBar';
 import ForceCloseDialog from './components/common/ForceCloseDialog';
+import SplashScreen from './components/SplashScreen';
 
 function AppShell(): JSX.Element {
   const [forceCloseApp, setForceCloseApp] = useState<string | null>(null);
@@ -59,6 +60,12 @@ function AppShell(): JSX.Element {
 }
 
 export default function App(): JSX.Element {
+  const [showSplash, setShowSplash] = useState(true);
+
+  if (showSplash) {
+    return <SplashScreen onComplete={() => setShowSplash(false)} />;
+  }
+
   return (
     <AppProvider>
       <AppShell />
