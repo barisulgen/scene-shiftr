@@ -83,7 +83,7 @@ export default function AppSelector({ value, onChange, label }: AppSelectorProps
   };
 
   return (
-    <div ref={containerRef} className="space-y-2">
+    <div ref={containerRef} className="space-y-2 relative">
       <label className="block text-sm" style={{ color: 'var(--text-muted)' }}>{label}</label>
 
       {/* Search input and browse button */}
@@ -138,15 +138,17 @@ export default function AppSelector({ value, onChange, label }: AppSelectorProps
         </button>
       </div>
 
-      {/* Dropdown list */}
+      {/* Dropdown list — absolute positioned to overlay */}
       {isOpen && filteredApps.length > 0 && (
         <div
-          className="max-h-48 overflow-y-auto rounded-md"
+          className="max-h-48 overflow-y-auto rounded-md absolute left-0 right-0 z-20 shadow-xl"
           style={{
             borderWidth: '1px',
             borderStyle: 'solid',
             borderColor: 'var(--border)',
             backgroundColor: 'var(--bg-elevated)',
+            top: '100%',
+            marginTop: '4px',
           }}
         >
           {filteredApps.map((app) => (
@@ -210,13 +212,15 @@ export default function AppSelector({ value, onChange, label }: AppSelectorProps
 
       {isOpen && !loading && filteredApps.length === 0 && search && (
         <div
-          className="px-3 py-2 rounded-md text-sm"
+          className="px-3 py-2 rounded-md text-sm absolute left-0 right-0 z-20 shadow-xl"
           style={{
             borderWidth: '1px',
             borderStyle: 'solid',
             borderColor: 'var(--border)',
             backgroundColor: 'var(--bg-elevated)',
             color: 'var(--text-muted)',
+            top: '100%',
+            marginTop: '4px',
           }}
         >
           No apps found matching &quot;{search}&quot;
