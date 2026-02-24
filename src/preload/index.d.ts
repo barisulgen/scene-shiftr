@@ -29,6 +29,7 @@ interface SceneShiftrAPI {
   windowMaximize: () => Promise<void>;
   windowClose: () => Promise<void>;
   setZoomFactor: (factor: number) => void;
+  resizeWindow: (width: number, height: number) => Promise<void>;
   onActivationProgress: (cb: (msg: string) => void) => () => void;
   onForceClosePrompt: (cb: (appName: string) => void) => () => void;
   respondForceClose: (app: string, action: 'force' | 'skip') => Promise<void>;

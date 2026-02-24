@@ -54,9 +54,11 @@ export function AppProvider({ children }: { children: ReactNode }): JSX.Element 
     try {
       const settings = await window.api.getSettings();
       setActiveWorkspaceId(settings.activeWorkspaceId);
-      // Apply saved zoom scale
+      // Apply saved zoom scale and resize window
       if (settings.appScale && settings.appScale !== 100) {
-        window.api.setZoomFactor(settings.appScale / 100);
+        const factor = settings.appScale / 100;
+        window.api.setZoomFactor(factor);
+        window.api.resizeWindow(960 * factor, 700 * factor);
       }
     } catch (err) {
       console.error('Failed to load settings:', err);

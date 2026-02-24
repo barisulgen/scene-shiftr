@@ -44,8 +44,9 @@ const api = {
   windowMaximize: () => ipcRenderer.invoke('window:maximize'),
   windowClose: () => ipcRenderer.invoke('window:close'),
 
-  // Zoom
+  // Zoom & resize
   setZoomFactor: (factor: number) => webFrame.setZoomFactor(factor),
+  resizeWindow: (width: number, height: number) => ipcRenderer.invoke('window:resize', width, height),
 
   // Events from main process
   onActivationProgress: (cb: (msg: string) => void) => {

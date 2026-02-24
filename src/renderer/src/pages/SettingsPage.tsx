@@ -38,8 +38,6 @@ export default function SettingsPage(): JSX.Element {
         dryRun,
         appScale,
       });
-      // Apply zoom factor on save
-      window.api.setZoomFactor(appScale / 100);
       setCurrentView('main');
     } catch {
       /* save error */
@@ -237,6 +235,12 @@ export default function SettingsPage(): JSX.Element {
                 step={10}
                 value={appScale}
                 onChange={(e) => setAppScale(Number(e.target.value))}
+                onMouseUp={(e) => {
+                  const val = Number((e.target as HTMLInputElement).value);
+                  const factor = val / 100;
+                  window.api.setZoomFactor(factor);
+                  window.api.resizeWindow(960 * factor, 700 * factor);
+                }}
                 className="w-full settings-slider"
                 style={{
                   '--slider-pct': `${((appScale - 100) / 50) * 100}%`,

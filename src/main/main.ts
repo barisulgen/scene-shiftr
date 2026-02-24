@@ -92,6 +92,15 @@ app.whenReady().then(async () => {
   ipcMain.handle('window:close', (e) => {
     BrowserWindow.fromWebContents(e.sender)?.close();
   });
+  ipcMain.handle('window:resize', (e, width: number, height: number) => {
+    const win = BrowserWindow.fromWebContents(e.sender);
+    if (win) {
+      win.setResizable(true);
+      win.setSize(Math.round(width), Math.round(height));
+      win.setResizable(false);
+      win.center();
+    }
+  });
 
   const win = createWindow();
 
