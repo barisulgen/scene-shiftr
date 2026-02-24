@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { Workspace, AppEntry, MonitorLayout } from '../../../../shared/types';
 import { useApp } from '../../context/AppContext';
 import { useWorkspaces } from '../../hooks/useWorkspaces';
@@ -14,62 +14,48 @@ type TriState = true | false | null;
 export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.Element {
   const { navigateAway, setHasUnsavedChanges } = useApp();
   const { createWorkspace, updateWorkspace } = useWorkspaces();
-  const mountedRef = useRef(false);
+
+  const markDirty = useCallback(() => setHasUnsavedChanges(true), [setHasUnsavedChanges]);
 
   const isEdit = !!workspace;
 
-  // --- Form state ---
-  const [name, setName] = useState(workspace?.name ?? '');
-  const [icon, setIcon] = useState(workspace?.icon ?? '');
-  const [appsToOpen, setAppsToOpen] = useState<AppEntry[]>(workspace?.apps.open ?? []);
-  const [appsToClose, setAppsToClose] = useState<AppEntry[]>(workspace?.apps.close ?? []);
+  // --- Form state (raw setters are private, dirty wrappers are used in JSX) ---
+  const [name, setNameRaw] = useState(workspace?.name ?? '');
+  const [icon, setIconRaw] = useState(workspace?.icon ?? '');
+  const [appsToOpen, setAppsToOpenRaw] = useState<AppEntry[]>(workspace?.apps.open ?? []);
+  const [appsToClose, setAppsToCloseRaw] = useState<AppEntry[]>(workspace?.apps.close ?? []);
   const [folders, setFolders] = useState<string[]>(workspace?.folders ?? []);
   const [urls, setUrls] = useState<string[]>(workspace?.urls ?? []);
   const [urlInput, setUrlInput] = useState('');
-
-  // System settings
-  const [nightLight, setNightLight] = useState<TriState>(workspace?.system.nightLight ?? null);
-  const [focusAssist, setFocusAssist] = useState<TriState>(workspace?.system.focusAssist ?? null);
-  const [audioDevice, setAudioDevice] = useState<string | null>(
-    workspace?.system.audioDevice ?? null
-  );
-  const [volume, setVolume] = useState<number>(workspace?.system.volume ?? 50);
-  const [volumeEnabled, setVolumeEnabled] = useState(workspace?.system.volume !== null);
+  const [nightLight, setNightLightRaw] = useState<TriState>(workspace?.system.nightLight ?? null);
+  const [focusAssist, setFocusAssistRaw] = useState<TriState>(workspace?.system.focusAssist ?? null);
+  const [audioDevice, setAudioDeviceRaw] = useState<string | null>(workspace?.system.audioDevice ?? null);
+  const [volume, setVolumeRaw] = useState<number>(workspace?.system.volume ?? 50);
+  const [volumeEnabled, setVolumeEnabledRaw] = useState(workspace?.system.volume !== null);
   const [audioDevices, setAudioDevices] = useState<string[]>([]);
-
-  // Display
   const [wallpaper, setWallpaper] = useState<string | null>(workspace?.display.wallpaper ?? null);
-  const [monitorLayout, setMonitorLayout] = useState<MonitorLayout | null>(
-    workspace?.display.monitorLayout ?? null
-  );
+  const [monitorLayout, setMonitorLayout] = useState<MonitorLayout | null>(workspace?.display.monitorLayout ?? null);
+  const [transitionSound, setTransitionSoundRaw] = useState<string | null>(workspace?.audio.transitionSound ?? null);
+  const [musicEnabled, setMusicEnabledRaw] = useState(!!(workspace?.audio.musicApp || workspace?.audio.playlistUri));
+  const [musicApp, setMusicAppRaw] = useState(workspace?.audio.musicApp ?? '');
+  const [playlistUri, setPlaylistUriRaw] = useState(workspace?.audio.playlistUri ?? '');
 
-  // Audio
-  const [transitionSound, setTransitionSound] = useState<string | null>(
-    workspace?.audio.transitionSound ?? null
-  );
-  const [musicEnabled, setMusicEnabled] = useState(
-    !!(workspace?.audio.musicApp || workspace?.audio.playlistUri)
-  );
-  const [musicApp, setMusicApp] = useState(workspace?.audio.musicApp ?? '');
-  const [playlistUri, setPlaylistUri] = useState(workspace?.audio.playlistUri ?? '');
+  // Dirty-wrapping setters — these mark the form as having unsaved changes
+  const setName = (v: string) => { setNameRaw(v); markDirty(); };
+  const setIcon = (v: string) => { setIconRaw(v); markDirty(); };
+  const setAppsToOpen = (v: AppEntry[]) => { setAppsToOpenRaw(v); markDirty(); };
+  const setAppsToClose = (v: AppEntry[]) => { setAppsToCloseRaw(v); markDirty(); };
+  const setNightLight = (v: TriState) => { setNightLightRaw(v); markDirty(); };
+  const setFocusAssist = (v: TriState) => { setFocusAssistRaw(v); markDirty(); };
+  const setAudioDevice = (v: string | null) => { setAudioDeviceRaw(v); markDirty(); };
+  const setVolume = (v: number) => { setVolumeRaw(v); markDirty(); };
+  const setVolumeEnabled = (v: boolean) => { setVolumeEnabledRaw(v); markDirty(); };
+  const setTransitionSound = (v: string | null) => { setTransitionSoundRaw(v); markDirty(); };
+  const setMusicEnabled = (v: boolean) => { setMusicEnabledRaw(v); markDirty(); };
+  const setMusicApp = (v: string) => { setMusicAppRaw(v); markDirty(); };
+  const setPlaylistUri = (v: string) => { setPlaylistUriRaw(v); markDirty(); };
 
   const [saving, setSaving] = useState(false);
-
-  // Track dirty state — mark as dirty when any field changes after initial mount
-  useEffect(() => {
-    if (!mountedRef.current) {
-      mountedRef.current = true;
-      return;
-    }
-    setHasUnsavedChanges(true);
-  }, [name, icon, appsToOpen, appsToClose, folders, urls, nightLight, focusAssist,
-      audioDevice, volume, volumeEnabled, wallpaper, monitorLayout, transitionSound,
-      musicEnabled, musicApp, playlistUri, setHasUnsavedChanges]);
-
-  // Clear dirty flag on unmount
-  useEffect(() => {
-    return () => setHasUnsavedChanges(false);
-  }, [setHasUnsavedChanges]);
 
   // Load audio devices on mount
   useEffect(() => {
@@ -87,6 +73,7 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
       const folderPath = await window.api.openFolderDialog();
       if (folderPath && !folders.includes(folderPath)) {
         setFolders([...folders, folderPath]);
+        markDirty();
       }
     } catch (err) {
       console.error('Failed to open folder dialog:', err);
@@ -95,6 +82,7 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
 
   const handleRemoveFolder = (index: number): void => {
     setFolders(folders.filter((_, i) => i !== index));
+    markDirty();
   };
 
   const handleAddUrl = (): void => {
@@ -102,6 +90,7 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
     if (trimmed && !urls.includes(trimmed)) {
       setUrls([...urls, trimmed]);
       setUrlInput('');
+      markDirty();
     }
   };
 
@@ -114,6 +103,7 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
 
   const handleRemoveUrl = (index: number): void => {
     setUrls(urls.filter((_, i) => i !== index));
+    markDirty();
   };
 
   const handleBrowseWallpaper = async (): Promise<void> => {
@@ -123,6 +113,7 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
       ]);
       if (filePath) {
         setWallpaper(filePath);
+        markDirty();
       }
     } catch (err) {
       console.error('Failed to open file dialog:', err);
@@ -133,6 +124,7 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
     try {
       const layout = await window.api.captureMonitorLayout();
       setMonitorLayout(layout);
+      markDirty();
     } catch {
       /* capture may fail */
     }
@@ -818,7 +810,7 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
                       </span>
                       <button
                         type="button"
-                        onClick={() => setWallpaper(null)}
+                        onClick={() => { setWallpaper(null); markDirty(); }}
                         className="shrink-0 text-xs hover:opacity-80 transition-opacity"
                         style={{ color: 'var(--text-muted)' }}
                       >
