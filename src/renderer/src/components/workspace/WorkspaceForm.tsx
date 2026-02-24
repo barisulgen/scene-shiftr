@@ -927,18 +927,24 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
                       >
                         Music App
                       </label>
-                      <input
-                        type="text"
+                      <select
                         value={musicApp}
                         onChange={(e) => setMusicApp(e.target.value)}
-                        placeholder="Spotify"
                         className={inputClass}
                         style={{
                           ...inputStyle,
-                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
                           '--tw-ring-color': 'var(--accent)',
                         } as React.CSSProperties}
-                      />
+                      >
+                        <option value="">Select app...</option>
+                        <option value="spotify">Spotify</option>
+                        <option value="apple-music">Apple Music</option>
+                        <option value="youtube-music">YouTube Music</option>
+                        <option value="tidal">Tidal</option>
+                        <option value="deezer">Deezer</option>
+                        <option value="soundcloud">SoundCloud</option>
+                        <option value="amazon-music">Amazon Music</option>
+                      </select>
                     </div>
                     <div>
                       <label
