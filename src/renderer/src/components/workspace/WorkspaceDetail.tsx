@@ -290,9 +290,13 @@ export default function WorkspaceDetail(): JSX.Element | null {
     }
   };
 
-  const handleDelete = (): void => {
+  const handleDelete = async (): Promise<void> => {
     if (window.confirm(`Delete "${workspace.name}"? This cannot be undone.`)) {
-      deleteWorkspace(workspace.id);
+      try {
+        await deleteWorkspace(workspace.id);
+      } catch (err) {
+        console.error('Failed to delete workspace:', err);
+      }
     }
   };
 

@@ -40,6 +40,8 @@ export async function captureSnapshot(): Promise<void> {
 }
 
 export async function restoreSnapshot(): Promise<void> {
+  if (!(await hasSnapshot())) return;
+
   const data = await fs.readFile(getSnapshotPath(), 'utf-8');
   const snapshot: SystemSnapshot = JSON.parse(data);
 
