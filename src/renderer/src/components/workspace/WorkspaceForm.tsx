@@ -158,6 +158,11 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
     };
 
     try {
+      // Clear dirty flag BEFORE save — createWorkspace internally calls
+      // selectWorkspace which goes through the guard. If dirty is still
+      // true at that point, the guard blocks it and shows the dialog.
+      setHasUnsavedChanges(false);
+
       if (isEdit && workspace) {
         await updateWorkspace(workspace.id, data as Record<string, unknown>);
       } else {
