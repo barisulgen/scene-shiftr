@@ -12,22 +12,6 @@ export default function Sidebar(): JSX.Element {
         borderRight: '1px solid var(--border)',
       }}
     >
-      {/* Logo area */}
-      <div
-        className="flex items-center gap-2.5 px-5 py-4"
-        style={{ borderBottom: '1px solid var(--border)' }}
-      >
-        <div
-          className="flex items-center justify-center w-7 h-7 rounded-md text-white text-xs font-bold"
-          style={{ backgroundColor: 'var(--accent)' }}
-        >
-          S
-        </div>
-        <span className="text-sm font-semibold tracking-wide" style={{ color: 'var(--text-primary)' }}>
-          Scene Shiftr
-        </span>
-      </div>
-
       {/* Workspace list area */}
       <div className="flex-1 overflow-y-auto px-3 py-3">
         <div className="px-2 pb-2">
