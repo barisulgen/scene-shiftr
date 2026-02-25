@@ -75,7 +75,7 @@ export default function StatusBar(): JSX.Element {
 
       {/* Right: version */}
       <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
-        v0.1.0
+        v0.1.0 - Alpha
       </span>
     </footer>
   );

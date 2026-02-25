@@ -149,6 +149,7 @@ Quick links:
 - [ ] Community workspace templates
 - [ ] Per-workspace window positions
 - [ ] Workspace usage stats
+- [ ] Theme editing
 
 ---
 

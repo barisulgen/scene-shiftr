@@ -4,11 +4,11 @@ directories:
   output: dist
   buildResources: build
 files:
-  - '!**/.vscode/*'
-  - '!docs/*'
-  - '!src/*'
-  - '!tests/*'
-  - '!**/*.test.*'
+  - "!**/.vscode/*"
+  - "!docs/*"
+  - "!src/*"
+  - "!tests/*"
+  - "!**/*.test.*"
 win:
   target:
     - nsis
@@ -16,6 +16,7 @@ win:
 nsis:
   oneClick: false
   allowToChangeInstallationDirectory: true
+  uninstallDisplayName: Scene Shiftr
 extraResources:
   - from: tools/
     to: tools/
