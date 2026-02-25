@@ -29,7 +29,7 @@ export async function captureSnapshot(): Promise<void> {
 
   const snapshot: SystemSnapshot = {
     capturedAt: new Date().toISOString(),
-    nightLight: await systemSettings.getNightLight(),
+    nightLight: false, // Night light control removed — field kept for backward compat
     focusAssist: await systemSettings.getFocusAssist(),
     audioDevice: await audioController.getCurrentDevice(),
     volume: await audioController.getVolume(),
@@ -45,7 +45,7 @@ export async function restoreSnapshot(): Promise<void> {
   const data = await fs.readFile(getSnapshotPath(), 'utf-8');
   const snapshot: SystemSnapshot = JSON.parse(data);
 
-  await systemSettings.setNightLight(snapshot.nightLight);
+  // Night light restore skipped — no public API
   await systemSettings.setFocusAssist(snapshot.focusAssist);
   await audioController.setAudioDevice(snapshot.audioDevice);
   await audioController.setVolume(snapshot.volume);

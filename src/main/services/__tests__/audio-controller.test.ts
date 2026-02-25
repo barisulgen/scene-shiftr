@@ -19,16 +19,18 @@ const mockExec = vi.mocked(exec);
 
 // Helper to create a mock exec that resolves with stdout/stderr
 function mockExecResolves(stdout: string, stderr: string = ''): void {
-  mockExec.mockImplementation((_cmd: string, callback: any) => {
-    callback(null, { stdout, stderr });
+  mockExec.mockImplementation((_cmd: string, _opts: any, callback?: any) => {
+    const cb = typeof _opts === 'function' ? _opts : callback;
+    cb(null, { stdout, stderr });
     return {} as any;
   });
 }
 
 // Helper to create a mock exec that rejects with an error
 function mockExecRejects(error: Error): void {
-  mockExec.mockImplementation((_cmd: string, callback: any) => {
-    callback(error, { stdout: '', stderr: '' });
+  mockExec.mockImplementation((_cmd: string, _opts: any, callback?: any) => {
+    const cb = typeof _opts === 'function' ? _opts : callback;
+    cb(error, { stdout: '', stderr: '' });
     return {} as any;
   });
 }
@@ -40,37 +42,40 @@ describe('audio-controller', () => {
   });
 
   describe('getAudioDevices', () => {
-    it('returns a list of audio output device names parsed from PowerShell output', async () => {
+    it('returns a list of audio devices with id and name parsed from PowerShell output', async () => {
       mockExecResolves(
-        'Realtek High Definition Audio\r\nNVIDIA Virtual Audio Device\r\nSteelSeries Arctis 7'
+        '{0.0.0.00000000}.{guid-1}||Realtek High Definition Audio\r\n{0.0.0.00000000}.{guid-2}||NVIDIA Virtual Audio Device\r\n{0.0.0.00000000}.{guid-3}||SteelSeries Arctis 7'
       );
 
       const devices = await getAudioDevices();
 
       expect(devices).toEqual([
-        'Realtek High Definition Audio',
-        'NVIDIA Virtual Audio Device',
-        'SteelSeries Arctis 7',
+        { id: '{0.0.0.00000000}.{guid-1}', name: 'Realtek High Definition Audio' },
+        { id: '{0.0.0.00000000}.{guid-2}', name: 'NVIDIA Virtual Audio Device' },
+        { id: '{0.0.0.00000000}.{guid-3}', name: 'SteelSeries Arctis 7' },
       ]);
     });
 
-    it('uses PowerShell to query audio devices', async () => {
-      mockExecResolves('Speaker');
+    it('uses PowerShell with AudioDeviceCmdlets to query audio devices', async () => {
+      mockExecResolves('{0.0.0.00000000}.{guid-1}||Speaker');
 
       await getAudioDevices();
 
       expect(mockExec).toHaveBeenCalledTimes(1);
       const cmd = String(mockExec.mock.calls[0][0]);
       expect(cmd).toContain('powershell');
-      expect(cmd).toContain('Win32_SoundDevice');
+      expect(cmd).toContain('Get-AudioDevice');
     });
 
     it('filters out empty lines from the output', async () => {
-      mockExecResolves('Speaker\r\n\r\nHeadphones\r\n');
+      mockExecResolves('{0.0.0.00000000}.{guid-1}||Speaker\r\n\r\n{0.0.0.00000000}.{guid-2}||Headphones\r\n');
 
       const devices = await getAudioDevices();
 
-      expect(devices).toEqual(['Speaker', 'Headphones']);
+      expect(devices).toEqual([
+        { id: '{0.0.0.00000000}.{guid-1}', name: 'Speaker' },
+        { id: '{0.0.0.00000000}.{guid-2}', name: 'Headphones' },
+      ]);
     });
 
     it('returns an empty array when the command fails', async () => {
@@ -99,7 +104,7 @@ describe('audio-controller', () => {
       expect(device).toBe('Realtek High Definition Audio');
     });
 
-    it('uses PowerShell to query the active device', async () => {
+    it('uses PowerShell with AudioDeviceCmdlets to query the active device', async () => {
       mockExecResolves('Speaker');
 
       await getCurrentDevice();
@@ -107,8 +112,8 @@ describe('audio-controller', () => {
       expect(mockExec).toHaveBeenCalledTimes(1);
       const cmd = String(mockExec.mock.calls[0][0]);
       expect(cmd).toContain('powershell');
-      expect(cmd).toContain('Win32_SoundDevice');
-      expect(cmd).toContain('Status');
+      expect(cmd).toContain('Get-AudioDevice');
+      expect(cmd).toContain('Playback');
     });
 
     it('returns an empty string when the command fails', async () => {
@@ -129,32 +134,22 @@ describe('audio-controller', () => {
   });
 
   describe('setAudioDevice', () => {
-    it('calls nircmd with the correct device name', async () => {
+    it('calls PowerShell Set-AudioDevice with the correct device ID', async () => {
       mockExecResolves('');
 
-      await setAudioDevice('Realtek High Definition Audio');
+      await setAudioDevice('{0.0.0.00000000}.{guid-1}');
 
       expect(mockExec).toHaveBeenCalledTimes(1);
       const cmd = String(mockExec.mock.calls[0][0]);
-      expect(cmd).toContain('nircmd');
-      expect(cmd).toContain('setdefaultsounddevice');
-      expect(cmd).toContain('Realtek High Definition Audio');
-    });
-
-    it('uses the configured nircmd path', async () => {
-      setNircmdPath('C:\\tools\\nircmd.exe');
-      mockExecResolves('');
-
-      await setAudioDevice('Speaker');
-
-      const cmd = String(mockExec.mock.calls[0][0]);
-      expect(cmd).toContain('C:\\tools\\nircmd.exe');
+      expect(cmd).toContain('powershell');
+      expect(cmd).toContain('Set-AudioDevice');
+      expect(cmd).toContain('{0.0.0.00000000}.{guid-1}');
     });
 
     it('does not throw when the command fails', async () => {
       mockExecRejects(new Error('Command failed'));
 
-      await expect(setAudioDevice('Speaker')).resolves.toBeUndefined();
+      await expect(setAudioDevice('{0.0.0.00000000}.{guid-1}')).resolves.toBeUndefined();
     });
   });
 
@@ -254,7 +249,7 @@ describe('audio-controller', () => {
       setNircmdPath('D:\\custom\\path\\nircmd.exe');
       mockExecResolves('');
 
-      await setAudioDevice('Speaker');
+      await setVolume(50);
 
       const cmd = String(mockExec.mock.calls[0][0]);
       expect(cmd).toContain('D:\\custom\\path\\nircmd.exe');

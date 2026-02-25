@@ -28,7 +28,6 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
   const [closeFolders, setCloseFoldersRaw] = useState(workspace?.closeFolders ?? false);
   const [urls, setUrls] = useState<string[]>(workspace?.urls ?? []);
   const [urlInput, setUrlInput] = useState('');
-  const [nightLight, setNightLightRaw] = useState<TriState>(workspace?.system.nightLight ?? null);
   const [focusAssist, setFocusAssistRaw] = useState<TriState>(workspace?.system.focusAssist ?? null);
   const [audioDevice, setAudioDeviceRaw] = useState<string | null>(workspace?.system.audioDevice ?? null);
   const [volume, setVolumeRaw] = useState<number>(workspace?.system.volume ?? 50);
@@ -46,7 +45,6 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
   const setIcon = (v: string) => { setIconRaw(v); markDirty(); };
   const setAppsToOpen = (v: AppEntry[]) => { setAppsToOpenRaw(v); markDirty(); };
   const setAppsToClose = (v: AppEntry[]) => { setAppsToCloseRaw(v); markDirty(); };
-  const setNightLight = (v: TriState) => { setNightLightRaw(v); markDirty(); };
   const setFocusAssist = (v: TriState) => { setFocusAssistRaw(v); markDirty(); };
   const setAudioDevice = (v: string | null) => { setAudioDeviceRaw(v); markDirty(); };
   const setVolume = (v: number) => { setVolumeRaw(v); markDirty(); };
@@ -144,7 +142,7 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
       closeFolders,
       urls,
       system: {
-        nightLight,
+        nightLight: null, // Night light control removed from V1
         focusAssist,
         audioDevice,
         volume: volumeEnabled ? volume : null,
@@ -613,29 +611,6 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
             </div>
 
             <div className="space-y-4">
-              {/* Night Light */}
-              <TriStateToggle
-                label="Night Light"
-                description="Reduce blue light for comfortable viewing"
-                icon={
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                    className="w-4 h-4"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M7.455 2.004a.75.75 0 0 1 .26.77 7 7 0 0 0 9.958 7.756.75.75 0 0 1 1.067.853A8.5 8.5 0 1 1 6.647 1.921a.75.75 0 0 1 .808.083Z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                }
-                iconColor="var(--accent)"
-                value={nightLight}
-                onChange={setNightLight}
-              />
-
               {/* Focus Assist */}
               <TriStateToggle
                 label="Focus Assist"

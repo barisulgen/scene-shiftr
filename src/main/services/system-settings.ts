@@ -3,43 +3,9 @@ import { promisify } from 'util';
 
 const execAsync = promisify(exec);
 
-// Night light: Toggle via registry binary blob at:
-// HKCU\Software\Microsoft\Windows\CurrentVersion\CloudStore\Store\DefaultAccount\Current\
-//   default$windows.data.bluelightreduction.bluelightreductionstate\
-//   windows.data.bluelightreduction.bluelightreductionstate
-//
-// Byte at offset 18 controls state: 0x15 = enabled, 0x13 = disabled
-// The settings key (separate from state key) indicates if night light is configured.
-
-export async function getNightLight(): Promise<boolean> {
-  try {
-    const { stdout } = await execAsync(
-      'powershell -NoProfile -Command "' +
-        "$path = 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\CloudStore\\Store\\DefaultAccount\\Current\\default$windows.data.bluelightreduction.settings\\windows.data.bluelightreduction.settings'; " +
-        "Get-ItemPropertyValue -Path $path -Name Data -ErrorAction SilentlyContinue | ForEach-Object { if ($_ -ne $null) { 'enabled' } else { 'disabled' } }" +
-        '"'
-    );
-    return stdout.trim().toLowerCase().includes('enabled');
-  } catch {
-    return false;
-  }
-}
-
-export async function setNightLight(enabled: boolean): Promise<void> {
-  try {
-    const byteValue = enabled ? '0x15' : '0x13';
-    // Byte 18 = on/off state, byte 10 = change counter (must increment for Windows to detect)
-    await execAsync(
-      'powershell -NoProfile -Command "' +
-        "$path = 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\CloudStore\\Store\\DefaultAccount\\Current\\default$windows.data.bluelightreduction.bluelightreductionstate\\windows.data.bluelightreduction.bluelightreductionstate'; " +
-        '$data = (Get-ItemProperty -Path $path -Name Data -ErrorAction SilentlyContinue).Data; ' +
-        `if ($data -and $data.Length -gt 18) { $data[18] = ${byteValue}; $data[10] = $data[10] + 1; Set-ItemProperty -Path $path -Name Data -Value ([byte[]]$data) -Type Binary }` +
-        '"'
-    );
-  } catch {
-    // Best effort - don't throw
-  }
-}
+// Night light control removed — Windows has no public API for this. All known
+// methods use fragile registry byte manipulation that can corrupt system
+// settings and crash the Windows Settings app.
 
 export async function getFocusAssist(): Promise<boolean> {
   try {
@@ -65,12 +31,8 @@ export async function setFocusAssist(enabled: boolean): Promise<void> {
 }
 
 export async function applySystemSettings(settings: {
-  nightLight: boolean | null;
   focusAssist: boolean | null;
 }): Promise<void> {
-  if (settings.nightLight !== null) {
-    await setNightLight(settings.nightLight);
-  }
   if (settings.focusAssist !== null) {
     await setFocusAssist(settings.focusAssist);
   }

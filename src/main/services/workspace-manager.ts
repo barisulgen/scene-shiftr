@@ -117,11 +117,10 @@ export async function activateWorkspace(
     console.error('Monitor layout error:', err);
   }
 
-  // 6. Apply system settings (nightLight, focusAssist)
+  // 6. Apply system settings (focusAssist)
   try {
     sendProgress(sender, 'Applying system settings...');
     await systemSettings.applySystemSettings({
-      nightLight: workspace.system.nightLight,
       focusAssist: workspace.system.focusAssist,
     });
   } catch (err) {
@@ -230,10 +229,6 @@ async function activateWorkspaceDryRun(
 
   if (workspace.display.monitorLayout) {
     actions.push({ timestamp: now(), action: 'display:restore-monitor-layout', details: { monitors: workspace.display.monitorLayout.monitors.length } });
-  }
-
-  if (workspace.system.nightLight !== null) {
-    actions.push({ timestamp: now(), action: 'system:set-night-light', details: { enabled: workspace.system.nightLight } });
   }
 
   if (workspace.system.focusAssist !== null) {
@@ -403,7 +398,6 @@ export async function switchWorkspace(
   // System settings
   try {
     await systemSettings.applySystemSettings({
-      nightLight: newWorkspace.system.nightLight,
       focusAssist: newWorkspace.system.focusAssist,
     });
   } catch (err) {
@@ -517,10 +511,6 @@ async function switchWorkspaceDryRun(
 
   if (newWorkspace.display.monitorLayout) {
     actions.push({ timestamp: now(), action: 'display:restore-monitor-layout', details: { monitors: newWorkspace.display.monitorLayout.monitors.length } });
-  }
-
-  if (newWorkspace.system.nightLight !== null) {
-    actions.push({ timestamp: now(), action: 'system:set-night-light', details: { enabled: newWorkspace.system.nightLight } });
   }
 
   if (newWorkspace.system.focusAssist !== null) {

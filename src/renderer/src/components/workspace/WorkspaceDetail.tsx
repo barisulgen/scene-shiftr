@@ -71,17 +71,7 @@ function TrashIcon(): JSX.Element {
   );
 }
 
-function MoonIcon(): JSX.Element {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5">
-      <path
-        fillRule="evenodd"
-        d="M7.455 2.004a.75.75 0 0 1 .26.77 7 7 0 0 0 9.958 7.967.75.75 0 0 1 1.067.853A8.5 8.5 0 1 1 6.647 1.921a.75.75 0 0 1 .808.083Z"
-        clipRule="evenodd"
-      />
-    </svg>
-  );
-}
+// MoonIcon removed — night light control removed from V1
 
 function BellIcon(): JSX.Element {
   return (
@@ -124,10 +114,7 @@ function hasApps(workspace: Workspace): boolean {
 }
 
 function hasSystem(workspace: Workspace): boolean {
-  return (
-    workspace.system.nightLight !== null ||
-    workspace.system.focusAssist !== null
-  );
+  return workspace.system.focusAssist !== null;
 }
 
 function hasDisplay(workspace: Workspace): boolean {
@@ -168,7 +155,6 @@ function hasAudio(workspace: Workspace): boolean {
 
 function countSettings(workspace: Workspace): number {
   let n = 0;
-  if (workspace.system.nightLight !== null) n++;
   if (workspace.system.focusAssist !== null) n++;
   if (workspace.system.audioDevice !== null) n++;
   if (workspace.system.volume !== null) n++;
@@ -561,19 +547,9 @@ export default function WorkspaceDetail(): JSX.Element | null {
           <CollapsibleSection
             title="System Settings"
             icon={<GearIcon />}
-            count={
-              [
-                workspace.system.nightLight,
-                workspace.system.focusAssist,
-              ].filter((v) => v !== null).length
-            }
-            isEmpty={workspace.system.nightLight === null && workspace.system.focusAssist === null}
+            count={workspace.system.focusAssist !== null ? 1 : 0}
+            isEmpty={!hasSystem(workspace)}
           >
-            {workspace.system.nightLight !== null && (
-              <SettingRow icon={<MoonIcon />} label="Night light">
-                <OnOffBadge value={workspace.system.nightLight} />
-              </SettingRow>
-            )}
             {workspace.system.focusAssist !== null && (
               <SettingRow icon={<BellIcon />} label="Focus assist">
                 <OnOffBadge value={workspace.system.focusAssist} />

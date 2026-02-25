@@ -7,8 +7,6 @@ vi.mock('child_process', () => ({
 
 import { exec } from 'child_process';
 import {
-  getNightLight,
-  setNightLight,
   getFocusAssist,
   setFocusAssist,
   applySystemSettings,
@@ -35,75 +33,6 @@ function mockExecRejects(error: Error): void {
 describe('system-settings', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-  });
-
-  describe('getNightLight', () => {
-    it('runs a PowerShell command to query night light state', async () => {
-      mockExecResolves('enabled');
-
-      await getNightLight();
-
-      expect(mockExec).toHaveBeenCalledTimes(1);
-      const cmd = String(mockExec.mock.calls[0][0]);
-      expect(cmd).toContain('powershell');
-      expect(cmd).toContain('bluelightreduction');
-    });
-
-    it('returns true when the output indicates night light is enabled', async () => {
-      mockExecResolves('enabled');
-
-      const result = await getNightLight();
-
-      expect(result).toBe(true);
-    });
-
-    it('returns false when the output indicates night light is disabled', async () => {
-      mockExecResolves('disabled');
-
-      const result = await getNightLight();
-
-      expect(result).toBe(false);
-    });
-
-    it('returns false when the command fails', async () => {
-      mockExecRejects(new Error('Command failed'));
-
-      const result = await getNightLight();
-
-      expect(result).toBe(false);
-    });
-  });
-
-  describe('setNightLight', () => {
-    it('runs the correct PowerShell command to enable night light', async () => {
-      mockExecResolves('');
-
-      await setNightLight(true);
-
-      expect(mockExec).toHaveBeenCalledTimes(1);
-      const cmd = String(mockExec.mock.calls[0][0]);
-      expect(cmd).toContain('powershell');
-      expect(cmd).toContain('bluelightreduction');
-      expect(cmd).toContain('0x15');
-    });
-
-    it('runs the correct PowerShell command to disable night light', async () => {
-      mockExecResolves('');
-
-      await setNightLight(false);
-
-      expect(mockExec).toHaveBeenCalledTimes(1);
-      const cmd = String(mockExec.mock.calls[0][0]);
-      expect(cmd).toContain('powershell');
-      expect(cmd).toContain('bluelightreduction');
-      expect(cmd).toContain('0x13');
-    });
-
-    it('does not throw when the command fails', async () => {
-      mockExecRejects(new Error('Command failed'));
-
-      await expect(setNightLight(true)).resolves.toBeUndefined();
-    });
   });
 
   describe('getFocusAssist', () => {
@@ -187,36 +116,16 @@ describe('system-settings', () => {
   });
 
   describe('applySystemSettings', () => {
-    it('applies both night light and focus assist when both are non-null', async () => {
+    it('applies focusAssist when it is non-null', async () => {
       mockExecResolves('');
 
-      await applySystemSettings({ nightLight: true, focusAssist: true });
-
-      expect(mockExec).toHaveBeenCalledTimes(2);
-    });
-
-    it('only applies nightLight when focusAssist is null', async () => {
-      mockExecResolves('');
-
-      await applySystemSettings({ nightLight: true, focusAssist: null });
+      await applySystemSettings({ focusAssist: true });
 
       expect(mockExec).toHaveBeenCalledTimes(1);
-      const cmd = String(mockExec.mock.calls[0][0]);
-      expect(cmd).toContain('bluelightreduction');
     });
 
-    it('only applies focusAssist when nightLight is null', async () => {
-      mockExecResolves('');
-
-      await applySystemSettings({ nightLight: null, focusAssist: false });
-
-      expect(mockExec).toHaveBeenCalledTimes(1);
-      const cmd = String(mockExec.mock.calls[0][0]);
-      expect(cmd).toContain('reg add');
-    });
-
-    it('skips all commands when both fields are null', async () => {
-      await applySystemSettings({ nightLight: null, focusAssist: null });
+    it('skips all commands when focusAssist is null', async () => {
+      await applySystemSettings({ focusAssist: null });
 
       expect(mockExec).not.toHaveBeenCalled();
     });
@@ -225,7 +134,7 @@ describe('system-settings', () => {
       mockExecRejects(new Error('Command failed'));
 
       await expect(
-        applySystemSettings({ nightLight: true, focusAssist: true })
+        applySystemSettings({ focusAssist: true })
       ).resolves.toBeUndefined();
     });
   });

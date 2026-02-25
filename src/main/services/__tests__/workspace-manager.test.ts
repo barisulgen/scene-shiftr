@@ -272,7 +272,6 @@ describe('workspace-manager', () => {
       await activateWorkspace(workspace, sender);
 
       expect(mockSystemSettings.applySystemSettings).toHaveBeenCalledWith({
-        nightLight: true,
         focusAssist: false,
       });
     });
@@ -294,7 +293,6 @@ describe('workspace-manager', () => {
       await activateWorkspace(workspace, sender);
 
       expect(mockSystemSettings.applySystemSettings).toHaveBeenCalledWith({
-        nightLight: null,
         focusAssist: null,
       });
     });
@@ -807,7 +805,6 @@ describe('workspace-manager', () => {
         'C:\\Pictures\\new-wallpaper.jpg'
       );
       expect(mockSystemSettings.applySystemSettings).toHaveBeenCalledWith({
-        nightLight: true,
         focusAssist: true,
       });
       expect(mockAudioController.setAudioDevice).toHaveBeenCalledWith('Headphones (USB)');

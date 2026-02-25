@@ -12,8 +12,6 @@ vi.mock('fs/promises', () => ({
 
 // Mock dependencies
 vi.mock('../system-settings', () => ({
-  getNightLight: vi.fn(),
-  setNightLight: vi.fn(),
   getFocusAssist: vi.fn(),
   setFocusAssist: vi.fn(),
 }));
@@ -89,8 +87,7 @@ describe('state-snapshot', () => {
       mockFs.access.mockRejectedValue(new Error('ENOENT'));
       mockFs.writeFile.mockResolvedValue(undefined);
 
-      // Mock current system state
-      mockSystemSettings.getNightLight.mockResolvedValue(false);
+      // Mock current system state (nightLight is no longer queried)
       mockSystemSettings.getFocusAssist.mockResolvedValue(false);
       mockAudioController.getCurrentDevice.mockResolvedValue('Speakers (Realtek)');
       mockAudioController.getVolume.mockResolvedValue(75);
@@ -98,7 +95,6 @@ describe('state-snapshot', () => {
 
       await captureSnapshot();
 
-      expect(mockSystemSettings.getNightLight).toHaveBeenCalled();
       expect(mockSystemSettings.getFocusAssist).toHaveBeenCalled();
       expect(mockAudioController.getCurrentDevice).toHaveBeenCalled();
       expect(mockAudioController.getVolume).toHaveBeenCalled();
@@ -126,7 +122,6 @@ describe('state-snapshot', () => {
       await captureSnapshot();
 
       expect(mockFs.writeFile).not.toHaveBeenCalled();
-      expect(mockSystemSettings.getNightLight).not.toHaveBeenCalled();
     });
   });
 
@@ -134,7 +129,6 @@ describe('state-snapshot', () => {
     it('reads snapshot.json and applies all settings', async () => {
       mockFs.readFile.mockResolvedValue(JSON.stringify(SAMPLE_SNAPSHOT));
       mockFs.unlink.mockResolvedValue(undefined);
-      mockSystemSettings.setNightLight.mockResolvedValue(undefined);
       mockSystemSettings.setFocusAssist.mockResolvedValue(undefined);
       mockAudioController.setAudioDevice.mockResolvedValue(undefined);
       mockAudioController.setVolume.mockResolvedValue(undefined);
@@ -146,7 +140,7 @@ describe('state-snapshot', () => {
         expect.stringContaining('snapshot.json'),
         'utf-8'
       );
-      expect(mockSystemSettings.setNightLight).toHaveBeenCalledWith(false);
+      // Night light restore is skipped — no public API
       expect(mockSystemSettings.setFocusAssist).toHaveBeenCalledWith(false);
       expect(mockAudioController.setAudioDevice).toHaveBeenCalledWith('Speakers (Realtek)');
       expect(mockAudioController.setVolume).toHaveBeenCalledWith(75);
@@ -158,7 +152,6 @@ describe('state-snapshot', () => {
     it('deletes snapshot.json after successful restore', async () => {
       mockFs.readFile.mockResolvedValue(JSON.stringify(SAMPLE_SNAPSHOT));
       mockFs.unlink.mockResolvedValue(undefined);
-      mockSystemSettings.setNightLight.mockResolvedValue(undefined);
       mockSystemSettings.setFocusAssist.mockResolvedValue(undefined);
       mockAudioController.setAudioDevice.mockResolvedValue(undefined);
       mockAudioController.setVolume.mockResolvedValue(undefined);
@@ -183,7 +176,6 @@ describe('state-snapshot', () => {
       );
       // Should NOT read or apply settings
       expect(mockFs.readFile).not.toHaveBeenCalled();
-      expect(mockSystemSettings.setNightLight).not.toHaveBeenCalled();
       expect(mockSystemSettings.setFocusAssist).not.toHaveBeenCalled();
       expect(mockAudioController.setAudioDevice).not.toHaveBeenCalled();
       expect(mockAudioController.setVolume).not.toHaveBeenCalled();
