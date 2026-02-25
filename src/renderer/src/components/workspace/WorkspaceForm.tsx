@@ -655,123 +655,6 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
                 onChange={setFocusAssist}
               />
 
-              {/* Divider */}
-              <div className="border-t" style={{ borderColor: 'var(--border)' }} />
-
-              {/* Audio Device */}
-              <div className="flex items-center gap-3">
-                <div
-                  className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-                  style={{ background: 'var(--accent-soft)' }}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                    className="w-4 h-4"
-                    style={{ color: 'var(--accent)' }}
-                  >
-                    <path d="M10 3.75a.75.75 0 0 0-1.264-.546L4.703 7H3.167a.75.75 0 0 0-.7.48A6.985 6.985 0 0 0 2 10c0 .887.165 1.737.468 2.52.111.29.39.48.7.48h1.535l4.033 3.796A.75.75 0 0 0 10 16.25V3.75ZM15.95 5.05a.75.75 0 0 0-1.06 1.061 5.5 5.5 0 0 1 0 7.778.75.75 0 0 0 1.06 1.06 7 7 0 0 0 0-9.899Z" />
-                    <path d="M13.829 7.172a.75.75 0 0 0-1.061 1.06 2.5 2.5 0 0 1 0 3.536.75.75 0 0 0 1.06 1.06 4 4 0 0 0 0-5.656Z" />
-                  </svg>
-                </div>
-                <div className="flex-1">
-                  <div className="text-sm" style={{ color: 'var(--text-primary)' }}>
-                    Audio Device
-                  </div>
-                  <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                    Output device when scene activates
-                  </div>
-                </div>
-                <select
-                  value={audioDevice ?? ''}
-                  onChange={(e) => setAudioDevice(e.target.value || null)}
-                  className="px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-1 max-w-[200px]"
-                  style={{
-                    ...inputStyle,
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    '--tw-ring-color': 'var(--accent)',
-                  } as React.CSSProperties}
-                >
-                  <option value="">Don&apos;t change</option>
-                  {audioDevices.map((device) => (
-                    <option key={device} value={device}>
-                      {device}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Volume */}
-              <div className="flex items-start gap-3">
-                <div
-                  className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
-                  style={{ background: 'rgba(124, 58, 237, 0.15)' }}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                    className="w-4 h-4"
-                    style={{ color: '#7C3AED' }}
-                  >
-                    <path d="M10 3.75a.75.75 0 0 0-1.264-.546L4.703 7H3.167a.75.75 0 0 0-.7.48A6.985 6.985 0 0 0 2 10c0 .887.165 1.737.468 2.52.111.29.39.48.7.48h1.535l4.033 3.796A.75.75 0 0 0 10 16.25V3.75Z" />
-                  </svg>
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center justify-between mb-2">
-                    <div>
-                      <div className="text-sm" style={{ color: 'var(--text-primary)' }}>
-                        Volume
-                      </div>
-                      <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                        Set system volume level
-                      </div>
-                    </div>
-                    <label className="flex items-center gap-1.5 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={!volumeEnabled}
-                        onChange={(e) => setVolumeEnabled(!e.target.checked)}
-                        className="rounded w-3.5 h-3.5"
-                        style={{
-                          accentColor: 'var(--accent)',
-                        }}
-                      />
-                      <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                        Don&apos;t change
-                      </span>
-                    </label>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="range"
-                      min={0}
-                      max={100}
-                      value={volume}
-                      onChange={(e) => setVolume(Number(e.target.value))}
-                      disabled={!volumeEnabled}
-                      className="flex-1 h-1.5 rounded-full appearance-none disabled:opacity-40 disabled:cursor-not-allowed"
-                      style={{
-                        background: volumeEnabled
-                          ? `linear-gradient(to right, var(--accent) ${volume}%, var(--bg-elevated) ${volume}%)`
-                          : 'var(--bg-elevated)',
-                        accentColor: 'var(--accent)',
-                      }}
-                    />
-                    <span
-                      className="text-xs font-mono w-8 text-right"
-                      style={{
-                        color: volumeEnabled
-                          ? 'var(--text-secondary)'
-                          : 'var(--text-muted)',
-                      }}
-                    >
-                      {volumeEnabled ? volume : '--'}
-                    </span>
-                  </div>
-                </div>
-              </div>
             </div>
           </section>
 
@@ -911,7 +794,7 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
             </div>
           </section>
 
-          {/* ---- 6. Audio & Vibes Card ---- */}
+          {/* ---- 6. Sound Card ---- */}
           <section className="rounded-xl p-5" style={cardStyle}>
             <div className="flex items-center gap-2 mb-5">
               <svg
@@ -921,21 +804,98 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
                 className="w-5 h-5"
                 style={{ color: 'var(--accent)' }}
               >
-                <path
-                  fillRule="evenodd"
-                  d="M17.721 1.599a.75.75 0 0 1 .279.584v11.29a2.25 2.25 0 0 1-1.774 2.198l-2.041.442a2.216 2.216 0 1 1-.938-4.333l2.224-.482V5.15l-7.5 1.63v7.693a2.25 2.25 0 0 1-1.774 2.198l-2.042.442a2.216 2.216 0 1 1-.935-4.334l2.222-.481V3.472a.75.75 0 0 1 .6-.735l9-1.958a.75.75 0 0 1 .683.177Z"
-                  clipRule="evenodd"
-                />
+                <path d="M10 3.75a.75.75 0 0 0-1.264-.546L4.703 7H3.167a.75.75 0 0 0-.7.48A6.985 6.985 0 0 0 2 10c0 .887.165 1.737.468 2.52.111.29.39.48.7.48h1.535l4.033 3.796A.75.75 0 0 0 10 16.25V3.75ZM15.95 5.05a.75.75 0 0 0-1.06 1.061 5.5 5.5 0 0 1 0 7.778.75.75 0 0 0 1.06 1.06 7 7 0 0 0 0-9.899Z" />
+                <path d="M13.829 7.172a.75.75 0 0 0-1.061 1.06 2.5 2.5 0 0 1 0 3.536.75.75 0 0 0 1.06 1.06 4 4 0 0 0 0-5.656Z" />
               </svg>
               <h2
                 className="text-sm font-semibold"
                 style={{ color: 'var(--text-primary)' }}
               >
-                Audio &amp; Vibes
+                Sound
               </h2>
             </div>
 
             <div className="space-y-5">
+              {/* Audio Device + Volume — side by side */}
+              <div className="grid grid-cols-2 gap-4">
+                {/* Audio Device (left) */}
+                <div>
+                  <div className="text-sm mb-1" style={{ color: 'var(--text-primary)' }}>
+                    Audio Device
+                  </div>
+                  <div className="text-xs mb-2" style={{ color: 'var(--text-muted)' }}>
+                    Output device
+                  </div>
+                  <select
+                    value={audioDevice ?? ''}
+                    onChange={(e) => setAudioDevice(e.target.value || null)}
+                    className="w-full px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-1"
+                    style={{
+                      ...inputStyle,
+                      '--tw-ring-color': 'var(--accent)',
+                    } as React.CSSProperties}
+                  >
+                    <option value="">Don&apos;t change</option>
+                    {audioDevices.map((device) => (
+                      <option key={device} value={device}>
+                        {device}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Volume (right) */}
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="text-sm" style={{ color: 'var(--text-primary)' }}>
+                      Volume
+                    </div>
+                    <label className="flex items-center gap-1.5 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={!volumeEnabled}
+                        onChange={(e) => setVolumeEnabled(!e.target.checked)}
+                        className="rounded w-3.5 h-3.5"
+                        style={{ accentColor: 'var(--accent)' }}
+                      />
+                      <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                        Don&apos;t change
+                      </span>
+                    </label>
+                  </div>
+                  <div className="text-xs mb-2" style={{ color: 'var(--text-muted)' }}>
+                    System volume level
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="range"
+                      min={0}
+                      max={100}
+                      value={volume}
+                      onChange={(e) => setVolume(Number(e.target.value))}
+                      disabled={!volumeEnabled}
+                      className="flex-1 h-1.5 rounded-full appearance-none disabled:opacity-40 disabled:cursor-not-allowed"
+                      style={{
+                        background: volumeEnabled
+                          ? `linear-gradient(to right, var(--accent) ${volume}%, var(--bg-elevated) ${volume}%)`
+                          : 'var(--bg-elevated)',
+                        accentColor: 'var(--accent)',
+                      }}
+                    />
+                    <span
+                      className="text-xs font-mono w-8 text-right"
+                      style={{
+                        color: volumeEnabled ? 'var(--text-secondary)' : 'var(--text-muted)',
+                      }}
+                    >
+                      {volumeEnabled ? volume : '--'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Divider */}
+              <div className="border-t" style={{ borderColor: 'var(--border)' }} />
               {/* Transition Sound */}
               <div>
                 <label

@@ -126,9 +126,7 @@ function hasApps(workspace: Workspace): boolean {
 function hasSystem(workspace: Workspace): boolean {
   return (
     workspace.system.nightLight !== null ||
-    workspace.system.focusAssist !== null ||
-    workspace.system.audioDevice !== null ||
-    workspace.system.volume !== null
+    workspace.system.focusAssist !== null
   );
 }
 
@@ -557,11 +555,9 @@ export default function WorkspaceDetail(): JSX.Element | null {
               [
                 workspace.system.nightLight,
                 workspace.system.focusAssist,
-                workspace.system.audioDevice,
-                workspace.system.volume,
               ].filter((v) => v !== null).length
             }
-            isEmpty={!hasSystem(workspace)}
+            isEmpty={workspace.system.nightLight === null && workspace.system.focusAssist === null}
           >
             {workspace.system.nightLight !== null && (
               <SettingRow icon={<MoonIcon />} label="Night light">
@@ -571,16 +567,6 @@ export default function WorkspaceDetail(): JSX.Element | null {
             {workspace.system.focusAssist !== null && (
               <SettingRow icon={<BellIcon />} label="Focus assist">
                 <OnOffBadge value={workspace.system.focusAssist} />
-              </SettingRow>
-            )}
-            {workspace.system.audioDevice !== null && (
-              <SettingRow icon={<HeadphonesIcon />} label="Audio device">
-                <PillBadge>{workspace.system.audioDevice}</PillBadge>
-              </SettingRow>
-            )}
-            {workspace.system.volume !== null && (
-              <SettingRow icon={<SpeakerIcon />} label="Volume">
-                <VolumeBadge value={workspace.system.volume} />
               </SettingRow>
             )}
           </CollapsibleSection>
@@ -680,21 +666,37 @@ export default function WorkspaceDetail(): JSX.Element | null {
             )}
           </CollapsibleSection>
 
-          {/* Audio & Vibes */}
+          {/* Sound */}
           <CollapsibleSection
-            title="Audio & Vibes"
-            icon={<MusicNoteIcon />}
+            title="Sound"
+            icon={<SpeakerIcon />}
             count={
               [
+                workspace.system.audioDevice,
+                workspace.system.volume,
                 workspace.audio.transitionSound,
                 workspace.audio.musicApp,
                 workspace.audio.playlistUri,
               ].filter((v) => v !== null).length
             }
-            isEmpty={!hasAudio(workspace)}
+            isEmpty={
+              workspace.system.audioDevice === null &&
+              workspace.system.volume === null &&
+              !hasAudio(workspace)
+            }
           >
+            {workspace.system.audioDevice !== null && (
+              <SettingRow icon={<HeadphonesIcon />} label="Audio device">
+                <PillBadge>{workspace.system.audioDevice}</PillBadge>
+              </SettingRow>
+            )}
+            {workspace.system.volume !== null && (
+              <SettingRow icon={<SpeakerIcon />} label="Volume">
+                <VolumeBadge value={workspace.system.volume} />
+              </SettingRow>
+            )}
             {workspace.audio.transitionSound !== null && (
-              <SettingRow icon={<SpeakerIcon />} label="Transition sound">
+              <SettingRow icon={<MusicNoteIcon />} label="Transition sound">
                 <PillBadge>{workspace.audio.transitionSound}</PillBadge>
               </SettingRow>
             )}

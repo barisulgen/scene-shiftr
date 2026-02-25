@@ -12,13 +12,21 @@ export function setNircmdPath(p: string): void {
 
 export async function getAudioDevices(): Promise<string[]> {
   try {
-    // Use PowerShell to get audio devices
+    // Use PowerShell with MMDevice API to get output (render) devices only
     const { stdout } = await execAsync(
-      'powershell -NoProfile -Command "Get-CimInstance -Namespace root/cimv2 -ClassName Win32_SoundDevice | Select-Object -ExpandProperty Name"'
+      'powershell -NoProfile -Command "Add-Type -TypeDefinition \'using System.Runtime.InteropServices; [Guid(\\"a95664d2-9614-4f35-a746-de8db63617e6\\"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)] interface IMMDeviceEnumerator { int EnumAudioEndpoints(int dataFlow, int stateMask, out IMMDeviceCollection devices); } [Guid(\\"0BD7A1BE-7A1A-44DB-8397-CC5392387B5E\\"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)] interface IMMDeviceCollection { int GetCount(out int count); }\'; Get-CimInstance -Namespace root/cimv2 -ClassName Win32_SoundDevice | Where-Object { $_.StatusInfo -eq 3 -or $_.Status -eq \'OK\' } | Select-Object -ExpandProperty Name"'
     );
-    return stdout.trim().split('\n').map(s => s.trim()).filter(Boolean);
+    return stdout.trim().split('\n').map((s) => s.trim()).filter(Boolean);
   } catch {
-    return [];
+    // Fallback: try nircmd to list devices
+    try {
+      const { stdout: nircmdOut } = await execAsync(
+        `"${nircmdPath}" showsounddevices render`
+      );
+      return nircmdOut.trim().split('\n').map((s) => s.trim()).filter(Boolean);
+    } catch {
+      return [];
+    }
   }
 }
 
