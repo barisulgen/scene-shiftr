@@ -218,8 +218,14 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
           <button
             type="button"
             onClick={handleCancel}
-            className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 hover:opacity-80 transition-opacity"
+            className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 cursor-pointer transition-colors duration-150"
             style={{ background: 'var(--bg-elevated)' }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--bg-elevated)';
+            }}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -362,8 +368,16 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
                 <button
                   type="button"
                   onClick={handleAddFolder}
-                  className="hover:opacity-80 transition-opacity"
+                  className="cursor-pointer transition-colors duration-150 rounded-full"
                   style={{ color: 'var(--accent)' }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = 'var(--accent-hover)';
+                    e.currentTarget.style.transform = 'scale(1.1)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = 'var(--accent)';
+                    e.currentTarget.style.transform = 'scale(1)';
+                  }}
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -420,8 +434,14 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
                     <button
                       type="button"
                       onClick={() => handleRemoveFolder(idx)}
-                      className="shrink-0 hover:opacity-80 transition-opacity"
+                      className="shrink-0 cursor-pointer transition-colors duration-150"
                       style={{ color: 'var(--text-muted)' }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.color = 'var(--accent)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.color = 'var(--text-muted)';
+                      }}
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -460,8 +480,18 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
                   type="button"
                   onClick={handleAddUrl}
                   disabled={!urlInput.trim()}
-                  className="hover:opacity-80 transition-opacity disabled:opacity-40"
+                  className="cursor-pointer transition-colors duration-150 rounded-full disabled:opacity-40 disabled:cursor-not-allowed"
                   style={{ color: 'var(--accent)' }}
+                  onMouseEnter={(e) => {
+                    if (!e.currentTarget.disabled) {
+                      e.currentTarget.style.color = 'var(--accent-hover)';
+                      e.currentTarget.style.transform = 'scale(1.1)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = 'var(--accent)';
+                    e.currentTarget.style.transform = 'scale(1)';
+                  }}
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -534,8 +564,14 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
                     <button
                       type="button"
                       onClick={() => handleRemoveUrl(idx)}
-                      className="shrink-0 hover:opacity-80 transition-opacity"
+                      className="shrink-0 cursor-pointer transition-colors duration-150"
                       style={{ color: 'var(--text-muted)' }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.color = 'var(--accent)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.color = 'var(--text-muted)';
+                      }}
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -776,11 +812,21 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
                   <button
                     type="button"
                     onClick={handleBrowseWallpaper}
-                    className="shrink-0 px-4 py-2.5 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
+                    className="shrink-0 px-4 py-2.5 rounded-lg text-sm font-medium cursor-pointer transition-colors duration-150"
                     style={{
                       background: 'var(--bg-elevated)',
                       border: '1px solid var(--border-light)',
                       color: 'var(--text-secondary)',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)';
+                      e.currentTarget.style.borderColor = 'var(--text-muted)';
+                      e.currentTarget.style.color = 'var(--text-primary)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'var(--bg-elevated)';
+                      e.currentTarget.style.borderColor = 'var(--border-light)';
+                      e.currentTarget.style.color = 'var(--text-secondary)';
                     }}
                   >
                     Browse...
@@ -799,8 +845,14 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
                       <button
                         type="button"
                         onClick={() => { setWallpaper(null); markDirty(); }}
-                        className="shrink-0 text-xs hover:opacity-80 transition-opacity"
+                        className="shrink-0 text-xs cursor-pointer transition-colors duration-150"
                         style={{ color: 'var(--text-muted)' }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.color = 'var(--accent)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.color = 'var(--text-muted)';
+                        }}
                       >
                         Clear
                       </button>
@@ -825,11 +877,21 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
                   <button
                     type="button"
                     onClick={handleCaptureLayout}
-                    className="shrink-0 px-4 py-2.5 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
+                    className="shrink-0 px-4 py-2.5 rounded-lg text-sm font-medium cursor-pointer transition-colors duration-150"
                     style={{
                       background: 'var(--bg-elevated)',
                       border: '1px solid var(--border-light)',
                       color: 'var(--text-secondary)',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)';
+                      e.currentTarget.style.borderColor = 'var(--text-muted)';
+                      e.currentTarget.style.color = 'var(--text-primary)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'var(--bg-elevated)';
+                      e.currentTarget.style.borderColor = 'var(--border-light)';
+                      e.currentTarget.style.color = 'var(--text-secondary)';
                     }}
                   >
                     Capture Current Layout
@@ -965,8 +1027,14 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
         <button
           type="button"
           onClick={handleCancel}
-          className="px-4 py-2 text-sm font-medium hover:opacity-80 transition-opacity"
+          className="px-4 py-2 text-sm font-medium cursor-pointer transition-colors duration-150"
           style={{ color: 'var(--text-secondary)' }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.color = 'var(--text-primary)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.color = 'var(--text-secondary)';
+          }}
         >
           Cancel
         </button>
@@ -974,8 +1042,24 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
           type="button"
           onClick={handleSave}
           disabled={!name.trim() || saving}
-          className="px-5 py-2.5 rounded-lg text-sm font-medium text-white hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-5 py-2.5 rounded-lg text-sm font-medium text-white cursor-pointer transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
           style={{ background: 'var(--accent)' }}
+          onMouseEnter={(e) => {
+            if (!e.currentTarget.disabled) {
+              e.currentTarget.style.backgroundColor = 'var(--accent-hover)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'var(--accent)';
+          }}
+          onMouseDown={(e) => {
+            if (!e.currentTarget.disabled) {
+              e.currentTarget.style.transform = 'scale(0.97)';
+            }
+          }}
+          onMouseUp={(e) => {
+            e.currentTarget.style.transform = 'scale(1)';
+          }}
         >
           {saving ? 'Saving...' : 'Save Changes'}
         </button>
@@ -1018,10 +1102,18 @@ function EmojiPicker({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-10 h-10 rounded-lg flex items-center justify-center text-xl shrink-0 transition-colors duration-150"
+        className="w-10 h-10 rounded-lg flex items-center justify-center text-xl shrink-0 cursor-pointer transition-colors duration-150"
         style={{
           backgroundColor: 'var(--bg-elevated)',
           border: '1px solid var(--border-light)',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)';
+          e.currentTarget.style.borderColor = 'var(--text-muted)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = 'var(--bg-elevated)';
+          e.currentTarget.style.borderColor = 'var(--border-light)';
         }}
       >
         {value || '🖥️'}
@@ -1076,9 +1168,15 @@ function ToggleSwitch({
     <button
       type="button"
       onClick={() => onChange(!checked)}
-      className="relative w-9 h-5 rounded-full transition-colors duration-200 shrink-0"
+      className="relative w-9 h-5 rounded-full transition-colors duration-200 shrink-0 cursor-pointer"
       style={{
         background: checked ? 'var(--accent)' : 'var(--bg-elevated)',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.opacity = '0.85';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.opacity = '1';
       }}
     >
       <span
@@ -1144,10 +1242,22 @@ function TriStateToggle({
         <button
           type="button"
           onClick={() => onChange(true)}
-          className={btnBase}
+          className={`${btnBase} cursor-pointer`}
           style={{
             background: value === true ? 'var(--accent)' : 'var(--bg-elevated)',
             color: value === true ? '#FFFFFF' : 'var(--text-secondary)',
+          }}
+          onMouseEnter={(e) => {
+            if (value !== true) {
+              e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)';
+              e.currentTarget.style.color = 'var(--text-primary)';
+            } else {
+              e.currentTarget.style.backgroundColor = 'var(--accent-hover)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = value === true ? 'var(--accent)' : 'var(--bg-elevated)';
+            e.currentTarget.style.color = value === true ? '#FFFFFF' : 'var(--text-secondary)';
           }}
         >
           On
@@ -1155,12 +1265,24 @@ function TriStateToggle({
         <button
           type="button"
           onClick={() => onChange(false)}
-          className={btnBase}
+          className={`${btnBase} cursor-pointer`}
           style={{
             background: value === false ? 'var(--accent)' : 'var(--bg-elevated)',
             color: value === false ? '#FFFFFF' : 'var(--text-secondary)',
             borderLeft: '1px solid var(--border-light)',
             borderRight: '1px solid var(--border-light)',
+          }}
+          onMouseEnter={(e) => {
+            if (value !== false) {
+              e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)';
+              e.currentTarget.style.color = 'var(--text-primary)';
+            } else {
+              e.currentTarget.style.backgroundColor = 'var(--accent-hover)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = value === false ? 'var(--accent)' : 'var(--bg-elevated)';
+            e.currentTarget.style.color = value === false ? '#FFFFFF' : 'var(--text-secondary)';
           }}
         >
           Off
@@ -1168,10 +1290,22 @@ function TriStateToggle({
         <button
           type="button"
           onClick={() => onChange(null)}
-          className={btnBase}
+          className={`${btnBase} cursor-pointer`}
           style={{
             background: value === null ? 'var(--accent)' : 'var(--bg-elevated)',
             color: value === null ? '#FFFFFF' : 'var(--text-secondary)',
+          }}
+          onMouseEnter={(e) => {
+            if (value !== null) {
+              e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)';
+              e.currentTarget.style.color = 'var(--text-primary)';
+            } else {
+              e.currentTarget.style.backgroundColor = 'var(--accent-hover)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = value === null ? 'var(--accent)' : 'var(--bg-elevated)';
+            e.currentTarget.style.color = value === null ? '#FFFFFF' : 'var(--text-secondary)';
           }}
         >
           Don&apos;t change

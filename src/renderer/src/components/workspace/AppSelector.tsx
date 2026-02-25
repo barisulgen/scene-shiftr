@@ -126,12 +126,22 @@ export default function AppSelector({ value, onChange, label }: AppSelectorProps
         <button
           type="button"
           onClick={handleBrowseExe}
-          className="shrink-0 px-3 py-2 rounded-md text-sm transition-colors duration-150"
+          className="shrink-0 px-3 py-2 rounded-md text-sm cursor-pointer transition-colors duration-150"
           style={{
             borderWidth: '1px',
             borderStyle: 'solid',
             borderColor: 'var(--border)',
             color: 'var(--text-secondary)',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.borderColor = 'var(--text-muted)';
+            e.currentTarget.style.color = 'var(--text-primary)';
+            e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.borderColor = 'var(--border)';
+            e.currentTarget.style.color = 'var(--text-secondary)';
+            e.currentTarget.style.backgroundColor = 'transparent';
           }}
         >
           Browse .exe

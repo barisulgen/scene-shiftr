@@ -29,8 +29,14 @@ export default function CollapsibleSection({
     >
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center justify-between w-full px-4 py-3 text-left transition-colors duration-100"
+        className="flex items-center justify-between w-full px-4 py-3 text-left cursor-pointer transition-colors duration-100"
         style={{ color: 'var(--text-primary)' }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = 'transparent';
+        }}
       >
         <div className="flex items-center gap-2.5">
           {icon && (

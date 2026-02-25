@@ -29,7 +29,7 @@ export default function Sidebar(): JSX.Element {
       <div className="flex flex-col gap-1 px-3 pb-3" style={{ borderTop: '1px solid var(--border)' }}>
         <button
           onClick={() => setCurrentView('create')}
-          className="flex items-center gap-2 w-full px-3 py-2.5 rounded-md text-sm font-medium transition-colors duration-150"
+          className="flex items-center gap-2 w-full px-3 py-2.5 rounded-md text-sm font-medium cursor-pointer transition-colors duration-150"
           style={{ color: 'var(--accent)' }}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = 'var(--accent-soft)';
@@ -50,7 +50,7 @@ export default function Sidebar(): JSX.Element {
         </button>
         <button
           onClick={() => setCurrentView(currentView === 'settings' ? 'main' : 'settings')}
-          className="flex items-center gap-2 w-full px-3 py-2.5 rounded-md text-sm font-medium transition-colors duration-150 relative"
+          className="flex items-center gap-2 w-full px-3 py-2.5 rounded-md text-sm font-medium cursor-pointer transition-colors duration-150 relative"
           style={{
             color: currentView === 'settings' ? 'var(--text-primary)' : 'var(--text-secondary)',
             backgroundColor: currentView === 'settings' ? 'var(--bg-card-hover)' : 'transparent',
@@ -85,7 +85,7 @@ export default function Sidebar(): JSX.Element {
         </button>
         <button
           onClick={() => window.open('https://github.com/barisulgen/scene-shiftr/issues/new/choose', '_blank')}
-          className="flex items-center gap-2 w-full px-3 py-2.5 rounded-md text-sm font-medium transition-colors duration-150"
+          className="flex items-center gap-2 w-full px-3 py-2.5 rounded-md text-sm font-medium cursor-pointer transition-colors duration-150"
           style={{ color: 'var(--text-secondary)' }}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)';

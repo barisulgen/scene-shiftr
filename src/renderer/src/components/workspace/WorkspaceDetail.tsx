@@ -184,12 +184,19 @@ function countSettings(workspace: Workspace): number {
 /* ─── Sub-components ─── */
 
 function AppChip({ app, variant }: { app: AppEntry; variant: 'open' | 'close' }): JSX.Element {
+  const defaultBg = variant === 'close' ? 'var(--accent-soft)' : 'var(--bg-elevated)';
   return (
     <span
-      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs"
+      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-colors duration-150"
       style={{
-        backgroundColor: variant === 'close' ? 'var(--accent-soft)' : 'var(--bg-elevated)',
+        backgroundColor: defaultBg,
         color: 'var(--text-primary)',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.backgroundColor = defaultBg;
       }}
     >
       <span
@@ -393,15 +400,23 @@ export default function WorkspaceDetail(): JSX.Element | null {
           <div className="flex items-center gap-2">
             <button
               onClick={handleEdit}
-              className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors duration-150"
+              className="w-8 h-8 rounded-lg flex items-center justify-center cursor-pointer transition-colors duration-150"
               style={{ backgroundColor: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}
               title="Edit"
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)';
+                e.currentTarget.style.color = 'var(--text-primary)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--bg-elevated)';
+                e.currentTarget.style.color = 'var(--text-secondary)';
+              }}
             >
               <PencilIcon />
             </button>
             <button
               onClick={handleDelete}
-              className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors duration-150 group"
+              className="w-8 h-8 rounded-lg flex items-center justify-center cursor-pointer transition-colors duration-150 group"
               style={{ backgroundColor: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}
               title="Delete"
               onMouseEnter={(e) => {
@@ -423,7 +438,7 @@ export default function WorkspaceDetail(): JSX.Element | null {
           {isActive ? (
             <button
               onClick={handleDeactivate}
-              className="w-full h-12 rounded-xl flex items-center justify-center gap-2 text-sm font-medium transition-colors duration-150"
+              className="w-full h-12 rounded-xl flex items-center justify-center gap-2 text-sm font-medium cursor-pointer transition-all duration-150"
               style={{
                 backgroundColor: 'var(--bg-card)',
                 border: '1px solid var(--border)',
@@ -431,9 +446,18 @@ export default function WorkspaceDetail(): JSX.Element | null {
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)';
+                e.currentTarget.style.color = 'var(--text-primary)';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.backgroundColor = 'var(--bg-card)';
+                e.currentTarget.style.color = 'var(--text-secondary)';
+                e.currentTarget.style.transform = 'scale(1)';
+              }}
+              onMouseDown={(e) => {
+                e.currentTarget.style.transform = 'scale(0.97)';
+              }}
+              onMouseUp={(e) => {
+                e.currentTarget.style.transform = 'scale(1)';
               }}
             >
               {/* Stop square icon */}
@@ -461,9 +485,18 @@ export default function WorkspaceDetail(): JSX.Element | null {
           ) : (
             <button
               onClick={handleActivate}
-              className="w-full h-12 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold text-white transition-all duration-150 hover:brightness-110"
+              className="w-full h-12 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold text-white cursor-pointer transition-all duration-150 hover:brightness-110"
               style={{
                 background: 'var(--gradient-activate)',
+              }}
+              onMouseDown={(e) => {
+                e.currentTarget.style.transform = 'scale(0.97)';
+              }}
+              onMouseUp={(e) => {
+                e.currentTarget.style.transform = 'scale(1)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'scale(1)';
               }}
             >
               {/* Play triangle icon */}
@@ -597,8 +630,16 @@ export default function WorkspaceDetail(): JSX.Element | null {
                   {workspace.folders.map((folder) => (
                     <div
                       key={folder}
-                      className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs"
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs transition-colors duration-150"
                       style={{ backgroundColor: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)';
+                        e.currentTarget.style.color = 'var(--text-primary)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'var(--bg-elevated)';
+                        e.currentTarget.style.color = 'var(--text-secondary)';
+                      }}
                     >
                       <FolderIcon />
                       <span className="truncate">{folder}</span>
@@ -619,8 +660,16 @@ export default function WorkspaceDetail(): JSX.Element | null {
                   {workspace.urls.map((url) => (
                     <div
                       key={url}
-                      className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs"
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs transition-colors duration-150"
                       style={{ backgroundColor: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)';
+                        e.currentTarget.style.color = 'var(--text-primary)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'var(--bg-elevated)';
+                        e.currentTarget.style.color = 'var(--text-secondary)';
+                      }}
                     >
                       <LinkIcon />
                       <span className="truncate">{url}</span>
@@ -695,7 +744,7 @@ export default function WorkspaceDetail(): JSX.Element | null {
             <div className="flex items-center gap-3 justify-end">
               <button
                 onClick={() => setShowDeleteConfirm(false)}
-                className="px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-150"
+                className="px-4 py-2 rounded-lg text-sm font-medium cursor-pointer transition-colors duration-150"
                 style={{
                   backgroundColor: 'var(--bg-elevated)',
                   color: 'var(--text-secondary)',
@@ -714,13 +763,20 @@ export default function WorkspaceDetail(): JSX.Element | null {
               </button>
               <button
                 onClick={confirmDelete}
-                className="px-4 py-2 rounded-lg text-sm font-medium text-white transition-colors duration-150"
+                className="px-4 py-2 rounded-lg text-sm font-medium text-white cursor-pointer transition-all duration-150"
                 style={{ backgroundColor: 'var(--accent)' }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.backgroundColor = 'var(--accent-hover)';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.backgroundColor = 'var(--accent)';
+                  e.currentTarget.style.transform = 'scale(1)';
+                }}
+                onMouseDown={(e) => {
+                  e.currentTarget.style.transform = 'scale(0.97)';
+                }}
+                onMouseUp={(e) => {
+                  e.currentTarget.style.transform = 'scale(1)';
                 }}
               >
                 Delete

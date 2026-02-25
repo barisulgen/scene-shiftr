@@ -100,12 +100,24 @@ export default function TransitionSoundPicker({
           type="button"
           onClick={handlePreview}
           disabled={!value || previewing}
-          className="shrink-0 px-3 py-2 rounded-md text-sm transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
+          className="shrink-0 px-3 py-2 rounded-md text-sm cursor-pointer transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
           style={{
             borderWidth: '1px',
             borderStyle: 'solid',
             borderColor: 'var(--border)',
             color: 'var(--text-secondary)',
+          }}
+          onMouseEnter={(e) => {
+            if (!e.currentTarget.disabled) {
+              e.currentTarget.style.borderColor = 'var(--text-muted)';
+              e.currentTarget.style.color = 'var(--text-primary)';
+              e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.borderColor = 'var(--border)';
+            e.currentTarget.style.color = 'var(--text-secondary)';
+            e.currentTarget.style.backgroundColor = 'transparent';
           }}
         >
           {previewing ? (
@@ -149,12 +161,22 @@ export default function TransitionSoundPicker({
           <button
             type="button"
             onClick={handleBrowseCustom}
-            className="shrink-0 px-2 py-1.5 rounded-md text-xs transition-colors"
+            className="shrink-0 px-2 py-1.5 rounded-md text-xs cursor-pointer transition-colors duration-150"
             style={{
               borderWidth: '1px',
               borderStyle: 'solid',
               borderColor: 'var(--border)',
               color: 'var(--text-muted)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = 'var(--text-muted)';
+              e.currentTarget.style.color = 'var(--text-primary)';
+              e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = 'var(--border)';
+              e.currentTarget.style.color = 'var(--text-muted)';
+              e.currentTarget.style.backgroundColor = 'transparent';
             }}
           >
             Change

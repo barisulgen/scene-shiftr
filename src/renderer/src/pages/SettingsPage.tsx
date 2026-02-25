@@ -123,9 +123,15 @@ export default function SettingsPage(): JSX.Element {
             <button
               type="button"
               onClick={() => setStartWithWindows(!startWithWindows)}
-              className="relative w-9 h-5 rounded-full transition-colors duration-200 shrink-0"
+              className="relative w-9 h-5 rounded-full transition-colors duration-200 shrink-0 cursor-pointer"
               style={{
                 backgroundColor: startWithWindows ? 'var(--accent)' : 'var(--bg-elevated)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.opacity = '0.85';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.opacity = '1';
               }}
             >
               <span
@@ -179,9 +185,15 @@ export default function SettingsPage(): JSX.Element {
             <button
               type="button"
               onClick={() => setConfirmBeforeSwitching(!confirmBeforeSwitching)}
-              className="relative w-9 h-5 rounded-full transition-colors duration-200 shrink-0"
+              className="relative w-9 h-5 rounded-full transition-colors duration-200 shrink-0 cursor-pointer"
               style={{
                 backgroundColor: confirmBeforeSwitching ? 'var(--accent)' : 'var(--bg-elevated)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.opacity = '0.85';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.opacity = '1';
               }}
             >
               <span
@@ -440,9 +452,15 @@ export default function SettingsPage(): JSX.Element {
               <button
                 type="button"
                 onClick={() => setDryRun(!dryRun)}
-                className="relative w-9 h-5 rounded-full transition-colors duration-200 shrink-0"
+                className="relative w-9 h-5 rounded-full transition-colors duration-200 shrink-0 cursor-pointer"
                 style={{
                   backgroundColor: dryRun ? '#F59E0B' : 'var(--bg-elevated)',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.opacity = '0.85';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.opacity = '1';
                 }}
               >
                 <span
@@ -481,8 +499,14 @@ export default function SettingsPage(): JSX.Element {
           <button
             type="button"
             onClick={handleBack}
-            className="px-4 py-2 rounded-md text-sm font-medium transition-colors duration-150 hover:opacity-80"
+            className="px-4 py-2 rounded-md text-sm font-medium cursor-pointer transition-colors duration-150"
             style={{ color: 'var(--text-secondary)' }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = 'var(--text-primary)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = 'var(--text-secondary)';
+            }}
           >
             Back
           </button>
@@ -490,8 +514,25 @@ export default function SettingsPage(): JSX.Element {
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="px-5 py-2 rounded-md text-white text-sm font-medium transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90"
+            className="px-5 py-2 rounded-md text-white text-sm font-medium cursor-pointer transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
             style={{ backgroundColor: 'var(--accent)' }}
+            onMouseEnter={(e) => {
+              if (!e.currentTarget.disabled) {
+                e.currentTarget.style.backgroundColor = 'var(--accent-hover)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--accent)';
+              e.currentTarget.style.transform = 'scale(1)';
+            }}
+            onMouseDown={(e) => {
+              if (!e.currentTarget.disabled) {
+                e.currentTarget.style.transform = 'scale(0.97)';
+              }
+            }}
+            onMouseUp={(e) => {
+              e.currentTarget.style.transform = 'scale(1)';
+            }}
           >
             {saving ? 'Saving...' : 'Save Changes'}
           </button>
