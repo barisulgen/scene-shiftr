@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import type { Workspace, AppEntry, MonitorLayout } from '../../../../shared/types';
 import { useApp } from '../../context/AppContext';
 import { useWorkspaces } from '../../hooks/useWorkspaces';
@@ -235,57 +235,27 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
 
         <div className="max-w-3xl space-y-6">
           {/* ---- 1. Workspace Name Section ---- */}
-          <section className="flex items-start gap-4">
-            {/* Icon preview */}
-            <div
-              className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 text-2xl"
-              style={{ background: 'var(--bg-elevated)' }}
+          <section>
+            <label
+              className="block text-[10px] font-medium tracking-widest uppercase mb-1.5"
+              style={{ color: 'var(--text-muted)' }}
             >
-              {icon || '\u{1F5A5}\u{FE0F}'}
-            </div>
-
-            <div className="flex-1 space-y-2">
-              <div>
-                <label
-                  className="block text-[10px] font-medium tracking-widest uppercase mb-1.5"
-                  style={{ color: 'var(--text-muted)' }}
-                >
-                  Workspace Name
-                </label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="My Workspace"
-                  required
-                  className={inputClass}
-                  style={{
-                    ...inputStyle,
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    '--tw-ring-color': 'var(--accent)',
-                  } as React.CSSProperties}
-                />
-              </div>
-              <div className="w-20">
-                <label
-                  className="block text-[10px] font-medium tracking-widest uppercase mb-1.5"
-                  style={{ color: 'var(--text-muted)' }}
-                >
-                  Icon
-                </label>
-                <input
-                  type="text"
-                  value={icon}
-                  onChange={(e) => setIcon(e.target.value)}
-                  placeholder={'\u{1F5A5}\u{FE0F}'}
-                  className={`${inputClass} text-center`}
-                  style={{
-                    ...inputStyle,
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    '--tw-ring-color': 'var(--accent)',
-                  } as React.CSSProperties}
-                />
-              </div>
+              Workspace Name
+            </label>
+            <div className="flex items-center gap-2">
+              <EmojiPicker value={icon} onChange={setIcon} />
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="My Workspace"
+                required
+                className={`${inputClass} flex-1`}
+                style={{
+                  ...inputStyle,
+                  '--tw-ring-color': 'var(--accent)',
+                } as React.CSSProperties}
+              />
             </div>
           </section>
 
@@ -1010,6 +980,85 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
           {saving ? 'Saving...' : 'Save Changes'}
         </button>
       </div>
+    </div>
+  );
+}
+
+/* ---- EmojiPicker sub-component ---- */
+
+const EMOJI_OPTIONS = [
+  '🖥️', '🎮', '💼', '🎨', '🎵', '📚', '🏠', '🌙',
+  '☀️', '🚀', '💻', '🎯', '📷', '🎬', '✏️', '🔧',
+  '🎧', '📱', '🌍', '⚡', '🎭', '🏋️', '🎸', '🍿',
+  '📝', '🔬', '🎪', '🏖️', '🎤', '🧩', '🎲', '🌈',
+];
+
+function EmojiPicker({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+}): JSX.Element {
+  const [isOpen, setIsOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent): void {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-10 h-10 rounded-lg flex items-center justify-center text-xl shrink-0 transition-colors duration-150"
+        style={{
+          backgroundColor: 'var(--bg-elevated)',
+          border: '1px solid var(--border-light)',
+        }}
+      >
+        {value || '🖥️'}
+      </button>
+      {isOpen && (
+        <div
+          className="absolute top-full left-0 mt-2 p-2 rounded-xl shadow-2xl z-30 grid grid-cols-8 gap-1"
+          style={{
+            backgroundColor: 'var(--bg-card)',
+            border: '1px solid var(--border-light)',
+            width: '280px',
+          }}
+        >
+          {EMOJI_OPTIONS.map((emoji) => (
+            <button
+              key={emoji}
+              type="button"
+              onClick={() => {
+                onChange(emoji);
+                setIsOpen(false);
+              }}
+              className="w-8 h-8 rounded-md flex items-center justify-center text-lg transition-colors duration-100"
+              style={{
+                backgroundColor: value === emoji ? 'var(--accent-soft)' : 'transparent',
+              }}
+              onMouseEnter={(e) => {
+                if (value !== emoji) e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)';
+              }}
+              onMouseLeave={(e) => {
+                if (value !== emoji) e.currentTarget.style.backgroundColor = 'transparent';
+              }}
+            >
+              {emoji}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
