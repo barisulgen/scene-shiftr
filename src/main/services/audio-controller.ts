@@ -82,6 +82,7 @@ public class AudioEndpoints {
 }
 "@
 
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 [AudioEndpoints]::GetPlaybackDevices() | ForEach-Object { Write-Output $_ }
 `;
 
@@ -113,17 +114,22 @@ export async function getCurrentDevice(): Promise<string> {
 }
 
 export async function setAudioDevice(name: string): Promise<void> {
-  // Use a .bat file with UTF-8 codepage so nircmd can match Unicode device names
-  const batPath = path.join(os.tmpdir(), `scene-shiftr-setaudio-${Date.now()}.bat`);
-  const batContent = `@echo off\r\nchcp 65001 >nul\r\n"${nircmdPath}" setdefaultsounddevice "${name}" 1\r\n"${nircmdPath}" setdefaultsounddevice "${name}" 2\r\n`;
+  // Use a PowerShell script to call nircmd — PowerShell handles UTF-8 natively
+  const scriptPath = path.join(os.tmpdir(), `scene-shiftr-setaudio-${Date.now()}.ps1`);
+  const escapedName = name.replace(/'/g, "''");
+  const escapedNircmd = nircmdPath.replace(/'/g, "''");
+  const script = `[Console]::OutputEncoding = [System.Text.Encoding]::UTF8\n& '${escapedNircmd}' setdefaultsounddevice '${escapedName}' 1\n& '${escapedNircmd}' setdefaultsounddevice '${escapedName}' 2\n`;
 
   try {
-    await fs.writeFile(batPath, batContent, 'utf-8');
-    await execAsync(`"${batPath}"`, { maxBuffer: 1024 * 1024 });
+    await fs.writeFile(scriptPath, script, 'utf-8');
+    await execAsync(
+      `powershell -NoProfile -ExecutionPolicy Bypass -File "${scriptPath}"`,
+      { maxBuffer: 1024 * 1024 }
+    );
   } catch {
     // Best effort
   } finally {
-    try { await fs.unlink(batPath); } catch { /* ignore */ }
+    try { await fs.unlink(scriptPath); } catch { /* ignore */ }
   }
 }
 
