@@ -2,9 +2,9 @@
 
 Scene Shiftr is a Windows desktop app that lets you create and switch between custom workspaces. Each workspace defines what apps open, what closes, what system settings change, and what your desktop looks like. Going from work mode to gaming mode takes 3 seconds instead of 5 minutes.
 
-![Windows 10/11](https://img.shields.io/badge/Windows-10%2F11-0078D6?logo=windows)
-![Electron](https://img.shields.io/badge/Electron-React%20%2B%20TypeScript-47848F?logo=electron)
-![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+![Windows 10/11](https://img.shields.io/badge/Windows-10%2F11-0078D6?logo=windows) ![Electron](https://img.shields.io/badge/Electron-React%20%2B%20TypeScript-47848F?logo=electron) ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+
+![shiftr-demo](https://github.com/user-attachments/assets/220986d5-96a5-446b-ba64-d29e1ca3f1ea)
 
 ---
 
