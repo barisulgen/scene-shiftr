@@ -28,11 +28,12 @@ export async function getNightLight(): Promise<boolean> {
 export async function setNightLight(enabled: boolean): Promise<void> {
   try {
     const byteValue = enabled ? '0x15' : '0x13';
+    // Byte 18 = on/off state, byte 10 = change counter (must increment for Windows to detect)
     await execAsync(
       'powershell -NoProfile -Command "' +
         "$path = 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\CloudStore\\Store\\DefaultAccount\\Current\\default$windows.data.bluelightreduction.bluelightreductionstate\\windows.data.bluelightreduction.bluelightreductionstate'; " +
         '$data = (Get-ItemProperty -Path $path -Name Data -ErrorAction SilentlyContinue).Data; ' +
-        `if ($data) { $data[18] = ${byteValue}; Set-ItemProperty -Path $path -Name Data -Value ([byte[]]$data) -Type Binary }` +
+        `if ($data -and $data.Length -gt 18) { $data[18] = ${byteValue}; $data[10] = $data[10] + 1; Set-ItemProperty -Path $path -Name Data -Value ([byte[]]$data) -Type Binary }` +
         '"'
     );
   } catch {
