@@ -19,7 +19,6 @@ export interface Workspace {
   };
   display: {
     wallpaper: string | null;
-    monitorLayout: MonitorLayout | null;
   };
   audio: {
     transitionSound: string | null;
@@ -32,21 +31,6 @@ export interface AppEntry {
   name: string;
   path: string;
   args?: string;
-}
-
-export interface MonitorLayout {
-  capturedAt: string;
-  monitors: MonitorConfig[];
-}
-
-export interface MonitorConfig {
-  deviceName: string;
-  primary: boolean;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  refreshRate: number;
 }
 
 export interface SystemSnapshot {

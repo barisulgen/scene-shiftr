@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import type { Workspace, AppEntry, MonitorLayout } from '../../../../shared/types';
+import type { Workspace, AppEntry } from '../../../../shared/types';
 import { useApp } from '../../context/AppContext';
 import { useWorkspaces } from '../../hooks/useWorkspaces';
 import AppSelector from './AppSelector';
@@ -34,7 +34,6 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
   const [volumeEnabled, setVolumeEnabledRaw] = useState(workspace?.system.volume != null);
   const [audioDevices, setAudioDevices] = useState<{ id: string; name: string }[]>([]);
   const [wallpaper, setWallpaper] = useState<string | null>(workspace?.display.wallpaper ?? null);
-  const [monitorLayout, setMonitorLayout] = useState<MonitorLayout | null>(workspace?.display.monitorLayout ?? null);
   const [transitionSound, setTransitionSoundRaw] = useState<string | null>(workspace?.audio.transitionSound ?? null);
   const [musicEnabled, setMusicEnabledRaw] = useState(!!(workspace?.audio.musicApp || workspace?.audio.playlistUri));
   const [musicApp, setMusicAppRaw] = useState(workspace?.audio.musicApp ?? '');
@@ -120,16 +119,6 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
     }
   };
 
-  const handleCaptureLayout = async (): Promise<void> => {
-    try {
-      const layout = await window.api.captureMonitorLayout();
-      setMonitorLayout(layout);
-      markDirty();
-    } catch {
-      /* capture may fail */
-    }
-  };
-
   const handleSave = async (): Promise<void> => {
     if (!name.trim()) return;
     setSaving(true);
@@ -148,7 +137,6 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
       },
       display: {
         wallpaper,
-        monitorLayout,
       },
       audio: {
         transitionSound,
@@ -722,49 +710,6 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
                 </div>
               </div>
 
-              {/* Monitor Layout */}
-              <div>
-                <label
-                  className="block text-[10px] font-medium tracking-widest uppercase mb-2"
-                  style={{ color: 'var(--text-muted)' }}
-                >
-                  Monitor Layout
-                </label>
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={handleCaptureLayout}
-                    className="shrink-0 px-4 py-2.5 rounded-lg text-sm font-medium cursor-pointer transition-colors duration-150"
-                    style={{
-                      background: 'var(--bg-elevated)',
-                      border: '1px solid var(--border-light)',
-                      color: 'var(--text-secondary)',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)';
-                      e.currentTarget.style.borderColor = 'var(--text-muted)';
-                      e.currentTarget.style.color = 'var(--text-primary)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'var(--bg-elevated)';
-                      e.currentTarget.style.borderColor = 'var(--border-light)';
-                      e.currentTarget.style.color = 'var(--text-secondary)';
-                    }}
-                  >
-                    Capture Current Layout
-                  </button>
-                  {monitorLayout ? (
-                    <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-                      {monitorLayout.monitors.length} monitor
-                      {monitorLayout.monitors.length !== 1 ? 's' : ''} captured
-                    </span>
-                  ) : (
-                    <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                      Not set
-                    </span>
-                  )}
-                </div>
-              </div>
             </div>
           </section>
 

@@ -23,9 +23,6 @@ const api = {
   getAudioDevices: () => ipcRenderer.invoke('system:get-audio-devices'),
   getCurrentSystemState: () => ipcRenderer.invoke('system:get-current-state'),
 
-  // Display
-  captureMonitorLayout: () => ipcRenderer.invoke('display:capture-layout'),
-
   // Audio
   previewSound: (soundId: string) => ipcRenderer.invoke('audio:preview-sound', soundId),
 

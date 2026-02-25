@@ -27,7 +27,6 @@ vi.mock('../audio-controller', () => ({
 
 vi.mock('../display-controller', () => ({
   setWallpaper: vi.fn(),
-  restoreMonitorLayout: vi.fn(),
 }));
 
 vi.mock('../sound-player', () => ({
@@ -92,7 +91,6 @@ function createTestWorkspace(overrides: Partial<Workspace> = {}): Workspace {
     },
     display: {
       wallpaper: null,
-      monitorLayout: null,
     },
     audio: {
       transitionSound: null,
@@ -182,7 +180,6 @@ describe('workspace-manager', () => {
       const workspace = createTestWorkspace({
         display: {
           wallpaper: 'C:\\Pictures\\work-wallpaper.jpg',
-          monitorLayout: null,
         },
       });
       const sender = createMockSender();
@@ -200,7 +197,7 @@ describe('workspace-manager', () => {
 
     it('does not set wallpaper if null', async () => {
       const workspace = createTestWorkspace({
-        display: { wallpaper: null, monitorLayout: null },
+        display: { wallpaper: null },
       });
       const sender = createMockSender();
 
@@ -210,49 +207,6 @@ describe('workspace-manager', () => {
       await activateWorkspace(workspace, sender);
 
       expect(mockDisplayController.setWallpaper).not.toHaveBeenCalled();
-    });
-
-    it('restores monitor layout if not null', async () => {
-      const layout = {
-        capturedAt: '2025-01-01T00:00:00.000Z',
-        monitors: [
-          {
-            deviceName: '\\\\.\\DISPLAY1',
-            primary: true,
-            x: 0,
-            y: 0,
-            width: 1920,
-            height: 1080,
-            refreshRate: 60,
-          },
-        ],
-      };
-      const workspace = createTestWorkspace({
-        display: { wallpaper: null, monitorLayout: layout },
-      });
-      const sender = createMockSender();
-
-      mockStateSnapshot.captureSnapshot.mockResolvedValue(undefined);
-      mockDisplayController.restoreMonitorLayout.mockResolvedValue(undefined);
-      mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
-
-      await activateWorkspace(workspace, sender);
-
-      expect(mockDisplayController.restoreMonitorLayout).toHaveBeenCalledWith(layout);
-    });
-
-    it('does not restore monitor layout if null', async () => {
-      const workspace = createTestWorkspace({
-        display: { wallpaper: null, monitorLayout: null },
-      });
-      const sender = createMockSender();
-
-      mockStateSnapshot.captureSnapshot.mockResolvedValue(undefined);
-      mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
-
-      await activateWorkspace(workspace, sender);
-
-      expect(mockDisplayController.restoreMonitorLayout).not.toHaveBeenCalled();
     });
 
     it('applies system settings via systemSettings.applySystemSettings', async () => {
@@ -465,7 +419,6 @@ describe('workspace-manager', () => {
         },
         display: {
           wallpaper: 'C:\\wallpaper.jpg',
-          monitorLayout: null,
         },
       });
       const sender = createMockSender();
@@ -771,7 +724,6 @@ describe('workspace-manager', () => {
         id: 'ws-new',
         display: {
           wallpaper: 'C:\\Pictures\\new-wallpaper.jpg',
-          monitorLayout: null,
         },
         system: {
           focusAssist: true,

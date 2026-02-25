@@ -117,10 +117,7 @@ function hasSystem(workspace: Workspace): boolean {
 }
 
 function hasDisplay(workspace: Workspace): boolean {
-  return (
-    workspace.display.wallpaper !== null ||
-    workspace.display.monitorLayout !== null
-  );
+  return workspace.display.wallpaper !== null;
 }
 
 function hasFoldersOrUrls(workspace: Workspace): boolean {
@@ -158,7 +155,6 @@ function countSettings(workspace: Workspace): number {
   if (workspace.system.audioDevice !== null) n++;
   if (workspace.system.volume !== null) n++;
   if (workspace.display.wallpaper !== null) n++;
-  if (workspace.display.monitorLayout !== null) n++;
   if (workspace.audio.transitionSound !== null) n++;
   if (workspace.audio.playlistUri !== null) n++;
   return n;
@@ -560,24 +556,12 @@ export default function WorkspaceDetail(): JSX.Element | null {
           <CollapsibleSection
             title="Display"
             icon={<MonitorIcon />}
-            count={
-              [workspace.display.wallpaper, workspace.display.monitorLayout].filter(
-                (v) => v !== null
-              ).length
-            }
+            count={workspace.display.wallpaper !== null ? 1 : 0}
             isEmpty={!hasDisplay(workspace)}
           >
             {workspace.display.wallpaper !== null && (
               <SettingRow icon={<MonitorIcon />} label="Wallpaper">
                 <PillBadge>{getFilename(workspace.display.wallpaper)}</PillBadge>
-              </SettingRow>
-            )}
-            {workspace.display.monitorLayout !== null && (
-              <SettingRow icon={<MonitorIcon />} label="Monitor layout">
-                <PillBadge>
-                  {workspace.display.monitorLayout.monitors.length} monitor
-                  {workspace.display.monitorLayout.monitors.length !== 1 ? 's' : ''}
-                </PillBadge>
               </SettingRow>
             )}
           </CollapsibleSection>

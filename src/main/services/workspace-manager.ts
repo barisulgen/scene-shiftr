@@ -106,18 +106,7 @@ export async function activateWorkspace(
     console.error('Wallpaper error:', err);
   }
 
-  // 5. Restore monitor layout
-  try {
-    if (workspace.display.monitorLayout) {
-      sendProgress(sender, 'Restoring monitor layout...');
-      await displayController.restoreMonitorLayout(workspace.display.monitorLayout);
-    }
-  } catch (err) {
-    sendProgress(sender, 'Failed to restore monitor layout, continuing...');
-    console.error('Monitor layout error:', err);
-  }
-
-  // 6. Apply system settings (focusAssist)
+  // 5. Apply system settings (focusAssist)
   try {
     sendProgress(sender, 'Applying system settings...');
     await systemSettings.applySystemSettings({
@@ -225,10 +214,6 @@ async function activateWorkspaceDryRun(
 
   if (workspace.display.wallpaper) {
     actions.push({ timestamp: now(), action: 'display:set-wallpaper', details: { path: workspace.display.wallpaper } });
-  }
-
-  if (workspace.display.monitorLayout) {
-    actions.push({ timestamp: now(), action: 'display:restore-monitor-layout', details: { monitors: workspace.display.monitorLayout.monitors.length } });
   }
 
   if (workspace.system.focusAssist !== null) {
@@ -385,16 +370,6 @@ export async function switchWorkspace(
     console.error('Wallpaper error:', err);
   }
 
-  // Restore monitor layout
-  try {
-    if (newWorkspace.display.monitorLayout) {
-      await displayController.restoreMonitorLayout(newWorkspace.display.monitorLayout);
-    }
-  } catch (err) {
-    sendProgress(sender, 'Failed to restore monitor layout, continuing...');
-    console.error('Monitor layout error:', err);
-  }
-
   // System settings
   try {
     await systemSettings.applySystemSettings({
@@ -507,10 +482,6 @@ async function switchWorkspaceDryRun(
 
   if (newWorkspace.display.wallpaper) {
     actions.push({ timestamp: now(), action: 'display:set-wallpaper', details: { path: newWorkspace.display.wallpaper } });
-  }
-
-  if (newWorkspace.display.monitorLayout) {
-    actions.push({ timestamp: now(), action: 'display:restore-monitor-layout', details: { monitors: newWorkspace.display.monitorLayout.monitors.length } });
   }
 
   if (newWorkspace.system.focusAssist !== null) {

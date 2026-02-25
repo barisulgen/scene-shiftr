@@ -1,4 +1,4 @@
-import type { Workspace, AppEntry, GlobalSettings, MonitorLayout } from '../shared/types';
+import type { Workspace, AppEntry, GlobalSettings } from '../shared/types';
 
 interface SceneShiftrAPI {
   listWorkspaces: () => Promise<Workspace[]>;
@@ -18,7 +18,6 @@ interface SceneShiftrAPI {
     volume: number;
     wallpaper: string;
   }>;
-  captureMonitorLayout: () => Promise<MonitorLayout>;
   previewSound: (soundId: string) => Promise<void>;
   openFileDialog: (filters?: { name: string; extensions: string[] }[]) => Promise<string | null>;
   openFolderDialog: () => Promise<string | null>;
