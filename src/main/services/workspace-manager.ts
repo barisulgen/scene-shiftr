@@ -157,15 +157,20 @@ export async function activateWorkspace(
   }
 
   // 9. Close Explorer windows (if enabled), then open folders
+  let alreadyOpenFolders: Set<string> = new Set();
   if (workspace.closeFolders) {
     try {
       sendProgress(sender, 'Closing Explorer windows...');
+      const openPaths = await explorerWindows.getOpenExplorerPaths();
+      alreadyOpenFolders = new Set(openPaths.map((p) => p.toLowerCase()));
       await explorerWindows.closeExplorerWindows(workspace.folders);
     } catch (err) {
       console.error('Close Explorer windows error:', err);
     }
   }
   for (const folder of workspace.folders) {
+    // Skip folders already open (kept open by closeExplorerWindows)
+    if (alreadyOpenFolders.has(folder.toLowerCase())) continue;
     try {
       await shell.openPath(folder);
     } catch (err) {
@@ -432,14 +437,18 @@ export async function switchWorkspace(
   }
 
   // Close Explorer windows (if enabled), then open folders
+  let alreadyOpenSwitchFolders: Set<string> = new Set();
   if (newWorkspace.closeFolders) {
     try {
+      const openPaths = await explorerWindows.getOpenExplorerPaths();
+      alreadyOpenSwitchFolders = new Set(openPaths.map((p) => p.toLowerCase()));
       await explorerWindows.closeExplorerWindows(newWorkspace.folders);
     } catch (err) {
       console.error('Close Explorer windows error:', err);
     }
   }
   for (const folder of newWorkspace.folders) {
+    if (alreadyOpenSwitchFolders.has(folder.toLowerCase())) continue;
     try {
       await shell.openPath(folder);
     } catch (err) {

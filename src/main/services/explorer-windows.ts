@@ -1,7 +1,31 @@
 import { exec } from 'child_process';
 import { promisify } from 'util';
+import path from 'path';
 
 const execAsync = promisify(exec);
+
+/**
+ * Returns normalized paths of all currently open Explorer folder windows.
+ */
+export async function getOpenExplorerPaths(): Promise<string[]> {
+  try {
+    const { stdout } = await execAsync(
+      `powershell -NoProfile -Command "$shell = New-Object -ComObject Shell.Application; $shell.Windows() | ForEach-Object { $_.LocationURL }" `
+    );
+    return stdout
+      .trim()
+      .split('\n')
+      .map((line) => {
+        const url = line.trim();
+        if (!url) return '';
+        // Convert file:///C:/path to C:\path
+        return path.normalize(decodeURIComponent(url.replace('file:///', '')));
+      })
+      .filter(Boolean);
+  } catch {
+    return [];
+  }
+}
 
 /**
  * Closes open Explorer folder windows, optionally keeping windows
