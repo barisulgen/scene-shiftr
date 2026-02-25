@@ -25,6 +25,7 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
   const [appsToOpen, setAppsToOpenRaw] = useState<AppEntry[]>(workspace?.apps.open ?? []);
   const [appsToClose, setAppsToCloseRaw] = useState<AppEntry[]>(workspace?.apps.close ?? []);
   const [folders, setFolders] = useState<string[]>(workspace?.folders ?? []);
+  const [closeFolders, setCloseFoldersRaw] = useState(workspace?.closeFolders ?? false);
   const [urls, setUrls] = useState<string[]>(workspace?.urls ?? []);
   const [urlInput, setUrlInput] = useState('');
   const [nightLight, setNightLightRaw] = useState<TriState>(workspace?.system.nightLight ?? null);
@@ -54,6 +55,7 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
   const setMusicEnabled = (v: boolean) => { setMusicEnabledRaw(v); markDirty(); };
   const setMusicApp = (v: string) => { setMusicAppRaw(v); markDirty(); };
   const setPlaylistUri = (v: string) => { setPlaylistUriRaw(v); markDirty(); };
+  const setCloseFolders = (v: boolean) => { setCloseFoldersRaw(v); markDirty(); };
 
   const [saving, setSaving] = useState(false);
 
@@ -139,6 +141,7 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
       icon: icon || '\u{1F5A5}\u{FE0F}',
       apps: { open: appsToOpen, close: appsToClose },
       folders,
+      closeFolders,
       urls,
       system: {
         nightLight,
@@ -405,6 +408,16 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
                     />
                   </svg>
                 </button>
+              </div>
+
+              {/* Close other Explorer windows toggle */}
+              <div
+                className="flex items-center justify-between py-2 px-1 mb-2 rounded-lg"
+              >
+                <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                  Close other folders
+                </span>
+                <ToggleSwitch checked={closeFolders} onChange={setCloseFolders} />
               </div>
 
               <div className="space-y-1.5">

@@ -10,6 +10,7 @@ export interface Workspace {
     close: AppEntry[];
   };
   folders: string[];
+  closeFolders: boolean;
   urls: string[];
   system: {
     nightLight: boolean | null;

@@ -7,6 +7,7 @@ import * as audioController from './audio-controller';
 import * as displayController from './display-controller';
 import * as soundPlayer from './sound-player';
 import * as dryRunLogger from './dry-run-logger';
+import * as explorerWindows from './explorer-windows';
 import { shell } from 'electron';
 
 const ALLOWED_URL_SCHEMES = ['http:', 'https:', 'spotify:'];
@@ -155,7 +156,15 @@ export async function activateWorkspace(
     }
   }
 
-  // 9. Open folders
+  // 9. Close Explorer windows (if enabled), then open folders
+  if (workspace.closeFolders) {
+    try {
+      sendProgress(sender, 'Closing Explorer windows...');
+      await explorerWindows.closeExplorerWindows(workspace.folders);
+    } catch (err) {
+      console.error('Close Explorer windows error:', err);
+    }
+  }
   for (const folder of workspace.folders) {
     try {
       await shell.openPath(folder);
@@ -237,6 +246,10 @@ async function activateWorkspaceDryRun(
   for (const app of workspace.apps.open) {
     sendProgress(sender, `[DRY RUN] Would launch ${app.name}`);
     actions.push({ timestamp: now(), action: 'app:launch', details: { name: app.name, path: app.path, args: app.args || '' } });
+  }
+
+  if (workspace.closeFolders) {
+    actions.push({ timestamp: now(), action: 'explorer:close-windows', details: { keepPaths: workspace.folders } });
   }
 
   for (const folder of workspace.folders) {
@@ -418,7 +431,14 @@ export async function switchWorkspace(
     }
   }
 
-  // Open folders
+  // Close Explorer windows (if enabled), then open folders
+  if (newWorkspace.closeFolders) {
+    try {
+      await explorerWindows.closeExplorerWindows(newWorkspace.folders);
+    } catch (err) {
+      console.error('Close Explorer windows error:', err);
+    }
+  }
   for (const folder of newWorkspace.folders) {
     try {
       await shell.openPath(folder);
@@ -509,6 +529,10 @@ async function switchWorkspaceDryRun(
   for (const app of newWorkspace.apps.open) {
     sendProgress(sender, `[DRY RUN] Would launch ${app.name}`);
     actions.push({ timestamp: now(), action: 'app:launch', details: { name: app.name, path: app.path, args: app.args || '' } });
+  }
+
+  if (newWorkspace.closeFolders) {
+    actions.push({ timestamp: now(), action: 'explorer:close-windows', details: { keepPaths: newWorkspace.folders } });
   }
 
   for (const folder of newWorkspace.folders) {

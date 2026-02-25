@@ -28,6 +28,7 @@ export function createEmptyWorkspace(id: string, name: string, order: number): W
     updatedAt: new Date().toISOString(),
     apps: { open: [], close: [] },
     folders: [],
+    closeFolders: false,
     urls: [],
     system: {
       nightLight: null,

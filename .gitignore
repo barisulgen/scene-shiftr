@@ -4,12 +4,14 @@ out
 .DS_Store
 *.local
 *.tsbuildinfo
+CLAUDE.md
 
 # Docs/plans (design artifacts, not shipped)
 docs/
 
 # Editor directories and files
 .vscode/*
+.claude/*
 !.vscode/extensions.json
 .idea
 *.suo
