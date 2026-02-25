@@ -286,6 +286,16 @@ export default function WorkspaceDetail(): JSX.Element | null {
     useWorkspaces();
   const [activating, setActivating] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [audioDeviceNames, setAudioDeviceNames] = useState<Record<string, string>>({});
+
+  // Fetch audio device names to resolve IDs for display
+  useEffect(() => {
+    window.api.getAudioDevices().then((devices) => {
+      const map: Record<string, string> = {};
+      for (const d of devices) map[d.id] = d.name;
+      setAudioDeviceNames(map);
+    }).catch(() => { /* ignore */ });
+  }, []);
 
   const isActive = selectedWorkspace ? selectedWorkspace.id === activeWorkspaceId : false;
 
@@ -687,7 +697,7 @@ export default function WorkspaceDetail(): JSX.Element | null {
           >
             {workspace.system.audioDevice !== null && (
               <SettingRow icon={<HeadphonesIcon />} label="Audio device">
-                <PillBadge>{workspace.system.audioDevice}</PillBadge>
+                <PillBadge>{audioDeviceNames[workspace.system.audioDevice] || workspace.system.audioDevice}</PillBadge>
               </SettingRow>
             )}
             {workspace.system.volume !== null && (

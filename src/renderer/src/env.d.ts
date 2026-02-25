@@ -13,7 +13,7 @@ interface SceneShiftrAPI {
   deactivateWorkspace: () => Promise<void>;
   detectApps: () => Promise<AppEntry[]>;
   isRunning: (name: string) => Promise<boolean>;
-  getAudioDevices: () => Promise<string[]>;
+  getAudioDevices: () => Promise<{ id: string; name: string }[]>;
   getCurrentSystemState: () => Promise<{
     nightLight: boolean;
     focusAssist: boolean;

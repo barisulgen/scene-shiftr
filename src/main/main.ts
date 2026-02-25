@@ -8,6 +8,7 @@ import { setAssetsPath } from './services/sound-player';
 import { createTray, updateTrayMenu, destroyTray } from './tray';
 import { setTrayRefreshCallback } from './tray-bridge';
 import { setDryRunCheck } from './services/workspace-manager';
+import { ensureAudioModule } from './services/audio-controller';
 import { setLogDir } from './services/dry-run-logger';
 import { getSettings } from './store';
 
@@ -73,6 +74,9 @@ app.whenReady().then(async () => {
   setAssetsPath(join(app.getAppPath(), 'assets', 'sounds'));
   setLogDir(join(appDataDir, 'logs'));
   setDryRunCheck(() => getSettings().dryRun);
+
+  // Ensure AudioDeviceCmdlets module is installed (background, non-blocking)
+  ensureAudioModule();
 
   // Register all IPC handlers
   registerAllHandlers();

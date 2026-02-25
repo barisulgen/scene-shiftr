@@ -33,7 +33,7 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
   const [audioDevice, setAudioDeviceRaw] = useState<string | null>(workspace?.system.audioDevice ?? null);
   const [volume, setVolumeRaw] = useState<number>(workspace?.system.volume ?? 50);
   const [volumeEnabled, setVolumeEnabledRaw] = useState(workspace?.system.volume != null);
-  const [audioDevices, setAudioDevices] = useState<string[]>([]);
+  const [audioDevices, setAudioDevices] = useState<{ id: string; name: string }[]>([]);
   const [wallpaper, setWallpaper] = useState<string | null>(workspace?.display.wallpaper ?? null);
   const [monitorLayout, setMonitorLayout] = useState<MonitorLayout | null>(workspace?.display.monitorLayout ?? null);
   const [transitionSound, setTransitionSoundRaw] = useState<string | null>(workspace?.audio.transitionSound ?? null);
@@ -837,8 +837,8 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
                   >
                     <option value="">Don&apos;t change</option>
                     {audioDevices.map((device) => (
-                      <option key={device} value={device}>
-                        {device}
+                      <option key={device.id} value={device.id}>
+                        {device.name}
                       </option>
                     ))}
                   </select>
