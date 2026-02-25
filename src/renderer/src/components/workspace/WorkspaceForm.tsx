@@ -35,8 +35,7 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
   const [audioDevices, setAudioDevices] = useState<{ id: string; name: string }[]>([]);
   const [wallpaper, setWallpaper] = useState<string | null>(workspace?.display.wallpaper ?? null);
   const [transitionSound, setTransitionSoundRaw] = useState<string | null>(workspace?.audio.transitionSound ?? null);
-  const [musicEnabled, setMusicEnabledRaw] = useState(!!(workspace?.audio.musicApp || workspace?.audio.playlistUri));
-  const [musicApp, setMusicAppRaw] = useState(workspace?.audio.musicApp ?? '');
+  const [musicEnabled, setMusicEnabledRaw] = useState(!!workspace?.audio.playlistUri);
   const [playlistUri, setPlaylistUriRaw] = useState(workspace?.audio.playlistUri ?? '');
 
   // Dirty-wrapping setters — these mark the form as having unsaved changes
@@ -50,7 +49,6 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
   const setVolumeEnabled = (v: boolean) => { setVolumeEnabledRaw(v); markDirty(); };
   const setTransitionSound = (v: string | null) => { setTransitionSoundRaw(v); markDirty(); };
   const setMusicEnabled = (v: boolean) => { setMusicEnabledRaw(v); markDirty(); };
-  const setMusicApp = (v: string) => { setMusicAppRaw(v); markDirty(); };
   const setPlaylistUri = (v: string) => { setPlaylistUriRaw(v); markDirty(); };
   const setCloseFolders = (v: boolean) => { setCloseFoldersRaw(v); markDirty(); };
 
@@ -140,7 +138,6 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
       },
       audio: {
         transitionSound,
-        musicApp: musicEnabled && musicApp.trim() ? musicApp.trim() : null,
         playlistUri: musicEnabled && playlistUri.trim() ? playlistUri.trim() : null,
       },
     };
@@ -842,56 +839,28 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
                   </div>
                   <ToggleSwitch checked={musicEnabled} onChange={setMusicEnabled} />
                 </div>
-                {musicEnabled && (
-                  <div className="space-y-3 mt-3">
-                    <div>
-                      <label
-                        className="block text-[10px] font-medium tracking-widest uppercase mb-1.5"
-                        style={{ color: 'var(--text-muted)' }}
-                      >
-                        Music App
-                      </label>
-                      <select
-                        value={musicApp}
-                        onChange={(e) => setMusicApp(e.target.value)}
-                        className={inputClass}
-                        style={{
-                          ...inputStyle,
-                          '--tw-ring-color': 'var(--accent)',
-                        } as React.CSSProperties}
-                      >
-                        <option value="">Select app...</option>
-                        <option value="spotify">Spotify</option>
-                        <option value="apple-music">Apple Music</option>
-                        <option value="youtube-music">YouTube Music</option>
-                        <option value="tidal">Tidal</option>
-                        <option value="deezer">Deezer</option>
-                        <option value="soundcloud">SoundCloud</option>
-                        <option value="amazon-music">Amazon Music</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label
-                        className="block text-[10px] font-medium tracking-widest uppercase mb-1.5"
-                        style={{ color: 'var(--text-muted)' }}
-                      >
-                        Playlist URI
-                      </label>
-                      <input
-                        type="text"
-                        value={playlistUri}
-                        onChange={(e) => setPlaylistUri(e.target.value)}
-                        placeholder="spotify:playlist:37i9dQZF1DXcBWIGoYBM5M"
-                        className={inputClass}
-                        style={{
-                          ...inputStyle,
-                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                          '--tw-ring-color': 'var(--accent)',
-                        } as React.CSSProperties}
-                      />
-                    </div>
+                <div className="space-y-3 mt-3" style={{ opacity: musicEnabled ? 1 : 0.4 }}>
+                  <div>
+                    <label
+                      className="block text-[10px] font-medium tracking-widest uppercase mb-1.5"
+                      style={{ color: 'var(--text-muted)' }}
+                    >
+                      Playlist URI
+                    </label>
+                    <input
+                      type="text"
+                      value={playlistUri}
+                      onChange={(e) => setPlaylistUri(e.target.value)}
+                      disabled={!musicEnabled}
+                      placeholder="https://open.spotify.com/playlist/54f9OUIs5yrqYz0yJbmmYH"
+                      className={`${inputClass} disabled:cursor-not-allowed`}
+                      style={{
+                        ...inputStyle,
+                        '--tw-ring-color': 'var(--accent)',
+                      } as React.CSSProperties}
+                    />
                   </div>
-                )}
+                </div>
               </div>
             </div>
           </section>

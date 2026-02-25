@@ -94,7 +94,6 @@ function createTestWorkspace(overrides: Partial<Workspace> = {}): Workspace {
     },
     audio: {
       transitionSound: null,
-      musicApp: null,
       playlistUri: null,
     },
     ...overrides,
@@ -126,7 +125,6 @@ describe('workspace-manager', () => {
       const workspace = createTestWorkspace({
         audio: {
           transitionSound: 'builtin:whoosh',
-          musicApp: null,
           playlistUri: null,
         },
       });
@@ -453,11 +451,10 @@ describe('workspace-manager', () => {
       await expect(activateWorkspace(workspace, null)).resolves.toBeUndefined();
     });
 
-    it('opens playlist URI via shell.openExternal when musicApp and playlistUri are set', async () => {
+    it('opens playlist URI via shell.openExternal when playlistUri is set', async () => {
       const workspace = createTestWorkspace({
         audio: {
           transitionSound: null,
-          musicApp: 'spotify',
           playlistUri: 'spotify:playlist:37i9dQZF1DXcBWIGoYBM5M',
         },
       });

@@ -54,7 +54,6 @@ function makeWorkspace(overrides: Partial<Workspace> = {}): Workspace {
     },
     audio: {
       transitionSound: null,
-      musicApp: null,
       playlistUri: null,
     },
     ...overrides,

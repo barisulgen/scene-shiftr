@@ -22,7 +22,6 @@ export interface Workspace {
   };
   audio: {
     transitionSound: string | null;
-    musicApp: string | null;
     playlistUri: string | null;
   };
 }

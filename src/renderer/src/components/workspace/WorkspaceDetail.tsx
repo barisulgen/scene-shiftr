@@ -144,7 +144,6 @@ function LinkIcon(): JSX.Element {
 function hasAudio(workspace: Workspace): boolean {
   return (
     workspace.audio.transitionSound !== null ||
-    workspace.audio.musicApp !== null ||
     workspace.audio.playlistUri !== null
   );
 }
@@ -644,7 +643,6 @@ export default function WorkspaceDetail(): JSX.Element | null {
                 workspace.system.audioDevice,
                 workspace.system.volume,
                 workspace.audio.transitionSound,
-                workspace.audio.musicApp,
                 workspace.audio.playlistUri,
               ].filter((v) => v !== null).length
             }
@@ -671,7 +669,7 @@ export default function WorkspaceDetail(): JSX.Element | null {
             )}
             {workspace.audio.playlistUri !== null && (
               <SettingRow icon={<MusicNoteIcon />} label="Playlist">
-                <PillBadge>Spotify: {workspace.audio.playlistUri}</PillBadge>
+                <PillBadge>{workspace.audio.playlistUri}</PillBadge>
               </SettingRow>
             )}
           </CollapsibleSection>

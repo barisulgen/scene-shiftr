@@ -3,7 +3,7 @@ import type { GlobalSettings, Workspace } from './types';
 export const DEFAULT_SETTINGS: GlobalSettings = {
   startWithWindows: false,
   defaultTransitionSound: null,
-  confirmBeforeSwitching: false,
+  confirmBeforeSwitching: true,
   gracefulCloseTimeout: 5,
   activeWorkspaceId: null,
   dryRun: false,
@@ -40,7 +40,6 @@ export function createEmptyWorkspace(id: string, name: string, order: number): W
     },
     audio: {
       transitionSound: null,
-      musicApp: null,
       playlistUri: null,
     },
   };

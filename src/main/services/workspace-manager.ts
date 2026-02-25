@@ -179,9 +179,9 @@ export async function activateWorkspace(
     }
   }
 
-  // 11. Music — open playlist URI if both musicApp and playlistUri are set
+  // 11. Music — open playlist URI if set
   try {
-    if (workspace.audio.musicApp && workspace.audio.playlistUri && isSafeUrl(workspace.audio.playlistUri)) {
+    if (workspace.audio.playlistUri && isSafeUrl(workspace.audio.playlistUri)) {
       await shell.openExternal(workspace.audio.playlistUri);
     }
   } catch (err) {
@@ -245,8 +245,8 @@ async function activateWorkspaceDryRun(
     actions.push({ timestamp: now(), action: 'shell:open-url', details: { url } });
   }
 
-  if (workspace.audio.musicApp && workspace.audio.playlistUri) {
-    actions.push({ timestamp: now(), action: 'music:launch', details: { app: workspace.audio.musicApp, uri: workspace.audio.playlistUri } });
+  if (workspace.audio.playlistUri) {
+    actions.push({ timestamp: now(), action: 'music:launch', details: { uri: workspace.audio.playlistUri } });
   }
 
   await dryRunLogger.logActivation(workspace.name, actions);
