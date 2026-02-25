@@ -114,22 +114,32 @@ export async function getCurrentDevice(): Promise<string> {
 }
 
 export async function setAudioDevice(name: string): Promise<void> {
-  // Use a PowerShell script to call nircmd — PowerShell handles UTF-8 natively
-  const scriptPath = path.join(os.tmpdir(), `scene-shiftr-setaudio-${Date.now()}.ps1`);
-  const escapedName = name.replace(/'/g, "''");
-  const escapedNircmd = nircmdPath.replace(/'/g, "''");
-  const script = `[Console]::OutputEncoding = [System.Text.Encoding]::UTF8\n& '${escapedNircmd}' setdefaultsounddevice '${escapedName}' 1\n& '${escapedNircmd}' setdefaultsounddevice '${escapedName}' 2\n`;
-
+  // Try nircmd directly first — it does substring matching on device names
   try {
-    await fs.writeFile(scriptPath, script, 'utf-8');
-    await execAsync(
-      `powershell -NoProfile -ExecutionPolicy Bypass -File "${scriptPath}"`,
-      { maxBuffer: 1024 * 1024 }
-    );
-  } catch {
-    // Best effort
-  } finally {
-    try { await fs.unlink(scriptPath); } catch { /* ignore */ }
+    await execAsync(`"${nircmdPath}" setdefaultsounddevice "${name}" 1`);
+    await execAsync(`"${nircmdPath}" setdefaultsounddevice "${name}" 2`);
+    return;
+  } catch { /* nircmd failed, try alternatives */ }
+
+  // Fallback: try with just the part before parentheses
+  // e.g. "Kulaklıklar (HyperX Cloud Alpha)" → "Kulaklıklar"
+  const shortName = name.replace(/\s*\(.*\)\s*$/, '').trim();
+  if (shortName && shortName !== name) {
+    try {
+      await execAsync(`"${nircmdPath}" setdefaultsounddevice "${shortName}" 1`);
+      await execAsync(`"${nircmdPath}" setdefaultsounddevice "${shortName}" 2`);
+      return;
+    } catch { /* fallback also failed */ }
+  }
+
+  // Last resort: try with just the part inside parentheses
+  // e.g. "Kulaklıklar (HyperX Cloud Alpha)" → "HyperX Cloud Alpha"
+  const match = name.match(/\(([^)]+)\)/);
+  if (match) {
+    try {
+      await execAsync(`"${nircmdPath}" setdefaultsounddevice "${match[1]}" 1`);
+      await execAsync(`"${nircmdPath}" setdefaultsounddevice "${match[1]}" 2`);
+    } catch { /* best effort */ }
   }
 }
 
