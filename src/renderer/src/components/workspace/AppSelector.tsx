@@ -83,11 +83,11 @@ export default function AppSelector({ value, onChange, label }: AppSelectorProps
   };
 
   return (
-    <div ref={containerRef} className="space-y-2 relative">
+    <div ref={containerRef} className="space-y-2">
       <label className="block text-sm" style={{ color: 'var(--text-muted)' }}>{label}</label>
 
       {/* Search input and browse button */}
-      <div className="flex gap-2">
+      <div className="flex gap-2 relative">
         <div className="relative flex-1">
           <input
             type="text"
@@ -136,7 +136,6 @@ export default function AppSelector({ value, onChange, label }: AppSelectorProps
         >
           Browse .exe
         </button>
-      </div>
 
       {/* Dropdown list — absolute positioned to overlay */}
       {isOpen && filteredApps.length > 0 && (
@@ -156,6 +155,7 @@ export default function AppSelector({ value, onChange, label }: AppSelectorProps
               key={app.path}
               type="button"
               onClick={() => toggleApp(app)}
+              title={app.path}
               className="flex items-center gap-2 w-full px-3 py-1.5 text-left text-sm transition-colors duration-100"
               style={{ backgroundColor: 'transparent' }}
               onMouseEnter={(e) =>
@@ -164,7 +164,7 @@ export default function AppSelector({ value, onChange, label }: AppSelectorProps
               onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
             >
               <span
-                className="flex items-center justify-center w-4 h-4 rounded"
+                className="flex items-center justify-center w-4 h-4 rounded shrink-0"
                 style={
                   isSelected(app)
                     ? {
@@ -199,12 +199,6 @@ export default function AppSelector({ value, onChange, label }: AppSelectorProps
               <span className="truncate" style={{ color: 'var(--text-primary)' }}>
                 {app.name}
               </span>
-              <span
-                className="ml-auto text-[11px] truncate max-w-[200px]"
-                style={{ color: 'var(--text-muted)' }}
-              >
-                {app.path}
-              </span>
             </button>
           ))}
         </div>
@@ -226,6 +220,7 @@ export default function AppSelector({ value, onChange, label }: AppSelectorProps
           No apps found matching &quot;{search}&quot;
         </div>
       )}
+      </div>
 
       {/* Selected apps as chips */}
       {value.length > 0 && (
