@@ -139,6 +139,27 @@ function hasDisplay(workspace: Workspace): boolean {
   );
 }
 
+function hasFoldersOrUrls(workspace: Workspace): boolean {
+  return workspace.folders.length > 0 || workspace.urls.length > 0;
+}
+
+function FolderIcon(): JSX.Element {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5">
+      <path d="M3.75 3A1.75 1.75 0 0 0 2 4.75v3.26a3.235 3.235 0 0 1 1.75-.51h12.5c.644 0 1.245.188 1.75.51V6.75A1.75 1.75 0 0 0 16.25 5h-4.836a.25.25 0 0 1-.177-.073L9.823 3.513A1.75 1.75 0 0 0 8.586 3H3.75ZM3.75 9A1.75 1.75 0 0 0 2 10.75v4.5c0 .966.784 1.75 1.75 1.75h12.5A1.75 1.75 0 0 0 18 15.25v-4.5A1.75 1.75 0 0 0 16.25 9H3.75Z" />
+    </svg>
+  );
+}
+
+function LinkIcon(): JSX.Element {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5">
+      <path d="M12.232 4.232a2.5 2.5 0 0 1 3.536 3.536l-1.225 1.224a.75.75 0 0 0 1.061 1.06l1.224-1.224a4 4 0 0 0-5.656-5.656l-3 3a4 4 0 0 0 .225 5.865.75.75 0 0 0 .977-1.138 2.5 2.5 0 0 1-.142-3.667l3-3Z" />
+      <path d="M11.603 7.963a.75.75 0 0 0-.977 1.138 2.5 2.5 0 0 1 .142 3.667l-3 3a2.5 2.5 0 0 1-3.536-3.536l1.225-1.224a.75.75 0 0 0-1.061-1.06l-1.224 1.224a4 4 0 1 0 5.656 5.656l3-3a4 4 0 0 0-.225-5.865Z" />
+    </svg>
+  );
+}
+
 function hasAudio(workspace: Workspace): boolean {
   return (
     workspace.audio.transitionSound !== null ||
@@ -554,6 +575,59 @@ export default function WorkspaceDetail(): JSX.Element | null {
                   {workspace.display.monitorLayout.monitors.length !== 1 ? 's' : ''}
                 </PillBadge>
               </SettingRow>
+            )}
+          </CollapsibleSection>
+
+          {/* Folders & URLs */}
+          <CollapsibleSection
+            title="Folders & URLs"
+            icon={<FolderIcon />}
+            count={workspace.folders.length + workspace.urls.length}
+            isEmpty={!hasFoldersOrUrls(workspace)}
+          >
+            {workspace.folders.length > 0 && (
+              <div className="mb-3">
+                <span
+                  className="text-[10px] font-semibold uppercase tracking-wider block mb-1.5"
+                  style={{ color: 'var(--accent)' }}
+                >
+                  Folders{workspace.closeFolders ? ' (close others)' : ''}
+                </span>
+                <div className="space-y-1">
+                  {workspace.folders.map((folder) => (
+                    <div
+                      key={folder}
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs"
+                      style={{ backgroundColor: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}
+                    >
+                      <FolderIcon />
+                      <span className="truncate">{folder}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {workspace.urls.length > 0 && (
+              <div>
+                <span
+                  className="text-[10px] font-semibold uppercase tracking-wider block mb-1.5"
+                  style={{ color: 'var(--accent)' }}
+                >
+                  URLs
+                </span>
+                <div className="space-y-1">
+                  {workspace.urls.map((url) => (
+                    <div
+                      key={url}
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs"
+                      style={{ backgroundColor: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}
+                    >
+                      <LinkIcon />
+                      <span className="truncate">{url}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             )}
           </CollapsibleSection>
 
