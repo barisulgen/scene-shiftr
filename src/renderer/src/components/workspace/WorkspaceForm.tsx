@@ -142,7 +142,6 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
       closeFolders,
       urls,
       system: {
-        nightLight: null, // Night light control removed from V1
         focusAssist,
         audioDevice,
         volume: volumeEnabled ? volume : null,

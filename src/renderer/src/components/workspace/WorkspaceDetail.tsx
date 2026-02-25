@@ -71,7 +71,6 @@ function TrashIcon(): JSX.Element {
   );
 }
 
-// MoonIcon removed — night light control removed from V1
 
 function BellIcon(): JSX.Element {
   return (

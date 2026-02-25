@@ -14,6 +14,6 @@ export function registerSystemHandlers(): void {
       displayController.getWallpaper(),
     ]);
 
-    return { nightLight: false, focusAssist, audioDevice, volume, wallpaper };
+    return { focusAssist, audioDevice, volume, wallpaper };
   });
 }

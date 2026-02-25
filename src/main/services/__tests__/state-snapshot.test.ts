@@ -47,7 +47,6 @@ const mockDisplayController = vi.mocked(displayController);
 
 const SAMPLE_SNAPSHOT = {
   capturedAt: '2025-01-01T00:00:00.000Z',
-  nightLight: false,
   focusAssist: false,
   audioDevice: 'Speakers (Realtek)',
   volume: 75,
@@ -87,7 +86,6 @@ describe('state-snapshot', () => {
       mockFs.access.mockRejectedValue(new Error('ENOENT'));
       mockFs.writeFile.mockResolvedValue(undefined);
 
-      // Mock current system state (nightLight is no longer queried)
       mockSystemSettings.getFocusAssist.mockResolvedValue(false);
       mockAudioController.getCurrentDevice.mockResolvedValue('Speakers (Realtek)');
       mockAudioController.getVolume.mockResolvedValue(75);
@@ -107,7 +105,6 @@ describe('state-snapshot', () => {
 
       // Verify the written data contains expected fields
       const writtenData = JSON.parse(mockFs.writeFile.mock.calls[0][1] as string);
-      expect(writtenData.nightLight).toBe(false);
       expect(writtenData.focusAssist).toBe(false);
       expect(writtenData.audioDevice).toBe('Speakers (Realtek)');
       expect(writtenData.volume).toBe(75);

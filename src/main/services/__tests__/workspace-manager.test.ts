@@ -83,9 +83,9 @@ function createTestWorkspace(overrides: Partial<Workspace> = {}): Workspace {
       close: [],
     },
     folders: [],
+    closeFolders: false,
     urls: [],
     system: {
-      nightLight: null,
       focusAssist: null,
       audioDevice: null,
       volume: null,
@@ -258,7 +258,6 @@ describe('workspace-manager', () => {
     it('applies system settings via systemSettings.applySystemSettings', async () => {
       const workspace = createTestWorkspace({
         system: {
-          nightLight: true,
           focusAssist: false,
           audioDevice: null,
           volume: null,
@@ -279,7 +278,6 @@ describe('workspace-manager', () => {
     it('applies system settings with null values (applySystemSettings handles them)', async () => {
       const workspace = createTestWorkspace({
         system: {
-          nightLight: null,
           focusAssist: null,
           audioDevice: null,
           volume: null,
@@ -300,7 +298,6 @@ describe('workspace-manager', () => {
     it('switches audio device if not null', async () => {
       const workspace = createTestWorkspace({
         system: {
-          nightLight: null,
           focusAssist: null,
           audioDevice: 'Headphones (USB)',
           volume: null,
@@ -320,7 +317,6 @@ describe('workspace-manager', () => {
     it('does not switch audio device if null', async () => {
       const workspace = createTestWorkspace({
         system: {
-          nightLight: null,
           focusAssist: null,
           audioDevice: null,
           volume: null,
@@ -339,7 +335,6 @@ describe('workspace-manager', () => {
     it('sets volume if not null', async () => {
       const workspace = createTestWorkspace({
         system: {
-          nightLight: null,
           focusAssist: null,
           audioDevice: null,
           volume: 75,
@@ -359,7 +354,6 @@ describe('workspace-manager', () => {
     it('does not set volume if null', async () => {
       const workspace = createTestWorkspace({
         system: {
-          nightLight: null,
           focusAssist: null,
           audioDevice: null,
           volume: null,
@@ -780,7 +774,6 @@ describe('workspace-manager', () => {
           monitorLayout: null,
         },
         system: {
-          nightLight: true,
           focusAssist: true,
           audioDevice: 'Headphones (USB)',
           volume: 80,

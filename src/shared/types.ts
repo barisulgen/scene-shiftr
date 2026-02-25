@@ -13,7 +13,6 @@ export interface Workspace {
   closeFolders: boolean;
   urls: string[];
   system: {
-    nightLight: boolean | null;
     focusAssist: boolean | null;
     audioDevice: string | null;
     volume: number | null;
@@ -52,7 +51,6 @@ export interface MonitorConfig {
 
 export interface SystemSnapshot {
   capturedAt: string;
-  nightLight: boolean;
   focusAssist: boolean;
   audioDevice: string;
   volume: number;
