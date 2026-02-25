@@ -7,14 +7,13 @@ export function registerSystemHandlers(): void {
   ipcMain.handle('system:get-audio-devices', () => audioController.getAudioDevices());
 
   ipcMain.handle('system:get-current-state', async () => {
-    const [nightLight, focusAssist, audioDevice, volume, wallpaper] = await Promise.all([
-      systemSettings.getNightLight(),
+    const [focusAssist, audioDevice, volume, wallpaper] = await Promise.all([
       systemSettings.getFocusAssist(),
       audioController.getCurrentDevice(),
       audioController.getVolume(),
       displayController.getWallpaper(),
     ]);
 
-    return { nightLight, focusAssist, audioDevice, volume, wallpaper };
+    return { nightLight: false, focusAssist, audioDevice, volume, wallpaper };
   });
 }
