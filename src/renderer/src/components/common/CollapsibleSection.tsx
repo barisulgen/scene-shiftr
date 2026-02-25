@@ -84,7 +84,15 @@ export default function CollapsibleSection({
           isOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
         }`}
       >
-        <div className="px-4 pb-4">{children}</div>
+        <div className="px-4 pb-4">
+          {isEmpty ? (
+            <p className="text-xs py-2 text-center" style={{ color: 'var(--text-muted)' }}>
+              Click edit to configure
+            </p>
+          ) : (
+            children
+          )}
+        </div>
       </div>
     </div>
   );
