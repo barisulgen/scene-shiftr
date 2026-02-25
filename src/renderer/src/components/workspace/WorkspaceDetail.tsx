@@ -259,6 +259,7 @@ export default function WorkspaceDetail(): JSX.Element | null {
   const { selectedWorkspace, activateWorkspace, deactivateWorkspace, deleteWorkspace } =
     useWorkspaces();
   const [activating, setActivating] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const isActive = selectedWorkspace ? selectedWorkspace.id === activeWorkspaceId : false;
 
@@ -290,13 +291,16 @@ export default function WorkspaceDetail(): JSX.Element | null {
     }
   };
 
-  const handleDelete = async (): Promise<void> => {
-    if (window.confirm(`Delete "${workspace.name}"? This cannot be undone.`)) {
-      try {
-        await deleteWorkspace(workspace.id);
-      } catch (err) {
-        console.error('Failed to delete workspace:', err);
-      }
+  const handleDelete = (): void => {
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDelete = async (): Promise<void> => {
+    setShowDeleteConfirm(false);
+    try {
+      await deleteWorkspace(workspace.id);
+    } catch (err) {
+      console.error('Failed to delete workspace:', err);
     }
   };
 
@@ -580,6 +584,77 @@ export default function WorkspaceDetail(): JSX.Element | null {
         </div>
         </div>
       </div>
+
+      {/* Delete confirmation dialog */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div
+            className="absolute inset-0"
+            style={{ backgroundColor: 'rgba(0, 0, 0, 0.6)' }}
+            onClick={() => setShowDeleteConfirm(false)}
+          />
+          <div
+            className="relative rounded-xl p-6 w-[400px] shadow-2xl"
+            style={{
+              backgroundColor: 'var(--bg-card)',
+              border: '1px solid var(--border-light)',
+            }}
+          >
+            <div
+              className="w-10 h-10 rounded-lg flex items-center justify-center mb-4"
+              style={{ backgroundColor: 'var(--accent-soft)' }}
+            >
+              <TrashIcon />
+            </div>
+            <h2
+              className="text-base font-semibold mb-1"
+              style={{ color: 'var(--text-primary)' }}
+            >
+              Delete workspace
+            </h2>
+            <p
+              className="text-sm mb-6"
+              style={{ color: 'var(--text-secondary)' }}
+            >
+              Delete &ldquo;{workspace.name}&rdquo;? This cannot be undone.
+            </p>
+            <div className="flex items-center gap-3 justify-end">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-150"
+                style={{
+                  backgroundColor: 'var(--bg-elevated)',
+                  color: 'var(--text-secondary)',
+                  border: '1px solid var(--border-light)',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)';
+                  e.currentTarget.style.color = 'var(--text-primary)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'var(--bg-elevated)';
+                  e.currentTarget.style.color = 'var(--text-secondary)';
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="px-4 py-2 rounded-lg text-sm font-medium text-white transition-colors duration-150"
+                style={{ backgroundColor: 'var(--accent)' }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'var(--accent-hover)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'var(--accent)';
+                }}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
