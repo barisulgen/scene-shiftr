@@ -10,38 +10,37 @@ Scene Shiftr is a Windows desktop app that lets you create and switch between cu
 
 ## What It Does
 
-Right now, switching contexts on your PC is a manual ritual. Going from work to gaming means: close Slack, close Outlook, close VS Code, open Steam, open Discord, open Spotify, switch audio to your headset, turn off night light, change Do Not Disturb. Every. Single. Time.
+Right now, switching contexts on your PC is a manual ritual. Going from work to gaming means: close Slack, close Outlook, close VS Code, open Steam, open Discord, open Spotify, switch audio to your headset, change Do Not Disturb. Every. Single. Time.
 
 Scene Shiftr turns that entire ritual into one click.
 
 ### What a Workspace Can Control
 
 - **Apps** — open and close specific programs
-- **System settings** — night light, focus assist, audio device, volume level
+- **System settings** — focus assist, audio output device, volume level
 - **Display** — wallpaper, multi-monitor layout
-- **Folders & URLs** — open specific folders and websites
-- **Audio & vibes** — transition sounds, auto-launch Spotify playlists
-- **Dry Run Mode** -- Log all actions to JSON instead of executing them (for testing)
+- **Folders & URLs** — open specific folders (with smart close), open websites
+- **Sound** — transition sounds, auto-launch Spotify/music playlists
+- **Dry Run Mode** — log all actions to JSON instead of executing them (for testing)
 
 ### Example
 
-> You right-click the tray icon, click "Gaming." A boot-up sound plays. Slack, Outlook, and VS Code close. Steam, Discord, and Spotify open. Audio switches to your headset at 70%. Night light turns off. Focus assist turns on. Your gaming playlist starts. Took 3 seconds.
+> You right-click the tray icon, click "Gaming." A boot-up sound plays. Slack, Outlook, and VS Code close. Steam, Discord, and Spotify open. Audio switches to your headset at 70%. Focus assist turns on. Your gaming playlist starts. Took 3 seconds.
 
 ## Tech Stack
 
 - **Electron** + **React 18** + **TypeScript**
 - **Vite** (via electron-vite) for build tooling
 - **TailwindCSS v4** for styling
-- **Vitest** for testing (172 tests)
-- **nircmd** for audio device switching and volume control
+- **Vitest** for testing (162 tests)
+- **AudioDeviceCmdlets** (PowerShell module) for audio device switching
+- **nircmd** for volume control
 
 ## Getting Started
 
-
-
 ```bash
 # Install dependencies
-git clone https://github.com/YOUR_USERNAME/scene-shiftr.git
+git clone https://github.com/barisulgen/scene-shiftr.git
 cd scene-shiftr
 npm install
 
@@ -83,15 +82,27 @@ assets/sounds/    # Transition sound files
 
 ### Smart Switching
 
-When switching from Workspace A to Workspace B, apps that exist in both stay running. Only apps unique to A get closed, and only apps unique to B get launched.
+When switching from Workspace A to Workspace B, apps that exist in both stay running. Only apps unique to A get closed, and only apps unique to B get launched. Same logic applies to folders — open folders shared between workspaces stay open.
+
+### Smart Folder Management
+
+Each workspace can open specific folders and optionally close all other Explorer windows. The "Close other folders" toggle uses the Shell.Application COM object to close windows individually — explorer.exe itself is never touched (it's on the safety whitelist).
 
 ### State Snapshot
 
-The system captures your "neutral" state (audio device, volume, night light, wallpaper, etc.) on the first workspace activation. Switching between workspaces preserves this original snapshot. "Close Workspace" restores everything back to how it was.
+The system captures your "neutral" state (audio device, volume, focus assist, wallpaper, etc.) on the first workspace activation. Switching between workspaces preserves this original snapshot. "Close Workspace" restores everything back to how it was.
 
 ### Dry Run Mode
 
 Enable in Settings to log all workspace actions as timestamped JSON to `%APPDATA%/scene-shiftr/logs/` instead of executing them. Useful for testing workspace configurations without making system changes.
+
+### Custom Title Bar & Splash Screen
+
+Frameless window with custom minimize/close controls. 6-second animated intro with logo reveal and gradient swooshes on startup.
+
+### App Scale
+
+Scale the entire UI from 80% to 130% (cosmetic labels — internally 100%-150%). Window size adjusts proportionally.
 
 ## Data Storage
 
@@ -108,6 +119,7 @@ Scene Shiftr directly manipulates your OS — it changes audio devices, registry
 - **State snapshots** — your system state is captured before the first workspace activation and restored on deactivation
 - **Graceful close** — apps are asked to close nicely before any force-close prompt
 - **Null = don't touch** — any setting left as `null` in a workspace config is left completely untouched
+- **No night light** — removed from V1 because Windows has no public API for it; all known methods use fragile registry manipulation that can corrupt system settings
 
 ---
 
@@ -126,6 +138,11 @@ Quick links:
 ## Roadmap
 
 - [✅] Dry run mode (preview what a workspace will do before activating)
+- [✅] Smart folder management (close other Explorer windows)
+- [✅] Custom title bar and splash screen
+- [✅] App scale setting
+- [✅] Emoji picker for workspace icons
+- [✅] Unsaved changes guard
 - [ ] System state debug panel (compare what the app thinks vs actual system state)
 - [ ] Auto-switch based on time of day or connected devices
 - [ ] Workspace export/import
@@ -143,5 +160,6 @@ MIT — see [LICENSE](LICENSE) for details.
 
 ## Acknowledgments
 
-- [nircmd](https://www.nirsoft.net/utils/nircmd.html) by NirSoft for audio device control
+- [AudioDeviceCmdlets](https://github.com/frgnca/AudioDeviceCmdlets) for reliable audio device switching
+- [nircmd](https://www.nirsoft.net/utils/nircmd.html) by NirSoft for volume control
 - Built with [Electron](https://www.electronjs.org/), [React](https://react.dev/), and [Vite](https://vitejs.dev/)
