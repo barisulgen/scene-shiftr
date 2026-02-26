@@ -32,7 +32,6 @@ export function createEmptyWorkspace(id: string, name: string, order: number): W
     closeFolders: false,
     urls: [],
     system: {
-      focusAssist: null,
       audioDevice: null,
       volume: null,
     },

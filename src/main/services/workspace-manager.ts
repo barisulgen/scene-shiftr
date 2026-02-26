@@ -1,7 +1,6 @@
 import { Workspace, AppEntry } from '../../shared/types';
 import * as workspaceStorage from './workspace-storage';
 import * as processManager from './process-manager';
-import * as systemSettings from './system-settings';
 import * as audioController from './audio-controller';
 import * as displayController from './display-controller';
 import * as soundPlayer from './sound-player';
@@ -220,26 +219,6 @@ export async function activateWorkspace(
     await logger.logStep('SET WALLPAPER', workspace.display.wallpaper || '', 'FAILED', err instanceof Error ? err.message : String(err));
   }
 
-  // 5. Apply system settings (focusAssist)
-  try {
-    total++;
-    sendProgress(sender, 'Applying system settings...');
-    await systemSettings.applySystemSettings({
-      focusAssist: workspace.system.focusAssist,
-    });
-    if (workspace.system.focusAssist !== null) {
-      await logger.logStep('SET FOCUS ASSIST', workspace.system.focusAssist ? 'on' : 'off', 'SUCCESS');
-    } else {
-      skipped++;
-      await logger.logStep('SET FOCUS ASSIST', 'null', 'SKIPPED');
-    }
-    succeeded++;
-  } catch (err) {
-    sendProgress(sender, 'Failed to apply system settings, continuing...');
-    console.error('System settings error:', err);
-    await logger.logStep('SET FOCUS ASSIST', workspace.system.focusAssist !== null ? (workspace.system.focusAssist ? 'on' : 'off') : 'null', 'FAILED', err instanceof Error ? err.message : String(err));
-  }
-
   // 7. Audio device and volume (only switch device if valid)
   try {
     if (workspace.system.audioDevice && validation.validAudioDevice) {
@@ -391,11 +370,6 @@ async function activateWorkspaceDryRun(
 
   if (workspace.display.wallpaper) {
     await logger.logDryRunStep(`[${ts()}] [DRY RUN] SET WALLPAPER — ${workspace.display.wallpaper}`);
-    actionCount++;
-  }
-
-  if (workspace.system.focusAssist !== null) {
-    await logger.logDryRunStep(`[${ts()}] [DRY RUN] SET FOCUS ASSIST — ${workspace.system.focusAssist ? 'on' : 'off'}`);
     actionCount++;
   }
 
@@ -592,25 +566,6 @@ async function switchWorkspaceInternal(
     await logger.logStep('SET WALLPAPER', newWorkspace.display.wallpaper || '', 'FAILED', err instanceof Error ? err.message : String(err));
   }
 
-  // System settings
-  try {
-    total++;
-    await systemSettings.applySystemSettings({
-      focusAssist: newWorkspace.system.focusAssist,
-    });
-    if (newWorkspace.system.focusAssist !== null) {
-      await logger.logStep('SET FOCUS ASSIST', newWorkspace.system.focusAssist ? 'on' : 'off', 'SUCCESS');
-    } else {
-      skipped++;
-      await logger.logStep('SET FOCUS ASSIST', 'null', 'SKIPPED');
-    }
-    succeeded++;
-  } catch (err) {
-    sendProgress(sender, 'Failed to apply system settings, continuing...');
-    console.error('System settings error:', err);
-    await logger.logStep('SET FOCUS ASSIST', newWorkspace.system.focusAssist !== null ? (newWorkspace.system.focusAssist ? 'on' : 'off') : 'null', 'FAILED', err instanceof Error ? err.message : String(err));
-  }
-
   // Audio (only switch device if valid)
   try {
     if (newWorkspace.system.audioDevice && validation.validAudioDevice) {
@@ -766,11 +721,6 @@ async function switchWorkspaceDryRun(
 
   if (newWorkspace.display.wallpaper) {
     await logger.logDryRunStep(`[${ts()}] [DRY RUN] SET WALLPAPER — ${newWorkspace.display.wallpaper}`);
-    actionCount++;
-  }
-
-  if (newWorkspace.system.focusAssist !== null) {
-    await logger.logDryRunStep(`[${ts()}] [DRY RUN] SET FOCUS ASSIST — ${newWorkspace.system.focusAssist ? 'on' : 'off'}`);
     actionCount++;
   }
 

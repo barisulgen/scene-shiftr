@@ -9,8 +9,6 @@ interface WorkspaceFormProps {
   workspace?: Workspace;
 }
 
-type TriState = true | false | null;
-
 export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.Element {
   const { navigateAway, setHasUnsavedChanges } = useApp();
   const { createWorkspace, updateWorkspace } = useWorkspaces();
@@ -29,7 +27,6 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
   const [closeFolders, setCloseFoldersRaw] = useState(workspace?.closeFolders ?? false);
   const [urls, setUrls] = useState<string[]>(workspace?.urls ?? []);
   const [urlInput, setUrlInput] = useState('');
-  const [focusAssist, setFocusAssistRaw] = useState<TriState>(workspace?.system.focusAssist ?? null);
   const [audioDevice, setAudioDeviceRaw] = useState<string | null>(workspace?.system.audioDevice ?? null);
   const [volume, setVolumeRaw] = useState<number>(workspace?.system.volume ?? 50);
   const [volumeEnabled, setVolumeEnabledRaw] = useState(workspace?.system.volume != null);
@@ -44,7 +41,6 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
   const setIcon = (v: string) => { setIconRaw(v); markDirty(); };
   const setAppsToOpen = (v: AppEntry[]) => { setAppsToOpenRaw(v); markDirty(); };
   const setAppsToClose = (v: AppEntry[]) => { setAppsToCloseRaw(v); markDirty(); };
-  const setFocusAssist = (v: TriState) => { setFocusAssistRaw(v); markDirty(); };
   const setAudioDevice = (v: string | null) => { setAudioDeviceRaw(v); markDirty(); };
   const setVolume = (v: number) => { setVolumeRaw(v); markDirty(); };
   const setVolumeEnabled = (v: boolean) => { setVolumeEnabledRaw(v); markDirty(); };
@@ -130,7 +126,6 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
       closeFolders,
       urls,
       system: {
-        focusAssist,
         audioDevice,
         volume: volumeEnabled ? volume : null,
       },
@@ -587,54 +582,7 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
           </div>
           )}
 
-          {/* ---- 4. System Settings Card ---- */}
-          <section className="rounded-xl p-5" style={cardStyle}>
-            <div className="flex items-center gap-2 mb-5">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                className="w-5 h-5"
-                style={{ color: 'var(--accent)' }}
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M7.84 1.804A1 1 0 0 1 8.82 1h2.36a1 1 0 0 1 .98.804l.331 1.652a6.993 6.993 0 0 1 1.929 1.115l1.598-.54a1 1 0 0 1 1.186.447l1.18 2.044a1 1 0 0 1-.205 1.251l-1.267 1.113a7.047 7.047 0 0 1 0 2.228l1.267 1.113a1 1 0 0 1 .206 1.25l-1.18 2.045a1 1 0 0 1-1.187.447l-1.598-.54a6.993 6.993 0 0 1-1.929 1.115l-.33 1.652a1 1 0 0 1-.98.804H8.82a1 1 0 0 1-.98-.804l-.331-1.652a6.993 6.993 0 0 1-1.929-1.115l-1.598.54a1 1 0 0 1-1.186-.447l-1.18-2.044a1 1 0 0 1 .205-1.251l1.267-1.114a7.05 7.05 0 0 1 0-2.227L1.821 7.773a1 1 0 0 1-.206-1.25l1.18-2.045a1 1 0 0 1 1.187-.447l1.598.54A6.992 6.992 0 0 1 7.51 3.456l.33-1.652ZM10 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              <h2
-                className="text-sm font-semibold"
-                style={{ color: 'var(--text-primary)' }}
-              >
-                System Settings
-              </h2>
-            </div>
-
-            <div className="space-y-4">
-              {/* Focus Assist */}
-              <TriStateToggle
-                label="Focus Assist"
-                description="Suppress notifications for deep work"
-                icon={
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                    className="w-4 h-4"
-                  >
-                    <path d="M10 1a6 6 0 0 0-3.815 10.631C7.237 12.5 8 13.443 8 14.456v.644a.75.75 0 0 0 .572.729 6.016 6.016 0 0 0 2.856 0A.75.75 0 0 0 12 15.1v-.644c0-1.013.762-1.957 1.815-2.825A6 6 0 0 0 10 1ZM8.863 17.414a.75.75 0 0 0-.226 1.483 9.066 9.066 0 0 0 2.726 0 .75.75 0 0 0-.226-1.483 7.553 7.553 0 0 1-2.274 0Z" />
-                  </svg>
-                }
-                iconColor="#7C3AED"
-                value={focusAssist}
-                onChange={setFocusAssist}
-              />
-
-            </div>
-          </section>
-
-          {/* ---- 5. Display Card ---- */}
+          {/* ---- 4. Display Card ---- */}
           <section className="rounded-xl p-5" style={cardStyle}>
             <div className="flex items-center gap-2 mb-5">
               <svg
@@ -1057,129 +1005,3 @@ function ToggleSwitch({
   );
 }
 
-/* ---- TriStateToggle sub-component ---- */
-
-function TriStateToggle({
-  label,
-  description,
-  icon,
-  iconColor,
-  value,
-  onChange,
-}: {
-  label: string;
-  description: string;
-  icon: React.ReactNode;
-  iconColor: string;
-  value: TriState;
-  onChange: (v: TriState) => void;
-}): JSX.Element {
-  const btnBase =
-    'px-3 py-1.5 text-xs font-medium transition-colors duration-150';
-
-  return (
-    <div className="flex items-center gap-3">
-      {/* Icon */}
-      <div
-        className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-        style={{
-          background:
-            iconColor === 'var(--accent)'
-              ? 'var(--accent-soft)'
-              : 'rgba(124, 58, 237, 0.15)',
-          color: iconColor,
-        }}
-      >
-        {icon}
-      </div>
-
-      {/* Label + description */}
-      <div className="flex-1">
-        <div className="text-sm" style={{ color: 'var(--text-primary)' }}>
-          {label}
-        </div>
-        <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
-          {description}
-        </div>
-      </div>
-
-      {/* Three-state buttons */}
-      <div
-        className="inline-flex rounded-lg overflow-hidden"
-        style={{ border: '1px solid var(--border-light)' }}
-      >
-        <button
-          type="button"
-          onClick={() => onChange(true)}
-          className={`${btnBase} cursor-pointer`}
-          style={{
-            background: value === true ? 'var(--accent)' : 'var(--bg-elevated)',
-            color: value === true ? '#FFFFFF' : 'var(--text-secondary)',
-          }}
-          onMouseEnter={(e) => {
-            if (value !== true) {
-              e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)';
-              e.currentTarget.style.color = 'var(--text-primary)';
-            } else {
-              e.currentTarget.style.backgroundColor = 'var(--accent-hover)';
-            }
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = value === true ? 'var(--accent)' : 'var(--bg-elevated)';
-            e.currentTarget.style.color = value === true ? '#FFFFFF' : 'var(--text-secondary)';
-          }}
-        >
-          On
-        </button>
-        <button
-          type="button"
-          onClick={() => onChange(false)}
-          className={`${btnBase} cursor-pointer`}
-          style={{
-            background: value === false ? 'var(--accent)' : 'var(--bg-elevated)',
-            color: value === false ? '#FFFFFF' : 'var(--text-secondary)',
-            borderLeft: '1px solid var(--border-light)',
-            borderRight: '1px solid var(--border-light)',
-          }}
-          onMouseEnter={(e) => {
-            if (value !== false) {
-              e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)';
-              e.currentTarget.style.color = 'var(--text-primary)';
-            } else {
-              e.currentTarget.style.backgroundColor = 'var(--accent-hover)';
-            }
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = value === false ? 'var(--accent)' : 'var(--bg-elevated)';
-            e.currentTarget.style.color = value === false ? '#FFFFFF' : 'var(--text-secondary)';
-          }}
-        >
-          Off
-        </button>
-        <button
-          type="button"
-          onClick={() => onChange(null)}
-          className={`${btnBase} cursor-pointer`}
-          style={{
-            background: value === null ? 'var(--accent)' : 'var(--bg-elevated)',
-            color: value === null ? '#FFFFFF' : 'var(--text-secondary)',
-          }}
-          onMouseEnter={(e) => {
-            if (value !== null) {
-              e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)';
-              e.currentTarget.style.color = 'var(--text-primary)';
-            } else {
-              e.currentTarget.style.backgroundColor = 'var(--accent-hover)';
-            }
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = value === null ? 'var(--accent)' : 'var(--bg-elevated)';
-            e.currentTarget.style.color = value === null ? '#FFFFFF' : 'var(--text-secondary)';
-          }}
-        >
-          Don&apos;t change
-        </button>
-      </div>
-    </div>
-  );
-}

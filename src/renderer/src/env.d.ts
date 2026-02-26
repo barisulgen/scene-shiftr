@@ -15,7 +15,6 @@ interface SceneShiftrAPI {
   isRunning: (name: string) => Promise<boolean>;
   getAudioDevices: () => Promise<{ id: string; name: string }[]>;
   getCurrentSystemState: () => Promise<{
-    focusAssist: boolean;
     audioDevice: string;
     volume: number;
     wallpaper: string;

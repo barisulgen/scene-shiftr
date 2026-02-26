@@ -14,7 +14,6 @@ export interface Workspace {
   closeFolders: boolean;
   urls: string[];
   system: {
-    focusAssist: boolean | null;
     audioDevice: string | null;
     volume: number | null;
   };

@@ -158,7 +158,6 @@ export async function createDefaultWorkspace(systemState: {
     createdAt: now,
     updatedAt: now,
     system: {
-      focusAssist: null,
       audioDevice: systemState.audioDevice || null,
       volume: systemState.volume ?? null,
     },

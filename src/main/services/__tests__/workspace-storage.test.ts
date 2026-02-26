@@ -46,7 +46,6 @@ function makeWorkspace(overrides: Partial<Workspace> = {}): Workspace {
     closeFolders: false,
     urls: [],
     system: {
-      focusAssist: null,
       audioDevice: null,
       volume: null,
     },

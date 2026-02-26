@@ -12,10 +12,6 @@ vi.mock('../process-manager', () => ({
   launchApp: vi.fn(),
 }));
 
-vi.mock('../system-settings', () => ({
-  applySystemSettings: vi.fn(),
-}));
-
 vi.mock('../audio-controller', () => ({
   setAudioDevice: vi.fn(),
   setVolume: vi.fn(),
@@ -64,7 +60,6 @@ vi.mock('fs', () => ({
 
 import * as workspaceStorage from '../workspace-storage';
 import * as processManager from '../process-manager';
-import * as systemSettings from '../system-settings';
 import * as audioController from '../audio-controller';
 import * as displayController from '../display-controller';
 import * as soundPlayer from '../sound-player';
@@ -79,7 +74,6 @@ import {
 
 const mockWorkspaceStorage = vi.mocked(workspaceStorage);
 const mockProcessManager = vi.mocked(processManager);
-const mockSystemSettings = vi.mocked(systemSettings);
 const mockAudioController = vi.mocked(audioController);
 // Default: getAudioDevices returns empty (no device to validate against = valid)
 // setAudioDevice returns true (success)
@@ -110,7 +104,6 @@ function createTestWorkspace(overrides: Partial<Workspace> = {}): Workspace {
     closeFolders: false,
     urls: [],
     system: {
-      focusAssist: null,
       audioDevice: null,
       volume: null,
     },
@@ -151,7 +144,6 @@ describe('workspace-manager', () => {
         },
       });
 
-      mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
       await activateWorkspace(workspace, sender);
 
@@ -165,7 +157,6 @@ describe('workspace-manager', () => {
       const workspace = createTestWorkspace();
       const sender = createMockSender();
 
-      mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
       await activateWorkspace(workspace, sender);
 
@@ -185,7 +176,6 @@ describe('workspace-manager', () => {
       const sender = createMockSender();
 
       mockProcessManager.closeApp.mockResolvedValue('closed');
-      mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
       await activateWorkspace(workspace, sender);
 
@@ -202,7 +192,6 @@ describe('workspace-manager', () => {
       const sender = createMockSender();
 
       mockDisplayController.setWallpaper.mockResolvedValue(undefined);
-      mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
       await activateWorkspace(workspace, sender);
 
@@ -217,62 +206,21 @@ describe('workspace-manager', () => {
       });
       const sender = createMockSender();
 
-      mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
       await activateWorkspace(workspace, sender);
 
       expect(mockDisplayController.setWallpaper).not.toHaveBeenCalled();
     });
 
-    it('applies system settings via systemSettings.applySystemSettings', async () => {
-      const workspace = createTestWorkspace({
-        system: {
-          focusAssist: false,
-          audioDevice: null,
-          volume: null,
-        },
-      });
-      const sender = createMockSender();
-
-      mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
-
-      await activateWorkspace(workspace, sender);
-
-      expect(mockSystemSettings.applySystemSettings).toHaveBeenCalledWith({
-        focusAssist: false,
-      });
-    });
-
-    it('applies system settings with null values (applySystemSettings handles them)', async () => {
-      const workspace = createTestWorkspace({
-        system: {
-          focusAssist: null,
-          audioDevice: null,
-          volume: null,
-        },
-      });
-      const sender = createMockSender();
-
-      mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
-
-      await activateWorkspace(workspace, sender);
-
-      expect(mockSystemSettings.applySystemSettings).toHaveBeenCalledWith({
-        focusAssist: null,
-      });
-    });
-
     it('switches audio device if not null', async () => {
       const workspace = createTestWorkspace({
         system: {
-          focusAssist: null,
           audioDevice: 'Headphones (USB)',
           volume: null,
         },
       });
       const sender = createMockSender();
 
-      mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
       mockAudioController.setAudioDevice.mockResolvedValue(true);
       mockAudioController.getAudioDevices.mockResolvedValue([
         { id: 'Headphones (USB)', name: 'Headphones' },
@@ -286,14 +234,12 @@ describe('workspace-manager', () => {
     it('does not switch audio device if null', async () => {
       const workspace = createTestWorkspace({
         system: {
-          focusAssist: null,
           audioDevice: null,
           volume: null,
         },
       });
       const sender = createMockSender();
 
-      mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
       await activateWorkspace(workspace, sender);
 
@@ -303,14 +249,12 @@ describe('workspace-manager', () => {
     it('sets volume if not null', async () => {
       const workspace = createTestWorkspace({
         system: {
-          focusAssist: null,
           audioDevice: null,
           volume: 75,
         },
       });
       const sender = createMockSender();
 
-      mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
       mockAudioController.setVolume.mockResolvedValue(undefined);
 
       await activateWorkspace(workspace, sender);
@@ -321,14 +265,12 @@ describe('workspace-manager', () => {
     it('does not set volume if null', async () => {
       const workspace = createTestWorkspace({
         system: {
-          focusAssist: null,
           audioDevice: null,
           volume: null,
         },
       });
       const sender = createMockSender();
 
-      mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
       await activateWorkspace(workspace, sender);
 
@@ -346,7 +288,6 @@ describe('workspace-manager', () => {
       const sender = createMockSender();
 
       mockProcessManager.launchApp.mockResolvedValue(undefined);
-      mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
       await activateWorkspace(workspace, sender);
 
@@ -361,7 +302,6 @@ describe('workspace-manager', () => {
       });
       const sender = createMockSender();
 
-      mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
       await activateWorkspace(workspace, sender);
 
@@ -375,7 +315,6 @@ describe('workspace-manager', () => {
       });
       const sender = createMockSender();
 
-      mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
       await activateWorkspace(workspace, sender);
 
@@ -387,7 +326,6 @@ describe('workspace-manager', () => {
       const workspace = createTestWorkspace({ id: 'ws-activate-test' });
       const sender = createMockSender();
 
-      mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
       await activateWorkspace(workspace, sender);
 
@@ -409,7 +347,6 @@ describe('workspace-manager', () => {
       mockProcessManager.closeApp.mockResolvedValue('closed');
       mockProcessManager.launchApp.mockResolvedValue(undefined);
       mockDisplayController.setWallpaper.mockResolvedValue(undefined);
-      mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
       await activateWorkspace(workspace, sender);
 
@@ -426,7 +363,6 @@ describe('workspace-manager', () => {
     it('handles sender being null without throwing', async () => {
       const workspace = createTestWorkspace();
 
-      mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
       // Should not throw with null sender
       await expect(activateWorkspace(workspace, null)).resolves.toBeUndefined();
@@ -441,7 +377,6 @@ describe('workspace-manager', () => {
       });
       const sender = createMockSender();
 
-      mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
       await activateWorkspace(workspace, sender);
 
@@ -457,7 +392,6 @@ describe('workspace-manager', () => {
       const sender = createMockSender();
 
       mockWorkspaceStorage.getWorkspace.mockResolvedValue(workspace);
-      mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
       await activateWorkspaceById('ws-by-id', sender);
 
@@ -481,7 +415,6 @@ describe('workspace-manager', () => {
       const sender = createMockSender();
 
       mockProcessManager.launchApp.mockResolvedValue(undefined);
-      mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
       await activateWorkspace(workspace, sender);
       expect(getActiveWorkspaceId()).toBe('ws-regular');
@@ -502,7 +435,6 @@ describe('workspace-manager', () => {
       // Force deactivate to reset state first
       const defaultWs = createDefaultWorkspace();
       mockWorkspaceStorage.getDefaultWorkspace.mockResolvedValue(defaultWs);
-      mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
       // Activate default first to have a clean starting point
       await activateWorkspace(defaultWs, null);
@@ -521,7 +453,6 @@ describe('workspace-manager', () => {
       const defaultWs = createDefaultWorkspace();
       const sender = createMockSender();
 
-      mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
       // Activate default
       await activateWorkspace(defaultWs, sender);
@@ -532,7 +463,7 @@ describe('workspace-manager', () => {
       await deactivateWorkspace(sender);
 
       // No switch should have happened
-      expect(mockSystemSettings.applySystemSettings).not.toHaveBeenCalled();
+      expect(mockDisplayController.setWallpaper).not.toHaveBeenCalled();
     });
   });
 
@@ -563,7 +494,6 @@ describe('workspace-manager', () => {
 
       // First activate old workspace
       mockProcessManager.launchApp.mockResolvedValue(undefined);
-      mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
       await activateWorkspace(oldWorkspace, sender);
       vi.clearAllMocks();
@@ -571,7 +501,6 @@ describe('workspace-manager', () => {
       // Now switch
       mockProcessManager.closeApp.mockResolvedValue('closed');
       mockProcessManager.launchApp.mockResolvedValue(undefined);
-      mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
       await switchWorkspace(newWorkspace, sender, oldWorkspace);
 
@@ -603,14 +532,12 @@ describe('workspace-manager', () => {
       const sender = createMockSender();
 
       mockProcessManager.launchApp.mockResolvedValue(undefined);
-      mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
       await activateWorkspace(oldWorkspace, sender);
       vi.clearAllMocks();
 
       mockProcessManager.closeApp.mockResolvedValue('closed');
       mockProcessManager.launchApp.mockResolvedValue(undefined);
-      mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
       await switchWorkspace(newWorkspace, sender, oldWorkspace);
 
@@ -632,20 +559,17 @@ describe('workspace-manager', () => {
           wallpaper: 'C:\\Pictures\\new-wallpaper.jpg',
         },
         system: {
-          focusAssist: true,
           audioDevice: 'Headphones (USB)',
           volume: 80,
         },
       });
       const sender = createMockSender();
 
-      mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
       await activateWorkspace(oldWorkspace, sender);
       vi.clearAllMocks();
 
       mockDisplayController.setWallpaper.mockResolvedValue(undefined);
-      mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
       mockAudioController.setAudioDevice.mockResolvedValue(true);
       mockAudioController.setVolume.mockResolvedValue(undefined);
       mockAudioController.getAudioDevices.mockResolvedValue([
@@ -657,9 +581,6 @@ describe('workspace-manager', () => {
       expect(mockDisplayController.setWallpaper).toHaveBeenCalledWith(
         'C:\\Pictures\\new-wallpaper.jpg'
       );
-      expect(mockSystemSettings.applySystemSettings).toHaveBeenCalledWith({
-        focusAssist: true,
-      });
       expect(mockAudioController.setAudioDevice).toHaveBeenCalledWith('Headphones (USB)');
       expect(mockAudioController.setVolume).toHaveBeenCalledWith(80);
     });
@@ -677,13 +598,11 @@ describe('workspace-manager', () => {
       });
       const sender = createMockSender();
 
-      mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
       await activateWorkspace(oldWorkspace, sender);
       vi.clearAllMocks();
 
       mockProcessManager.closeApp.mockResolvedValue('closed');
-      mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
       await switchWorkspace(newWorkspace, sender, oldWorkspace);
 
@@ -713,14 +632,12 @@ describe('workspace-manager', () => {
       const sender = createMockSender();
 
       mockProcessManager.launchApp.mockResolvedValue(undefined);
-      mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
       await activateWorkspace(oldWorkspace, sender);
       vi.clearAllMocks();
 
       mockProcessManager.closeApp.mockResolvedValue('closed');
       mockProcessManager.launchApp.mockResolvedValue(undefined);
-      mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
       await switchWorkspace(newWorkspace, sender, oldWorkspace);
 
@@ -735,7 +652,6 @@ describe('workspace-manager', () => {
       const newWorkspace = createTestWorkspace({ id: 'ws-new' });
       const sender = createMockSender();
 
-      mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
       await activateWorkspace(oldWorkspace, sender);
       expect(getActiveWorkspaceId()).toBe('ws-old');
@@ -754,12 +670,10 @@ describe('workspace-manager', () => {
       });
       const sender = createMockSender();
 
-      mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
       await activateWorkspace(oldWorkspace, sender);
       vi.clearAllMocks();
 
-      mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
       await switchWorkspace(newWorkspace, sender, oldWorkspace);
 
