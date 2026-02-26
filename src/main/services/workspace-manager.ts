@@ -1,4 +1,4 @@
-import { Workspace } from '../../shared/types';
+import { Workspace, AppEntry } from '../../shared/types';
 import * as workspaceStorage from './workspace-storage';
 import * as processManager from './process-manager';
 import * as systemSettings from './system-settings';
@@ -9,6 +9,7 @@ import * as logger from './logger';
 import * as explorerWindows from './explorer-windows';
 import { shell } from 'electron';
 import { setActiveWorkspaceId as setStoreActiveWorkspaceId } from '../store';
+import fs from 'fs';
 
 const ALLOWED_URL_SCHEMES = ['http:', 'https:', 'spotify:'];
 
@@ -47,6 +48,80 @@ function sendProgress(sender: ProgressSender | null, message: string): void {
   sender?.send('activation:progress', message);
 }
 
+interface ValidationResult {
+  validAppsToOpen: AppEntry[];
+  skippedAppsToOpen: AppEntry[];
+  validWallpaper: boolean;
+  validSound: boolean;
+  validFolders: string[];
+  skippedFolders: string[];
+  validAudioDevice: boolean;
+  skippedCount: number;
+}
+
+async function validateResources(workspace: Workspace): Promise<ValidationResult> {
+  const result: ValidationResult = {
+    validAppsToOpen: [],
+    skippedAppsToOpen: [],
+    validWallpaper: true,
+    validSound: true,
+    validFolders: [],
+    skippedFolders: [],
+    validAudioDevice: true,
+    skippedCount: 0,
+  };
+
+  // Validate app paths
+  for (const app of workspace.apps.open) {
+    if (fs.existsSync(app.path)) {
+      result.validAppsToOpen.push(app);
+    } else {
+      result.skippedAppsToOpen.push(app);
+      result.skippedCount++;
+    }
+  }
+
+  // Validate wallpaper
+  if (workspace.display.wallpaper && !fs.existsSync(workspace.display.wallpaper)) {
+    result.validWallpaper = false;
+    result.skippedCount++;
+  }
+
+  // Validate transition sound (resolve builtin: prefix)
+  if (workspace.audio.transitionSound) {
+    const soundPath = workspace.audio.transitionSound.startsWith('builtin:')
+      ? // Can't easily validate builtin sounds here, assume valid
+        true
+      : fs.existsSync(workspace.audio.transitionSound);
+    if (!soundPath) {
+      result.validSound = false;
+      result.skippedCount++;
+    }
+  }
+
+  // Validate folders
+  for (const folder of workspace.folders) {
+    if (fs.existsSync(folder)) {
+      result.validFolders.push(folder);
+    } else {
+      result.skippedFolders.push(folder);
+      result.skippedCount++;
+    }
+  }
+
+  // Validate audio device
+  if (workspace.system.audioDevice) {
+    const devices = await audioController.getAudioDevices();
+    const deviceExists = devices.some(d => d.id === workspace.system.audioDevice);
+    if (!deviceExists) {
+      result.validAudioDevice = false;
+      result.skippedCount++;
+    }
+  }
+
+  return result;
+}
+
 export function getActiveWorkspaceId(): string | null {
   return activeWorkspaceId;
 }
@@ -55,6 +130,7 @@ export async function activateWorkspaceById(
   id: string,
   sender?: ProgressSender
 ): Promise<void> {
+  if (isActivating) return;
   const workspace = await workspaceStorage.getWorkspace(id);
   await activateWorkspace(workspace, sender ?? null);
 }
@@ -63,6 +139,7 @@ export async function activateWorkspace(
   workspace: Workspace,
   sender: ProgressSender | null
 ): Promise<void> {
+  if (isActivating) return;
   isActivating = true;
   try {
   const dryRun = isDryRunFn();
@@ -72,16 +149,36 @@ export async function activateWorkspace(
     return;
   }
 
+  // Pre-validate resources
+  const validation = await validateResources(workspace);
+
+  // Log skipped resources
+  for (const app of validation.skippedAppsToOpen) {
+    await logger.logStep('OPEN APP', app.name, 'SKIPPED', `Path not found: ${app.path}`);
+  }
+  for (const folder of validation.skippedFolders) {
+    await logger.logStep('OPEN FOLDER', folder, 'SKIPPED', 'Path not found');
+  }
+  if (!validation.validWallpaper) {
+    await logger.logStep('SET WALLPAPER', workspace.display.wallpaper || '', 'SKIPPED', 'File not found');
+  }
+  if (!validation.validSound) {
+    await logger.logStep('PLAY SOUND', workspace.audio.transitionSound || '', 'SKIPPED', 'File not found');
+  }
+  if (!validation.validAudioDevice) {
+    await logger.logStep('SET AUDIO DEVICE', workspace.system.audioDevice || '', 'SKIPPED', 'Device not found');
+  }
+
   const startTime = Date.now();
   let succeeded = 0;
   let total = 0;
-  let skipped = 0;
+  let skipped = validation.skippedCount;
 
   await logger.logActivationStart(workspace.name);
 
-  // 1. Play transition sound
+  // 1. Play transition sound (only if valid)
   try {
-    if (workspace.audio.transitionSound && sender) {
+    if (workspace.audio.transitionSound && sender && validation.validSound) {
       total++;
       soundPlayer.playSound(workspace.audio.transitionSound, sender);
       await logger.logStep('PLAY SOUND', workspace.audio.transitionSound, 'SUCCESS');
@@ -108,9 +205,9 @@ export async function activateWorkspace(
     }
   }
 
-  // 4. Set wallpaper
+  // 4. Set wallpaper (only if valid)
   try {
-    if (workspace.display.wallpaper) {
+    if (workspace.display.wallpaper && validation.validWallpaper) {
       total++;
       sendProgress(sender, 'Setting wallpaper...');
       await displayController.setWallpaper(workspace.display.wallpaper);
@@ -143,13 +240,17 @@ export async function activateWorkspace(
     await logger.logStep('SET FOCUS ASSIST', workspace.system.focusAssist !== null ? (workspace.system.focusAssist ? 'on' : 'off') : 'null', 'FAILED', err instanceof Error ? err.message : String(err));
   }
 
-  // 7. Audio device and volume
+  // 7. Audio device and volume (only switch device if valid)
   try {
-    if (workspace.system.audioDevice) {
+    if (workspace.system.audioDevice && validation.validAudioDevice) {
       total++;
       sendProgress(sender, `Switching audio to ${workspace.system.audioDevice}...`);
-      await audioController.setAudioDevice(workspace.system.audioDevice);
-      await logger.logStep('SET AUDIO DEVICE', workspace.system.audioDevice, 'SUCCESS');
+      const audioSuccess = await audioController.setAudioDevice(workspace.system.audioDevice);
+      if (audioSuccess) {
+        await logger.logStep('SET AUDIO DEVICE', workspace.system.audioDevice, 'SUCCESS');
+      } else {
+        await logger.logStep('SET AUDIO DEVICE', workspace.system.audioDevice, 'FAILED', 'Verification failed after retry');
+      }
       succeeded++;
     }
     if (workspace.system.volume !== null) {
@@ -169,9 +270,9 @@ export async function activateWorkspace(
     }
   }
 
-  // 8. Launch apps from open list
+  // 8. Launch apps from open list (only valid ones)
   openedApps.clear();
-  for (const app of workspace.apps.open) {
+  for (const app of validation.validAppsToOpen) {
     total++;
     try {
       sendProgress(sender, `Launching ${app.name}...`);
@@ -186,7 +287,7 @@ export async function activateWorkspace(
     }
   }
 
-  // 9. Close Explorer windows (if enabled), then open folders
+  // 9. Close Explorer windows (if enabled), then open valid folders
   let alreadyOpenFolders: Set<string> = new Set();
   if (workspace.closeFolders) {
     try {
@@ -194,15 +295,15 @@ export async function activateWorkspace(
       sendProgress(sender, 'Closing Explorer windows...');
       const openPaths = await explorerWindows.getOpenExplorerPaths();
       alreadyOpenFolders = new Set(openPaths.map((p) => p.toLowerCase()));
-      await explorerWindows.closeExplorerWindows(workspace.folders);
-      await logger.logStep('CLOSE EXPLORER WINDOWS', `keeping ${workspace.folders.length} folders`, 'SUCCESS');
+      await explorerWindows.closeExplorerWindows(validation.validFolders);
+      await logger.logStep('CLOSE EXPLORER WINDOWS', `keeping ${validation.validFolders.length} folders`, 'SUCCESS');
       succeeded++;
     } catch (err) {
       console.error('Close Explorer windows error:', err);
       await logger.logStep('CLOSE EXPLORER WINDOWS', '', 'FAILED', err instanceof Error ? err.message : String(err));
     }
   }
-  for (const folder of workspace.folders) {
+  for (const folder of validation.validFolders) {
     // Skip folders already open (kept open by closeExplorerWindows)
     if (alreadyOpenFolders.has(folder.toLowerCase())) {
       skipped++;
@@ -256,7 +357,11 @@ export async function activateWorkspace(
 
   await logger.logActivationComplete(Date.now() - startTime, succeeded, total, skipped);
 
-  sendProgress(sender, 'Done');
+  if (validation.skippedCount > 0) {
+    sendProgress(sender, `Done (${validation.skippedCount} items skipped — check logs)`);
+  } else {
+    sendProgress(sender, 'Done');
+  }
   } finally {
     isActivating = false;
   }
@@ -341,6 +446,7 @@ async function activateWorkspaceDryRun(
 export async function deactivateWorkspace(
   sender: ProgressSender | null
 ): Promise<void> {
+  if (isActivating) return;
   if (!activeWorkspaceId) return;
 
   // Find the default workspace and activate it
@@ -369,7 +475,8 @@ export async function deactivateWorkspace(
     const closingName = currentWorkspace?.name || activeWorkspaceId;
     await logger.logDeactivationStart(closingName, defaultWs.name);
 
-    await switchWorkspace(defaultWs, sender, currentWorkspace);
+    // Call internal switch — bypasses isActivating guard since we own the flag
+    await switchWorkspaceInternal(defaultWs, sender, currentWorkspace);
 
     await logger.logDeactivationComplete(Date.now() - startTime);
   } finally {
@@ -382,8 +489,20 @@ export async function switchWorkspace(
   sender: ProgressSender | null,
   currentWorkspace?: Workspace
 ): Promise<void> {
+  if (isActivating) return;
   isActivating = true;
   try {
+    await switchWorkspaceInternal(newWorkspace, sender, currentWorkspace);
+  } finally {
+    isActivating = false;
+  }
+}
+
+async function switchWorkspaceInternal(
+  newWorkspace: Workspace,
+  sender: ProgressSender | null,
+  currentWorkspace?: Workspace
+): Promise<void> {
   const dryRun = isDryRunFn();
 
   if (dryRun) {
@@ -391,10 +510,30 @@ export async function switchWorkspace(
     return;
   }
 
+  // Pre-validate resources
+  const validation = await validateResources(newWorkspace);
+
+  // Log skipped resources
+  for (const app of validation.skippedAppsToOpen) {
+    await logger.logStep('OPEN APP', app.name, 'SKIPPED', `Path not found: ${app.path}`);
+  }
+  for (const folder of validation.skippedFolders) {
+    await logger.logStep('OPEN FOLDER', folder, 'SKIPPED', 'Path not found');
+  }
+  if (!validation.validWallpaper) {
+    await logger.logStep('SET WALLPAPER', newWorkspace.display.wallpaper || '', 'SKIPPED', 'File not found');
+  }
+  if (!validation.validSound) {
+    await logger.logStep('PLAY SOUND', newWorkspace.audio.transitionSound || '', 'SKIPPED', 'File not found');
+  }
+  if (!validation.validAudioDevice) {
+    await logger.logStep('SET AUDIO DEVICE', newWorkspace.system.audioDevice || '', 'SKIPPED', 'Device not found');
+  }
+
   const startTime = Date.now();
   let succeeded = 0;
   let total = 0;
-  let skipped = 0;
+  let skipped = validation.skippedCount;
 
   await logger.logActivationStart(newWorkspace.name);
 
@@ -439,9 +578,9 @@ export async function switchWorkspace(
 
   // Apply new workspace settings
 
-  // Set wallpaper
+  // Set wallpaper (only if valid)
   try {
-    if (newWorkspace.display.wallpaper) {
+    if (newWorkspace.display.wallpaper && validation.validWallpaper) {
       total++;
       await displayController.setWallpaper(newWorkspace.display.wallpaper);
       await logger.logStep('SET WALLPAPER', newWorkspace.display.wallpaper, 'SUCCESS');
@@ -472,12 +611,16 @@ export async function switchWorkspace(
     await logger.logStep('SET FOCUS ASSIST', newWorkspace.system.focusAssist !== null ? (newWorkspace.system.focusAssist ? 'on' : 'off') : 'null', 'FAILED', err instanceof Error ? err.message : String(err));
   }
 
-  // Audio
+  // Audio (only switch device if valid)
   try {
-    if (newWorkspace.system.audioDevice) {
+    if (newWorkspace.system.audioDevice && validation.validAudioDevice) {
       total++;
-      await audioController.setAudioDevice(newWorkspace.system.audioDevice);
-      await logger.logStep('SET AUDIO DEVICE', newWorkspace.system.audioDevice, 'SUCCESS');
+      const audioSuccess = await audioController.setAudioDevice(newWorkspace.system.audioDevice);
+      if (audioSuccess) {
+        await logger.logStep('SET AUDIO DEVICE', newWorkspace.system.audioDevice, 'SUCCESS');
+      } else {
+        await logger.logStep('SET AUDIO DEVICE', newWorkspace.system.audioDevice, 'FAILED', 'Verification failed after retry');
+      }
       succeeded++;
     }
     if (newWorkspace.system.volume !== null) {
@@ -497,9 +640,9 @@ export async function switchWorkspace(
     }
   }
 
-  // Launch new apps
+  // Launch new apps (only valid ones)
   openedApps.clear();
-  for (const app of newWorkspace.apps.open) {
+  for (const app of validation.validAppsToOpen) {
     total++;
     try {
       await processManager.launchApp(app);
@@ -513,22 +656,22 @@ export async function switchWorkspace(
     }
   }
 
-  // Close Explorer windows (if enabled), then open folders
+  // Close Explorer windows (if enabled), then open valid folders
   let alreadyOpenSwitchFolders: Set<string> = new Set();
   if (newWorkspace.closeFolders) {
     try {
       total++;
       const openPaths = await explorerWindows.getOpenExplorerPaths();
       alreadyOpenSwitchFolders = new Set(openPaths.map((p) => p.toLowerCase()));
-      await explorerWindows.closeExplorerWindows(newWorkspace.folders);
-      await logger.logStep('CLOSE EXPLORER WINDOWS', `keeping ${newWorkspace.folders.length} folders`, 'SUCCESS');
+      await explorerWindows.closeExplorerWindows(validation.validFolders);
+      await logger.logStep('CLOSE EXPLORER WINDOWS', `keeping ${validation.validFolders.length} folders`, 'SUCCESS');
       succeeded++;
     } catch (err) {
       console.error('Close Explorer windows error:', err);
       await logger.logStep('CLOSE EXPLORER WINDOWS', '', 'FAILED', err instanceof Error ? err.message : String(err));
     }
   }
-  for (const folder of newWorkspace.folders) {
+  for (const folder of validation.validFolders) {
     if (alreadyOpenSwitchFolders.has(folder.toLowerCase())) {
       skipped++;
       await logger.logStep('OPEN FOLDER', folder, 'SKIPPED');
@@ -563,9 +706,9 @@ export async function switchWorkspace(
     }
   }
 
-  // Transition sound
+  // Transition sound (only if valid)
   try {
-    if (newWorkspace.audio.transitionSound && sender) {
+    if (newWorkspace.audio.transitionSound && sender && validation.validSound) {
       total++;
       soundPlayer.playSound(newWorkspace.audio.transitionSound, sender);
       await logger.logStep('PLAY SOUND', newWorkspace.audio.transitionSound, 'SUCCESS');
@@ -581,9 +724,10 @@ export async function switchWorkspace(
 
   await logger.logActivationComplete(Date.now() - startTime, succeeded, total, skipped);
 
-  sendProgress(sender, 'Done');
-  } finally {
-    isActivating = false;
+  if (validation.skippedCount > 0) {
+    sendProgress(sender, `Done (${validation.skippedCount} items skipped — check logs)`);
+  } else {
+    sendProgress(sender, 'Done');
   }
 }
 

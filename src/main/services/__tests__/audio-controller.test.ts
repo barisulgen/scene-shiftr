@@ -134,22 +134,60 @@ describe('audio-controller', () => {
   });
 
   describe('setAudioDevice', () => {
-    it('calls PowerShell Set-AudioDevice with the correct device ID', async () => {
-      mockExecResolves('');
+    it('calls PowerShell Set-AudioDevice with the correct device ID and returns true on success', async () => {
+      // Mock sequence: Set-AudioDevice, getCurrentDevice, getAudioDevices
+      let callIndex = 0;
+      mockExec.mockImplementation((_cmd: string, _opts: any, callback?: any) => {
+        const cb = typeof _opts === 'function' ? _opts : callback;
+        const cmd = String(_cmd);
+        callIndex++;
+        if (cmd.includes('Set-AudioDevice')) {
+          cb(null, { stdout: '', stderr: '' });
+        } else if (cmd.includes('Get-AudioDevice -Playback') && !cmd.includes('-List')) {
+          cb(null, { stdout: 'Speaker\r\n', stderr: '' });
+        } else if (cmd.includes('Get-AudioDevice -List')) {
+          cb(null, { stdout: '{0.0.0.00000000}.{guid-1}||Speaker\r\n', stderr: '' });
+        } else {
+          cb(null, { stdout: '', stderr: '' });
+        }
+        return {} as any;
+      });
 
-      await setAudioDevice('{0.0.0.00000000}.{guid-1}');
+      const result = await setAudioDevice('{0.0.0.00000000}.{guid-1}');
 
-      expect(mockExec).toHaveBeenCalledTimes(1);
-      const cmd = String(mockExec.mock.calls[0][0]);
-      expect(cmd).toContain('powershell');
-      expect(cmd).toContain('Set-AudioDevice');
-      expect(cmd).toContain('{0.0.0.00000000}.{guid-1}');
+      expect(result).toBe(true);
+      const firstCmd = String(mockExec.mock.calls[0][0]);
+      expect(firstCmd).toContain('powershell');
+      expect(firstCmd).toContain('Set-AudioDevice');
+      expect(firstCmd).toContain('{0.0.0.00000000}.{guid-1}');
     });
 
-    it('does not throw when the command fails', async () => {
+    it('returns false when the command fails', async () => {
       mockExecRejects(new Error('Command failed'));
 
-      await expect(setAudioDevice('{0.0.0.00000000}.{guid-1}')).resolves.toBeUndefined();
+      const result = await setAudioDevice('{0.0.0.00000000}.{guid-1}');
+      expect(result).toBe(false);
+    });
+
+    it('retries once and returns false if verification still fails', async () => {
+      // Mock: Set-AudioDevice succeeds, but getCurrentDevice returns wrong device
+      mockExec.mockImplementation((_cmd: string, _opts: any, callback?: any) => {
+        const cb = typeof _opts === 'function' ? _opts : callback;
+        const cmd = String(_cmd);
+        if (cmd.includes('Set-AudioDevice')) {
+          cb(null, { stdout: '', stderr: '' });
+        } else if (cmd.includes('Get-AudioDevice -Playback') && !cmd.includes('-List')) {
+          cb(null, { stdout: 'Wrong Device\r\n', stderr: '' });
+        } else if (cmd.includes('Get-AudioDevice -List')) {
+          cb(null, { stdout: '{0.0.0.00000000}.{guid-1}||Speaker\r\n', stderr: '' });
+        } else {
+          cb(null, { stdout: '', stderr: '' });
+        }
+        return {} as any;
+      });
+
+      const result = await setAudioDevice('{0.0.0.00000000}.{guid-1}');
+      expect(result).toBe(false);
     });
   });
 

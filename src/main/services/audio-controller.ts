@@ -71,14 +71,36 @@ export async function getCurrentDevice(): Promise<string> {
 
 /**
  * Sets the default audio device by ID using AudioDeviceCmdlets.
+ * Returns true if the switch was confirmed, false if verification failed.
  */
-export async function setAudioDevice(deviceId: string): Promise<void> {
+export async function setAudioDevice(deviceId: string): Promise<boolean> {
   try {
     await execAsync(
       `powershell -NoProfile -Command "Set-AudioDevice -ID '${deviceId.replace(/'/g, "''")}'"`,
     );
+
+    // Wait 500ms for the switch to take effect
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // Verify the switch worked
+    const currentDevice = await getCurrentDevice();
+    const devices = await getAudioDevices();
+    const targetDevice = devices.find(d => d.id === deviceId);
+
+    if (targetDevice && currentDevice === targetDevice.name) {
+      return true; // Switch confirmed
+    }
+
+    // Retry once
+    await execAsync(
+      `powershell -NoProfile -Command "Set-AudioDevice -ID '${deviceId.replace(/'/g, "''")}'"`,
+    );
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    const retryDevice = await getCurrentDevice();
+    return targetDevice ? retryDevice === targetDevice.name : false;
   } catch {
-    // Best effort
+    return false;
   }
 }
 

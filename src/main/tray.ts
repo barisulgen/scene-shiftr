@@ -27,10 +27,13 @@ export async function updateTrayMenu(mainWindow: BrowserWindow): Promise<void> {
   const activeId = workspaceManager.getActiveWorkspaceId();
   const defaultWs = workspaces.find((w) => w.isDefault);
 
+  const isCurrentlyActivating = workspaceManager.getIsActivating();
+
   const workspaceItems = workspaces.map((ws) => ({
     label: `${ws.icon} ${ws.name}`,
     type: 'radio' as const,
     checked: ws.id === activeId,
+    enabled: !isCurrentlyActivating,
     click: async () => {
       await workspaceManager.activateWorkspaceById(ws.id, mainWindow.webContents);
       await updateTrayMenu(mainWindow);
@@ -45,7 +48,7 @@ export async function updateTrayMenu(mainWindow: BrowserWindow): Promise<void> {
     { type: 'separator' },
     {
       label: 'Deactivate',
-      enabled: !isOnDefault,
+      enabled: !isOnDefault && !isCurrentlyActivating,
       click: async () => {
         await workspaceManager.deactivateWorkspace(mainWindow.webContents);
         await updateTrayMenu(mainWindow);

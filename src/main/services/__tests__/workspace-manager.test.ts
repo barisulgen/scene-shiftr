@@ -19,6 +19,7 @@ vi.mock('../system-settings', () => ({
 vi.mock('../audio-controller', () => ({
   setAudioDevice: vi.fn(),
   setVolume: vi.fn(),
+  getAudioDevices: vi.fn(),
 }));
 
 vi.mock('../display-controller', () => ({
@@ -54,6 +55,13 @@ vi.mock('../explorer-windows', () => ({
   closeExplorerWindows: vi.fn(),
 }));
 
+vi.mock('fs', () => ({
+  default: {
+    existsSync: vi.fn().mockReturnValue(true),
+  },
+  existsSync: vi.fn().mockReturnValue(true),
+}));
+
 import * as workspaceStorage from '../workspace-storage';
 import * as processManager from '../process-manager';
 import * as systemSettings from '../system-settings';
@@ -73,6 +81,10 @@ const mockWorkspaceStorage = vi.mocked(workspaceStorage);
 const mockProcessManager = vi.mocked(processManager);
 const mockSystemSettings = vi.mocked(systemSettings);
 const mockAudioController = vi.mocked(audioController);
+// Default: getAudioDevices returns empty (no device to validate against = valid)
+// setAudioDevice returns true (success)
+mockAudioController.getAudioDevices.mockResolvedValue([]);
+mockAudioController.setAudioDevice.mockResolvedValue(true);
 const mockDisplayController = vi.mocked(displayController);
 const mockSoundPlayer = vi.mocked(soundPlayer);
 const mockShell = vi.mocked(shell);
@@ -261,7 +273,10 @@ describe('workspace-manager', () => {
       const sender = createMockSender();
 
       mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
-      mockAudioController.setAudioDevice.mockResolvedValue(undefined);
+      mockAudioController.setAudioDevice.mockResolvedValue(true);
+      mockAudioController.getAudioDevices.mockResolvedValue([
+        { id: 'Headphones (USB)', name: 'Headphones' },
+      ]);
 
       await activateWorkspace(workspace, sender);
 
@@ -631,8 +646,11 @@ describe('workspace-manager', () => {
 
       mockDisplayController.setWallpaper.mockResolvedValue(undefined);
       mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
-      mockAudioController.setAudioDevice.mockResolvedValue(undefined);
+      mockAudioController.setAudioDevice.mockResolvedValue(true);
       mockAudioController.setVolume.mockResolvedValue(undefined);
+      mockAudioController.getAudioDevices.mockResolvedValue([
+        { id: 'Headphones (USB)', name: 'Headphones' },
+      ]);
 
       await switchWorkspace(newWorkspace, sender, oldWorkspace);
 
