@@ -24,6 +24,7 @@ export function createEmptyWorkspace(id: string, name: string, order: number): W
     name,
     icon: '🖥️',
     order,
+    isDefault: false,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     apps: { open: [], close: [] },

@@ -25,6 +25,7 @@ export async function updateTrayMenu(mainWindow: BrowserWindow): Promise<void> {
 
   const workspaces = await workspaceStorage.listWorkspaces();
   const activeId = workspaceManager.getActiveWorkspaceId();
+  const defaultWs = workspaces.find((w) => w.isDefault);
 
   const workspaceItems = workspaces.map((ws) => ({
     label: `${ws.icon} ${ws.name}`,
@@ -36,12 +37,15 @@ export async function updateTrayMenu(mainWindow: BrowserWindow): Promise<void> {
     },
   }));
 
+  // "Deactivate" activates the default workspace
+  const isOnDefault = defaultWs ? activeId === defaultWs.id : false;
+
   const menu = Menu.buildFromTemplate([
     ...workspaceItems,
     { type: 'separator' },
     {
-      label: 'Close Workspace',
-      enabled: activeId !== null,
+      label: 'Deactivate',
+      enabled: !isOnDefault,
       click: async () => {
         await workspaceManager.deactivateWorkspace(mainWindow.webContents);
         await updateTrayMenu(mainWindow);

@@ -3,6 +3,7 @@ export interface Workspace {
   name: string;
   icon: string;
   order: number;
+  isDefault: boolean;
   createdAt: string;
   updatedAt: string;
   apps: {
@@ -30,14 +31,6 @@ export interface AppEntry {
   name: string;
   path: string;
   args?: string;
-}
-
-export interface SystemSnapshot {
-  capturedAt: string;
-  focusAssist: boolean;
-  audioDevice: string;
-  volume: number;
-  wallpaper: string;
 }
 
 export interface GlobalSettings {

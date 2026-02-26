@@ -45,15 +45,24 @@ export function AppProvider({ children }: { children: ReactNode }): JSX.Element 
   const hasUnsavedRef = useRef(false);
 
   const refreshWorkspaces = useCallback(async () => {
+    let list: Workspace[] = [];
     try {
-      const list = await window.api.listWorkspaces();
+      list = await window.api.listWorkspaces();
       setWorkspaces(list);
     } catch (err) {
       console.error('Failed to load workspaces:', err);
     }
     try {
       const settings = await window.api.getSettings();
-      setActiveWorkspaceId(settings.activeWorkspaceId);
+      let activeId = settings.activeWorkspaceId;
+      // If no active workspace, fall back to the default workspace
+      if (!activeId) {
+        const defaultWs = list.find((w) => w.isDefault);
+        if (defaultWs) {
+          activeId = defaultWs.id;
+        }
+      }
+      setActiveWorkspaceId(activeId);
     } catch (err) {
       console.error('Failed to load settings:', err);
     }

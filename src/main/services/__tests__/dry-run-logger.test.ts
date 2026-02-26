@@ -104,7 +104,7 @@ describe('dry-run-logger', () => {
 
       const actions = [
         { timestamp: '2026-01-01T00:00:00.000Z', action: 'app:close', details: { process: 'steam.exe' } },
-        { timestamp: '2026-01-01T00:00:01.000Z', action: 'snapshot:restore', details: { skipped: true } },
+        { timestamp: '2026-01-01T00:00:01.000Z', action: 'workspace:switch-to-default', details: { workspace: 'Default' } },
       ];
 
       await logDeactivation(actions);

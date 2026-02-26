@@ -38,6 +38,7 @@ function makeWorkspace(overrides: Partial<Workspace> = {}): Workspace {
     name: 'Test Workspace',
     icon: '🖥️',
     order: 0,
+    isDefault: false,
     createdAt: '2025-01-01T00:00:00.000Z',
     updatedAt: '2025-01-01T00:00:00.000Z',
     apps: { open: [], close: [] },

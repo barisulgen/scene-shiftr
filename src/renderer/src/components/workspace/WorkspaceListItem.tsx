@@ -10,13 +10,14 @@ interface WorkspaceListItemProps {
 }
 
 function getSubtitle(workspace: Workspace, isActive: boolean): string {
+  if (workspace.isDefault) return isActive ? 'Active' : 'Default';
   if (isActive) return 'Active';
   const appNames = workspace.apps.open.map((a) => a.name).slice(0, 3);
   if (appNames.length === 0) return 'No apps configured';
   return appNames.join(', ');
 }
 
-export default function WorkspaceListItem({
+function SortableWorkspaceListItem({
   workspace,
   isSelected,
   isActive,
@@ -93,5 +94,82 @@ export default function WorkspaceListItem({
         />
       )}
     </div>
+  );
+}
+
+export default function WorkspaceListItem({
+  workspace,
+  isSelected,
+  isActive,
+  onSelect,
+}: WorkspaceListItemProps): JSX.Element {
+  // Default workspace is not draggable — render without sortable wrapper
+  if (workspace.isDefault) {
+    const subtitle = getSubtitle(workspace, isActive);
+
+    const style: React.CSSProperties = {
+      backgroundColor: isSelected ? 'var(--bg-card-hover)' : 'transparent',
+      borderLeft: isSelected ? '3px solid var(--accent)' : '3px solid transparent',
+    };
+
+    return (
+      <div
+        style={style}
+        className="flex items-center gap-3 px-2 py-1.5 rounded-md cursor-pointer transition-colors duration-100"
+        onClick={() => onSelect(workspace.id)}
+        onMouseEnter={(e) => {
+          if (!isSelected) {
+            e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)';
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (!isSelected) {
+            e.currentTarget.style.backgroundColor = 'transparent';
+          }
+        }}
+      >
+        {/* Icon in colored square */}
+        <div
+          className="flex items-center justify-center w-9 h-9 rounded-lg shrink-0 text-base"
+          style={{ backgroundColor: 'var(--bg-elevated)' }}
+        >
+          {workspace.icon}
+        </div>
+
+        {/* Name + subtitle */}
+        <div className="flex flex-col flex-1 min-w-0">
+          <span
+            className="text-sm font-semibold truncate"
+            style={{ color: 'var(--text-primary)' }}
+          >
+            {workspace.name}
+          </span>
+          <span
+            className="text-xs truncate"
+            style={{ color: isActive ? 'var(--accent)' : 'var(--text-muted)' }}
+          >
+            {subtitle}
+          </span>
+        </div>
+
+        {/* Active dot */}
+        {isActive && (
+          <span
+            className="w-2 h-2 rounded-full shrink-0"
+            style={{ backgroundColor: 'var(--accent)' }}
+          />
+        )}
+      </div>
+    );
+  }
+
+  // Regular workspace — use sortable wrapper
+  return (
+    <SortableWorkspaceListItem
+      workspace={workspace}
+      isSelected={isSelected}
+      isActive={isActive}
+      onSelect={onSelect}
+    />
   );
 }

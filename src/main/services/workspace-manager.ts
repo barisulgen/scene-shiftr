@@ -1,6 +1,5 @@
 import { Workspace, DryRunLogEntry } from '../../shared/types';
 import * as workspaceStorage from './workspace-storage';
-import * as stateSnapshot from './state-snapshot';
 import * as processManager from './process-manager';
 import * as systemSettings from './system-settings';
 import * as audioController from './audio-controller';
@@ -9,6 +8,7 @@ import * as soundPlayer from './sound-player';
 import * as dryRunLogger from './dry-run-logger';
 import * as explorerWindows from './explorer-windows';
 import { shell } from 'electron';
+import { setActiveWorkspaceId as setStoreActiveWorkspaceId } from '../store';
 
 const ALLOWED_URL_SCHEMES = ['http:', 'https:', 'spotify:'];
 
@@ -65,16 +65,7 @@ export async function activateWorkspace(
     return;
   }
 
-  // 1. Capture snapshot (only on first activation — captureSnapshot itself guards against overwrites)
-  try {
-    sendProgress(sender, 'Saving current state...');
-    await stateSnapshot.captureSnapshot();
-  } catch (err) {
-    sendProgress(sender, 'Failed to save current state, continuing...');
-    console.error('Snapshot capture error:', err);
-  }
-
-  // 2. Play transition sound
+  // 1. Play transition sound
   try {
     if (workspace.audio.transitionSound && sender) {
       soundPlayer.playSound(workspace.audio.transitionSound, sender);
@@ -189,6 +180,7 @@ export async function activateWorkspace(
   }
 
   activeWorkspaceId = workspace.id;
+  setStoreActiveWorkspaceId(workspace.id);
   sendProgress(sender, 'Done');
 }
 
@@ -200,8 +192,6 @@ async function activateWorkspaceDryRun(
   const now = () => new Date().toISOString();
 
   sendProgress(sender, '[DRY RUN] Simulating activation...');
-
-  actions.push({ timestamp: now(), action: 'snapshot:capture', details: { skipped: true, reason: 'dry run' } });
 
   if (workspace.audio.transitionSound) {
     actions.push({ timestamp: now(), action: 'sound:play', details: { sound: workspace.audio.transitionSound } });
@@ -252,6 +242,7 @@ async function activateWorkspaceDryRun(
   await dryRunLogger.logActivation(workspace.name, actions);
 
   activeWorkspaceId = workspace.id;
+  setStoreActiveWorkspaceId(workspace.id);
   sendProgress(sender, `[DRY RUN] Done — ${actions.length} actions logged`);
 }
 
@@ -260,59 +251,27 @@ export async function deactivateWorkspace(
 ): Promise<void> {
   if (!activeWorkspaceId) return;
 
-  const dryRun = isDryRunFn();
-
-  if (dryRun) {
-    await deactivateWorkspaceDryRun(sender);
+  // Find the default workspace and activate it
+  // This uses smart switching (switchWorkspace) to close apps from the
+  // previous workspace and apply the default workspace's system settings.
+  const defaultWs = await workspaceStorage.getDefaultWorkspace();
+  if (!defaultWs) {
+    console.error('No default workspace found — cannot deactivate');
     return;
   }
 
-  // Close apps that were opened by the workspace
-  for (const appPath of openedApps) {
-    try {
-      const processName = getProcessName(appPath);
-      sendProgress(sender, `Closing ${processName}...`);
-      await processManager.closeApp(processName);
-    } catch (err) {
-      console.error(`Close app error (${appPath}):`, err);
-    }
-  }
+  // If already on the default workspace, do nothing
+  if (activeWorkspaceId === defaultWs.id) return;
 
-  // Restore snapshot
+  // Get the current workspace to enable smart switching
+  let currentWorkspace: Workspace | undefined;
   try {
-    sendProgress(sender, 'Restoring previous state...');
-    await stateSnapshot.restoreSnapshot();
-  } catch (err) {
-    sendProgress(sender, 'Failed to restore previous state, continuing...');
-    console.error('Snapshot restore error:', err);
+    currentWorkspace = await workspaceStorage.getWorkspace(activeWorkspaceId);
+  } catch {
+    // If current workspace can't be read, proceed without smart close
   }
 
-  openedApps.clear();
-  activeWorkspaceId = null;
-  sendProgress(sender, 'Done');
-}
-
-async function deactivateWorkspaceDryRun(
-  sender: ProgressSender | null
-): Promise<void> {
-  const actions: DryRunLogEntry[] = [];
-  const now = () => new Date().toISOString();
-
-  sendProgress(sender, '[DRY RUN] Simulating deactivation...');
-
-  for (const appPath of openedApps) {
-    const processName = getProcessName(appPath);
-    sendProgress(sender, `[DRY RUN] Would close ${processName}`);
-    actions.push({ timestamp: now(), action: 'app:close', details: { path: appPath, process: processName } });
-  }
-
-  actions.push({ timestamp: now(), action: 'snapshot:restore', details: { skipped: true, reason: 'dry run' } });
-
-  await dryRunLogger.logDeactivation(actions);
-
-  openedApps.clear();
-  activeWorkspaceId = null;
-  sendProgress(sender, `[DRY RUN] Done — ${actions.length} actions logged`);
+  await switchWorkspace(defaultWs, sender, currentWorkspace);
 }
 
 export async function switchWorkspace(
@@ -358,7 +317,7 @@ export async function switchWorkspace(
     }
   }
 
-  // Apply settings (do NOT capture new snapshot — preserve original)
+  // Apply new workspace settings
 
   // Set wallpaper
   try {
@@ -448,6 +407,7 @@ export async function switchWorkspace(
   }
 
   activeWorkspaceId = newWorkspace.id;
+  setStoreActiveWorkspaceId(newWorkspace.id);
   sendProgress(sender, 'Done');
 }
 
@@ -520,5 +480,6 @@ async function switchWorkspaceDryRun(
   await dryRunLogger.logActivation(newWorkspace.name, actions);
 
   activeWorkspaceId = newWorkspace.id;
+  setStoreActiveWorkspaceId(newWorkspace.id);
   sendProgress(sender, `[DRY RUN] Done — ${actions.length} actions logged`);
 }

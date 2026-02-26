@@ -4,11 +4,7 @@ import type { Workspace, AppEntry } from '../../../shared/types';
 // Mock ALL dependent services
 vi.mock('../workspace-storage', () => ({
   getWorkspace: vi.fn(),
-}));
-
-vi.mock('../state-snapshot', () => ({
-  captureSnapshot: vi.fn(),
-  restoreSnapshot: vi.fn(),
+  getDefaultWorkspace: vi.fn(),
 }));
 
 vi.mock('../process-manager', () => ({
@@ -40,8 +36,11 @@ vi.mock('electron', () => ({
   },
 }));
 
+vi.mock('../../store', () => ({
+  setActiveWorkspaceId: vi.fn(),
+}));
+
 import * as workspaceStorage from '../workspace-storage';
-import * as stateSnapshot from '../state-snapshot';
 import * as processManager from '../process-manager';
 import * as systemSettings from '../system-settings';
 import * as audioController from '../audio-controller';
@@ -57,7 +56,6 @@ import {
 } from '../workspace-manager';
 
 const mockWorkspaceStorage = vi.mocked(workspaceStorage);
-const mockStateSnapshot = vi.mocked(stateSnapshot);
 const mockProcessManager = vi.mocked(processManager);
 const mockSystemSettings = vi.mocked(systemSettings);
 const mockAudioController = vi.mocked(audioController);
@@ -75,6 +73,7 @@ function createTestWorkspace(overrides: Partial<Workspace> = {}): Workspace {
     name: 'Test Workspace',
     icon: '🖥️',
     order: 0,
+    isDefault: false,
     createdAt: '2025-01-01T00:00:00.000Z',
     updatedAt: '2025-01-01T00:00:00.000Z',
     apps: {
@@ -100,26 +99,23 @@ function createTestWorkspace(overrides: Partial<Workspace> = {}): Workspace {
   };
 }
 
+function createDefaultWorkspace(overrides: Partial<Workspace> = {}): Workspace {
+  return createTestWorkspace({
+    id: 'ws-default',
+    name: 'Default',
+    icon: '🏠',
+    order: -1,
+    isDefault: true,
+    ...overrides,
+  });
+}
+
 describe('workspace-manager', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Reset module state by deactivating any active workspace
-    // We need to ensure clean state between tests
   });
 
   describe('activateWorkspace', () => {
-    it('captures snapshot on first activation', async () => {
-      const workspace = createTestWorkspace();
-      const sender = createMockSender();
-
-      mockStateSnapshot.captureSnapshot.mockResolvedValue(undefined);
-      mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
-
-      await activateWorkspace(workspace, sender);
-
-      expect(mockStateSnapshot.captureSnapshot).toHaveBeenCalledTimes(1);
-    });
-
     it('plays transition sound if set', async () => {
       const sender = createMockSender();
       const workspace = createTestWorkspace({
@@ -129,7 +125,6 @@ describe('workspace-manager', () => {
         },
       });
 
-      mockStateSnapshot.captureSnapshot.mockResolvedValue(undefined);
       mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
       await activateWorkspace(workspace, sender);
@@ -144,7 +139,6 @@ describe('workspace-manager', () => {
       const workspace = createTestWorkspace();
       const sender = createMockSender();
 
-      mockStateSnapshot.captureSnapshot.mockResolvedValue(undefined);
       mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
       await activateWorkspace(workspace, sender);
@@ -164,7 +158,6 @@ describe('workspace-manager', () => {
       });
       const sender = createMockSender();
 
-      mockStateSnapshot.captureSnapshot.mockResolvedValue(undefined);
       mockProcessManager.closeApp.mockResolvedValue('closed');
       mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
@@ -182,7 +175,6 @@ describe('workspace-manager', () => {
       });
       const sender = createMockSender();
 
-      mockStateSnapshot.captureSnapshot.mockResolvedValue(undefined);
       mockDisplayController.setWallpaper.mockResolvedValue(undefined);
       mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
@@ -199,7 +191,6 @@ describe('workspace-manager', () => {
       });
       const sender = createMockSender();
 
-      mockStateSnapshot.captureSnapshot.mockResolvedValue(undefined);
       mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
       await activateWorkspace(workspace, sender);
@@ -217,7 +208,6 @@ describe('workspace-manager', () => {
       });
       const sender = createMockSender();
 
-      mockStateSnapshot.captureSnapshot.mockResolvedValue(undefined);
       mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
       await activateWorkspace(workspace, sender);
@@ -237,7 +227,6 @@ describe('workspace-manager', () => {
       });
       const sender = createMockSender();
 
-      mockStateSnapshot.captureSnapshot.mockResolvedValue(undefined);
       mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
       await activateWorkspace(workspace, sender);
@@ -257,7 +246,6 @@ describe('workspace-manager', () => {
       });
       const sender = createMockSender();
 
-      mockStateSnapshot.captureSnapshot.mockResolvedValue(undefined);
       mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
       mockAudioController.setAudioDevice.mockResolvedValue(undefined);
 
@@ -276,7 +264,6 @@ describe('workspace-manager', () => {
       });
       const sender = createMockSender();
 
-      mockStateSnapshot.captureSnapshot.mockResolvedValue(undefined);
       mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
       await activateWorkspace(workspace, sender);
@@ -294,7 +281,6 @@ describe('workspace-manager', () => {
       });
       const sender = createMockSender();
 
-      mockStateSnapshot.captureSnapshot.mockResolvedValue(undefined);
       mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
       mockAudioController.setVolume.mockResolvedValue(undefined);
 
@@ -313,7 +299,6 @@ describe('workspace-manager', () => {
       });
       const sender = createMockSender();
 
-      mockStateSnapshot.captureSnapshot.mockResolvedValue(undefined);
       mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
       await activateWorkspace(workspace, sender);
@@ -331,7 +316,6 @@ describe('workspace-manager', () => {
       });
       const sender = createMockSender();
 
-      mockStateSnapshot.captureSnapshot.mockResolvedValue(undefined);
       mockProcessManager.launchApp.mockResolvedValue(undefined);
       mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
@@ -348,7 +332,6 @@ describe('workspace-manager', () => {
       });
       const sender = createMockSender();
 
-      mockStateSnapshot.captureSnapshot.mockResolvedValue(undefined);
       mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
       await activateWorkspace(workspace, sender);
@@ -363,7 +346,6 @@ describe('workspace-manager', () => {
       });
       const sender = createMockSender();
 
-      mockStateSnapshot.captureSnapshot.mockResolvedValue(undefined);
       mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
       await activateWorkspace(workspace, sender);
@@ -372,36 +354,10 @@ describe('workspace-manager', () => {
       expect(mockShell.openExternal).toHaveBeenCalledWith('https://jira.example.com');
     });
 
-    it('tracks which apps it opened (for deactivation)', async () => {
-      const apps: AppEntry[] = [
-        { name: 'VS Code', path: 'C:\\Program Files\\Code\\code.exe' },
-        { name: 'Chrome', path: 'C:\\Program Files\\Chrome\\chrome.exe' },
-      ];
-      const workspace = createTestWorkspace({
-        apps: { open: apps, close: [] },
-      });
-      const sender = createMockSender();
-
-      mockStateSnapshot.captureSnapshot.mockResolvedValue(undefined);
-      mockProcessManager.launchApp.mockResolvedValue(undefined);
-      mockProcessManager.closeApp.mockResolvedValue('closed');
-      mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
-      mockStateSnapshot.restoreSnapshot.mockResolvedValue(undefined);
-
-      await activateWorkspace(workspace, sender);
-
-      // Now deactivate to verify the tracked apps get closed
-      await deactivateWorkspace(sender);
-
-      expect(mockProcessManager.closeApp).toHaveBeenCalledWith('code.exe');
-      expect(mockProcessManager.closeApp).toHaveBeenCalledWith('chrome.exe');
-    });
-
     it('sets activeWorkspaceId', async () => {
       const workspace = createTestWorkspace({ id: 'ws-activate-test' });
       const sender = createMockSender();
 
-      mockStateSnapshot.captureSnapshot.mockResolvedValue(undefined);
       mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
       await activateWorkspace(workspace, sender);
@@ -421,7 +377,6 @@ describe('workspace-manager', () => {
       });
       const sender = createMockSender();
 
-      mockStateSnapshot.captureSnapshot.mockResolvedValue(undefined);
       mockProcessManager.closeApp.mockResolvedValue('closed');
       mockProcessManager.launchApp.mockResolvedValue(undefined);
       mockDisplayController.setWallpaper.mockResolvedValue(undefined);
@@ -435,16 +390,13 @@ describe('workspace-manager', () => {
       );
       expect(progressCalls.length).toBeGreaterThan(0);
 
-      // Should include saving state, closing, launching, and done
       const progressMessages = progressCalls.map((call: unknown[]) => call[1]);
-      expect(progressMessages).toContain('Saving current state...');
       expect(progressMessages).toContain('Done');
     });
 
     it('handles sender being null without throwing', async () => {
       const workspace = createTestWorkspace();
 
-      mockStateSnapshot.captureSnapshot.mockResolvedValue(undefined);
       mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
       // Should not throw with null sender
@@ -460,7 +412,6 @@ describe('workspace-manager', () => {
       });
       const sender = createMockSender();
 
-      mockStateSnapshot.captureSnapshot.mockResolvedValue(undefined);
       mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
       await activateWorkspace(workspace, sender);
@@ -477,7 +428,6 @@ describe('workspace-manager', () => {
       const sender = createMockSender();
 
       mockWorkspaceStorage.getWorkspace.mockResolvedValue(workspace);
-      mockStateSnapshot.captureSnapshot.mockResolvedValue(undefined);
       mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
       await activateWorkspaceById('ws-by-id', sender);
@@ -488,121 +438,72 @@ describe('workspace-manager', () => {
   });
 
   describe('deactivateWorkspace', () => {
-    it('closes only apps that were opened by the workspace', async () => {
-      // First activate a workspace to populate openedApps
+    it('activates the default workspace when deactivating', async () => {
+      // First activate a regular workspace
       const workspace = createTestWorkspace({
+        id: 'ws-regular',
         apps: {
           open: [
             { name: 'VS Code', path: 'C:\\Program Files\\Code\\code.exe' },
-            { name: 'Chrome', path: 'C:\\Program Files\\Chrome\\chrome.exe' },
           ],
           close: [],
         },
       });
       const sender = createMockSender();
 
-      mockStateSnapshot.captureSnapshot.mockResolvedValue(undefined);
       mockProcessManager.launchApp.mockResolvedValue(undefined);
+      mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
+
+      await activateWorkspace(workspace, sender);
+      expect(getActiveWorkspaceId()).toBe('ws-regular');
+
+      // Set up default workspace
+      const defaultWs = createDefaultWorkspace();
+      mockWorkspaceStorage.getDefaultWorkspace.mockResolvedValue(defaultWs);
+      mockWorkspaceStorage.getWorkspace.mockResolvedValue(workspace);
       mockProcessManager.closeApp.mockResolvedValue('closed');
-      mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
-      mockStateSnapshot.restoreSnapshot.mockResolvedValue(undefined);
 
-      await activateWorkspace(workspace, sender);
-      vi.clearAllMocks();
-
-      // Now deactivate
-      mockProcessManager.closeApp.mockResolvedValue('closed');
-      mockStateSnapshot.restoreSnapshot.mockResolvedValue(undefined);
-
+      // Deactivate — should activate default workspace
       await deactivateWorkspace(sender);
 
-      expect(mockProcessManager.closeApp).toHaveBeenCalledWith('code.exe');
-      expect(mockProcessManager.closeApp).toHaveBeenCalledWith('chrome.exe');
-      expect(mockProcessManager.closeApp).toHaveBeenCalledTimes(2);
-    });
-
-    it('restores snapshot', async () => {
-      const workspace = createTestWorkspace();
-      const sender = createMockSender();
-
-      mockStateSnapshot.captureSnapshot.mockResolvedValue(undefined);
-      mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
-
-      await activateWorkspace(workspace, sender);
-      vi.clearAllMocks();
-
-      mockStateSnapshot.restoreSnapshot.mockResolvedValue(undefined);
-
-      await deactivateWorkspace(sender);
-
-      expect(mockStateSnapshot.restoreSnapshot).toHaveBeenCalledTimes(1);
-    });
-
-    it('clears activeWorkspaceId', async () => {
-      const workspace = createTestWorkspace({ id: 'ws-to-deactivate' });
-      const sender = createMockSender();
-
-      mockStateSnapshot.captureSnapshot.mockResolvedValue(undefined);
-      mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
-
-      await activateWorkspace(workspace, sender);
-      expect(getActiveWorkspaceId()).toBe('ws-to-deactivate');
-
-      mockStateSnapshot.restoreSnapshot.mockResolvedValue(undefined);
-
-      await deactivateWorkspace(sender);
-
-      expect(getActiveWorkspaceId()).toBeNull();
+      expect(getActiveWorkspaceId()).toBe('ws-default');
     });
 
     it('does nothing if no workspace is active', async () => {
-      const sender = createMockSender();
-
-      // Ensure no workspace is active (fresh state or after deactivation)
-      // We need to force a clean state. Deactivate first in case previous test left state.
-      mockStateSnapshot.restoreSnapshot.mockResolvedValue(undefined);
-
-      // Force deactivate to reset state
-      await deactivateWorkspace(sender);
-      vi.clearAllMocks();
-
-      // Now call deactivate again with no active workspace
-      await deactivateWorkspace(sender);
-
-      expect(mockProcessManager.closeApp).not.toHaveBeenCalled();
-      expect(mockStateSnapshot.restoreSnapshot).not.toHaveBeenCalled();
-    });
-
-    it('sends progress events during deactivation', async () => {
-      const workspace = createTestWorkspace({
-        apps: {
-          open: [{ name: 'VS Code', path: 'C:\\code.exe' }],
-          close: [],
-        },
-      });
-      const sender = createMockSender();
-
-      mockStateSnapshot.captureSnapshot.mockResolvedValue(undefined);
-      mockProcessManager.launchApp.mockResolvedValue(undefined);
+      // Force deactivate to reset state first
+      const defaultWs = createDefaultWorkspace();
+      mockWorkspaceStorage.getDefaultWorkspace.mockResolvedValue(defaultWs);
       mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
-      await activateWorkspace(workspace, sender);
+      // Activate default first to have a clean starting point
+      await activateWorkspace(defaultWs, null);
       vi.clearAllMocks();
 
-      const deactivateSender = createMockSender();
-      mockProcessManager.closeApp.mockResolvedValue('closed');
-      mockStateSnapshot.restoreSnapshot.mockResolvedValue(undefined);
+      // Deactivate while on default — should do nothing (already on default)
+      mockWorkspaceStorage.getDefaultWorkspace.mockResolvedValue(defaultWs);
+      await deactivateWorkspace(null);
 
-      await deactivateWorkspace(deactivateSender);
+      // Should still be on default, no switch happened
+      expect(getActiveWorkspaceId()).toBe('ws-default');
+      expect(mockProcessManager.closeApp).not.toHaveBeenCalled();
+    });
 
-      const progressCalls = deactivateSender.send.mock.calls.filter(
-        (call: unknown[]) => call[0] === 'activation:progress'
-      );
-      expect(progressCalls.length).toBeGreaterThan(0);
+    it('does nothing if already on default workspace', async () => {
+      const defaultWs = createDefaultWorkspace();
+      const sender = createMockSender();
 
-      const messages = progressCalls.map((call: unknown[]) => call[1]);
-      expect(messages).toContain('Restoring previous state...');
-      expect(messages).toContain('Done');
+      mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
+
+      // Activate default
+      await activateWorkspace(defaultWs, sender);
+      vi.clearAllMocks();
+
+      // Try to deactivate — already on default
+      mockWorkspaceStorage.getDefaultWorkspace.mockResolvedValue(defaultWs);
+      await deactivateWorkspace(sender);
+
+      // No switch should have happened
+      expect(mockSystemSettings.applySystemSettings).not.toHaveBeenCalled();
     });
   });
 
@@ -632,7 +533,6 @@ describe('workspace-manager', () => {
       const sender = createMockSender();
 
       // First activate old workspace
-      mockStateSnapshot.captureSnapshot.mockResolvedValue(undefined);
       mockProcessManager.launchApp.mockResolvedValue(undefined);
       mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
@@ -673,7 +573,6 @@ describe('workspace-manager', () => {
       });
       const sender = createMockSender();
 
-      mockStateSnapshot.captureSnapshot.mockResolvedValue(undefined);
       mockProcessManager.launchApp.mockResolvedValue(undefined);
       mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
@@ -696,25 +595,6 @@ describe('workspace-manager', () => {
       expect(closeAppCalls).toContain('discord.exe');
     });
 
-    it('does NOT overwrite the original snapshot', async () => {
-      const oldWorkspace = createTestWorkspace({ id: 'ws-old' });
-      const newWorkspace = createTestWorkspace({ id: 'ws-new' });
-      const sender = createMockSender();
-
-      mockStateSnapshot.captureSnapshot.mockResolvedValue(undefined);
-      mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
-
-      await activateWorkspace(oldWorkspace, sender);
-      vi.clearAllMocks();
-
-      mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
-
-      await switchWorkspace(newWorkspace, sender, oldWorkspace);
-
-      // captureSnapshot should NOT be called during switch
-      expect(mockStateSnapshot.captureSnapshot).not.toHaveBeenCalled();
-    });
-
     it('applies new workspace settings', async () => {
       const oldWorkspace = createTestWorkspace({ id: 'ws-old' });
       const newWorkspace = createTestWorkspace({
@@ -730,7 +610,6 @@ describe('workspace-manager', () => {
       });
       const sender = createMockSender();
 
-      mockStateSnapshot.captureSnapshot.mockResolvedValue(undefined);
       mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
       await activateWorkspace(oldWorkspace, sender);
@@ -766,7 +645,6 @@ describe('workspace-manager', () => {
       });
       const sender = createMockSender();
 
-      mockStateSnapshot.captureSnapshot.mockResolvedValue(undefined);
       mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
       await activateWorkspace(oldWorkspace, sender);
@@ -780,7 +658,7 @@ describe('workspace-manager', () => {
       expect(mockProcessManager.closeApp).toHaveBeenCalledWith('slack.exe');
     });
 
-    it('launches new workspace open list (skipping already running)', async () => {
+    it('launches new workspace open list', async () => {
       const oldWorkspace = createTestWorkspace({
         id: 'ws-old',
         apps: {
@@ -802,7 +680,6 @@ describe('workspace-manager', () => {
       });
       const sender = createMockSender();
 
-      mockStateSnapshot.captureSnapshot.mockResolvedValue(undefined);
       mockProcessManager.launchApp.mockResolvedValue(undefined);
       mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
@@ -815,11 +692,7 @@ describe('workspace-manager', () => {
 
       await switchWorkspace(newWorkspace, sender, oldWorkspace);
 
-      // All apps from the new workspace's open list should be launched
-      // (the implementation launches all and relies on launchApps skipping running ones,
-      //  or launches all from new list)
       expect(mockProcessManager.launchApp).toHaveBeenCalled();
-      // Figma should definitely be launched
       expect(mockProcessManager.launchApp).toHaveBeenCalledWith(
         expect.objectContaining({ name: 'Figma' })
       );
@@ -830,7 +703,6 @@ describe('workspace-manager', () => {
       const newWorkspace = createTestWorkspace({ id: 'ws-new' });
       const sender = createMockSender();
 
-      mockStateSnapshot.captureSnapshot.mockResolvedValue(undefined);
       mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
       await activateWorkspace(oldWorkspace, sender);
@@ -850,7 +722,6 @@ describe('workspace-manager', () => {
       });
       const sender = createMockSender();
 
-      mockStateSnapshot.captureSnapshot.mockResolvedValue(undefined);
       mockSystemSettings.applySystemSettings.mockResolvedValue(undefined);
 
       await activateWorkspace(oldWorkspace, sender);

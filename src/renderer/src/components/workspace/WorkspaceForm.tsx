@@ -18,6 +18,7 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
   const markDirty = useCallback(() => setHasUnsavedChanges(true), [setHasUnsavedChanges]);
 
   const isEdit = !!workspace;
+  const isDefaultWorkspace = workspace?.isDefault ?? false;
 
   // --- Form state (raw setters are private, dirty wrappers are used in JSX) ---
   const [name, setNameRaw] = useState(workspace?.name ?? '');
@@ -231,7 +232,19 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
               Workspace Name
             </label>
             <div className="flex items-center gap-2">
-              <EmojiPicker value={icon} onChange={setIcon} />
+              {isDefaultWorkspace ? (
+                <div
+                  className="w-10 h-10 rounded-lg flex items-center justify-center text-xl shrink-0"
+                  style={{
+                    backgroundColor: 'var(--bg-elevated)',
+                    border: '1px solid var(--border-light)',
+                  }}
+                >
+                  {'\u{1F3E0}'}
+                </div>
+              ) : (
+                <EmojiPicker value={icon} onChange={setIcon} />
+              )}
               <input
                 type="text"
                 value={name}
@@ -248,6 +261,7 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
           </section>
 
           {/* ---- 2. Apps & Programs Card ---- */}
+          {!isDefaultWorkspace && (
           <section className="rounded-xl p-5" style={cardStyle}>
             {/* Card header */}
             <div className="flex items-center gap-2 mb-4">
@@ -326,8 +340,10 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
               </div>
             </div>
           </section>
+          )}
 
           {/* ---- 3. Folders & URLs ---- */}
+          {!isDefaultWorkspace && (
           <div className="grid grid-cols-2 gap-4">
             {/* Folders card */}
             <section className="rounded-xl p-5" style={cardStyle}>
@@ -569,6 +585,7 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
               </div>
             </section>
           </div>
+          )}
 
           {/* ---- 4. System Settings Card ---- */}
           <section className="rounded-xl p-5" style={cardStyle}>
@@ -810,6 +827,8 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
                 </div>
               </div>
 
+              {!isDefaultWorkspace && (
+              <>
               {/* Divider */}
               <div className="border-t" style={{ borderColor: 'var(--border)' }} />
               {/* Transition Sound */}
@@ -862,6 +881,8 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
                   </div>
                 </div>
               </div>
+              </>
+              )}
             </div>
           </section>
         </div>

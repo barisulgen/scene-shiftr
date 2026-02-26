@@ -402,28 +402,30 @@ export default function WorkspaceDetail(): JSX.Element | null {
             >
               <PencilIcon />
             </button>
-            <button
-              onClick={handleDelete}
-              className="w-8 h-8 rounded-lg flex items-center justify-center cursor-pointer transition-colors duration-150 group"
-              style={{ backgroundColor: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}
-              title="Delete"
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = 'var(--accent-soft)';
-                e.currentTarget.style.color = 'var(--accent)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'var(--bg-elevated)';
-                e.currentTarget.style.color = 'var(--text-secondary)';
-              }}
-            >
-              <TrashIcon />
-            </button>
+            {!workspace.isDefault && (
+              <button
+                onClick={handleDelete}
+                className="w-8 h-8 rounded-lg flex items-center justify-center cursor-pointer transition-colors duration-150 group"
+                style={{ backgroundColor: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}
+                title="Delete"
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'var(--accent-soft)';
+                  e.currentTarget.style.color = 'var(--accent)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'var(--bg-elevated)';
+                  e.currentTarget.style.color = 'var(--text-secondary)';
+                }}
+              >
+                <TrashIcon />
+              </button>
+            )}
           </div>
         </div>
 
         {/* ── Activate / Deactivate Button ── */}
         <div className="mb-6">
-          {isActive ? (
+          {isActive && !workspace.isDefault ? (
             <button
               onClick={handleDeactivate}
               className="w-full h-12 rounded-xl flex items-center justify-center gap-2 text-sm font-medium cursor-pointer transition-all duration-150"
@@ -458,6 +460,9 @@ export default function WorkspaceDetail(): JSX.Element | null {
               </svg>
               Deactivate Scene
             </button>
+          ) : isActive && workspace.isDefault ? (
+            /* Already on default workspace — no action needed */
+            null
           ) : activating ? (
             <button
               disabled

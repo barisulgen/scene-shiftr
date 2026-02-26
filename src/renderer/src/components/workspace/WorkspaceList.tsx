@@ -21,6 +21,10 @@ export default function WorkspaceList(): JSX.Element {
   const { selectedWorkspaceId, activeWorkspaceId, setCurrentView } = useApp();
   const { workspaces, selectWorkspace, reorderWorkspaces } = useWorkspaces();
 
+  // Separate default workspace from the rest
+  const defaultWorkspace = workspaces.find((w) => w.isDefault) ?? null;
+  const sortableWorkspaces = workspaces.filter((w) => !w.isDefault);
+
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 5 },
@@ -34,9 +38,9 @@ export default function WorkspaceList(): JSX.Element {
     const { active, over } = event;
 
     if (over && active.id !== over.id) {
-      const oldIndex = workspaces.findIndex((w) => w.id === active.id);
-      const newIndex = workspaces.findIndex((w) => w.id === over.id);
-      const reordered = arrayMove(workspaces, oldIndex, newIndex);
+      const oldIndex = sortableWorkspaces.findIndex((w) => w.id === active.id);
+      const newIndex = sortableWorkspaces.findIndex((w) => w.id === over.id);
+      const reordered = arrayMove(sortableWorkspaces, oldIndex, newIndex);
       reorderWorkspaces(reordered.map((w) => w.id));
     }
   };
@@ -55,17 +59,29 @@ export default function WorkspaceList(): JSX.Element {
   }
 
   return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      onDragEnd={handleDragEnd}
-    >
-      <SortableContext
-        items={workspaces.map((w) => w.id)}
-        strategy={verticalListSortingStrategy}
+    <div className="flex flex-col gap-0.5">
+      {/* Default workspace — always first, not draggable */}
+      {defaultWorkspace && (
+        <WorkspaceListItem
+          key={defaultWorkspace.id}
+          workspace={defaultWorkspace}
+          isSelected={defaultWorkspace.id === selectedWorkspaceId}
+          isActive={defaultWorkspace.id === activeWorkspaceId}
+          onSelect={handleSelect}
+        />
+      )}
+
+      {/* Sortable workspaces */}
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
       >
-        <div className="flex flex-col gap-0.5">
-          {workspaces.map((workspace) => (
+        <SortableContext
+          items={sortableWorkspaces.map((w) => w.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          {sortableWorkspaces.map((workspace) => (
             <WorkspaceListItem
               key={workspace.id}
               workspace={workspace}
@@ -74,8 +90,8 @@ export default function WorkspaceList(): JSX.Element {
               onSelect={handleSelect}
             />
           ))}
-        </div>
-      </SortableContext>
-    </DndContext>
+        </SortableContext>
+      </DndContext>
+    </div>
   );
 }

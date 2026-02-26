@@ -1,8 +1,7 @@
 import { app, shell, BrowserWindow, ipcMain } from 'electron';
 import { join } from 'path';
 import { registerAllHandlers } from './ipc';
-import { setStorageDir } from './services/workspace-storage';
-import { setSnapshotDir } from './services/state-snapshot';
+import { setStorageDir, getDefaultWorkspace, createDefaultWorkspace } from './services/workspace-storage';
 import { setNircmdPath } from './services/audio-controller';
 import { setAssetsPath } from './services/sound-player';
 import { createTray, updateTrayMenu, destroyTray } from './tray';
@@ -10,7 +9,9 @@ import { setTrayRefreshCallback } from './tray-bridge';
 import { setDryRunCheck } from './services/workspace-manager';
 import { ensureAudioModule } from './services/audio-controller';
 import { setLogDir } from './services/dry-run-logger';
-import { getSettings } from './store';
+import { getSettings, setActiveWorkspaceId, getActiveWorkspaceId } from './store';
+import * as audioController from './services/audio-controller';
+import * as displayController from './services/display-controller';
 
 const isMinimized = process.argv.includes('--minimized');
 
@@ -69,7 +70,6 @@ app.whenReady().then(async () => {
   // Configure service paths
   const appDataDir = join(app.getPath('appData'), 'scene-shiftr');
   setStorageDir(join(appDataDir, 'workspaces'));
-  setSnapshotDir(appDataDir);
   setNircmdPath(join(app.getAppPath(), 'tools', 'nircmd.exe'));
   setAssetsPath(join(app.getAppPath(), 'assets', 'sounds'));
   setLogDir(join(appDataDir, 'logs'));
@@ -80,6 +80,25 @@ app.whenReady().then(async () => {
 
   // Register all IPC handlers
   registerAllHandlers();
+
+  // First-launch: ensure a default workspace exists
+  try {
+    const existingDefault = await getDefaultWorkspace();
+    if (!existingDefault) {
+      const [audioDevice, volume, wallpaper] = await Promise.all([
+        audioController.getCurrentDevice().catch(() => ''),
+        audioController.getVolume().catch(() => 50),
+        displayController.getWallpaper().catch(() => ''),
+      ]);
+      const defaultWs = await createDefaultWorkspace({ audioDevice, volume, wallpaper });
+      setActiveWorkspaceId(defaultWs.id);
+    } else if (!getActiveWorkspaceId()) {
+      // Default exists but no active workspace set — use the default
+      setActiveWorkspaceId(existingDefault.id);
+    }
+  } catch (err) {
+    console.error('Failed to initialize default workspace:', err);
+  }
 
   // Window control handlers
   ipcMain.handle('window:minimize', (e) => {

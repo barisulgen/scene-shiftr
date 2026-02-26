@@ -136,13 +136,76 @@ export async function updateWorkspace(
 }
 
 /**
+ * Create the default workspace with system state from the current environment.
+ * The default workspace has isDefault: true, order: -1, no apps/folders/URLs.
+ */
+export async function createDefaultWorkspace(systemState: {
+  audioDevice: string;
+  volume: number;
+  wallpaper: string;
+}): Promise<Workspace> {
+  await ensureWorkspaceDir();
+
+  const dir = getStorageDir();
+  const id = uuidv4();
+  const now = new Date().toISOString();
+
+  const workspace: Workspace = {
+    ...createEmptyWorkspace(id, 'Default', -1),
+    isDefault: true,
+    icon: '\u{1F3E0}',
+    order: -1,
+    createdAt: now,
+    updatedAt: now,
+    system: {
+      focusAssist: null,
+      audioDevice: systemState.audioDevice || null,
+      volume: systemState.volume ?? null,
+    },
+    display: {
+      wallpaper: systemState.wallpaper || null,
+    },
+  };
+
+  const filePath = path.join(dir, `${id}.json`);
+  await fs.writeFile(filePath, JSON.stringify(workspace, null, 2), 'utf-8');
+
+  return workspace;
+}
+
+/**
+ * Find and return the default workspace (isDefault: true).
+ * Returns null if no default workspace exists.
+ */
+export async function getDefaultWorkspace(): Promise<Workspace | null> {
+  const workspaces = await listWorkspaces();
+  return workspaces.find((w) => w.isDefault) ?? null;
+}
+
+/**
  * Delete a workspace by its ID (removes the JSON file).
+ * Throws if attempting to delete the default workspace.
  */
 export async function deleteWorkspace(id: string): Promise<void> {
   await ensureWorkspaceDir();
 
   const dir = getStorageDir();
   const filePath = path.join(dir, `${id}.json`);
+
+  // Prevent deletion of default workspace
+  try {
+    const content = await fs.readFile(filePath, 'utf-8');
+    const workspace = JSON.parse(content) as Workspace;
+    if (workspace.isDefault) {
+      throw new Error('Cannot delete the default workspace');
+    }
+  } catch (err) {
+    if (err instanceof Error && err.message === 'Cannot delete the default workspace') {
+      throw err;
+    }
+    // If file doesn't exist, unlink below will throw appropriately
+  }
+
   await fs.unlink(filePath);
 }
 
@@ -163,7 +226,8 @@ export async function reorderWorkspaces(ids: string[]): Promise<void> {
     const filePath = path.join(dir, `${ids[i]}.json`);
     const content = await fs.readFile(filePath, 'utf-8');
     const workspace = JSON.parse(content) as Workspace;
-    workspace.order = i;
+    // Default workspace always stays at order -1
+    workspace.order = workspace.isDefault ? -1 : i;
     await fs.writeFile(filePath, JSON.stringify(workspace, null, 2), 'utf-8');
   }
 }
