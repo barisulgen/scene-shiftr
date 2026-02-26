@@ -42,9 +42,3 @@ export interface GlobalSettings {
   dryRun: boolean;
   appScale: number;
 }
-
-export interface DryRunLogEntry {
-  timestamp: string;
-  action: string;
-  details: Record<string, unknown>;
-}

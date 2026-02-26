@@ -8,7 +8,7 @@ import { createTray, updateTrayMenu, destroyTray } from './tray';
 import { setTrayRefreshCallback } from './tray-bridge';
 import { setDryRunCheck } from './services/workspace-manager';
 import { ensureAudioModule } from './services/audio-controller';
-import { setLogDir } from './services/dry-run-logger';
+import { setLogBaseDir, rotateOldLogs } from './services/logger';
 import { getSettings, setActiveWorkspaceId, getActiveWorkspaceId } from './store';
 import * as audioController from './services/audio-controller';
 import * as displayController from './services/display-controller';
@@ -72,8 +72,11 @@ app.whenReady().then(async () => {
   setStorageDir(join(appDataDir, 'workspaces'));
   setNircmdPath(join(app.getAppPath(), 'tools', 'nircmd.exe'));
   setAssetsPath(join(app.getAppPath(), 'assets', 'sounds'));
-  setLogDir(join(appDataDir, 'logs'));
+  setLogBaseDir(join(appDataDir, 'logs'));
   setDryRunCheck(() => getSettings().dryRun);
+
+  // Clean up old log files on app launch
+  rotateOldLogs();
 
   // Ensure AudioDeviceCmdlets module is installed (background, non-blocking)
   ensureAudioModule();

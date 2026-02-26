@@ -40,6 +40,20 @@ vi.mock('../../store', () => ({
   setActiveWorkspaceId: vi.fn(),
 }));
 
+vi.mock('../logger', () => ({
+  logActivationStart: vi.fn(),
+  logActivationComplete: vi.fn(),
+  logDeactivationStart: vi.fn(),
+  logDeactivationComplete: vi.fn(),
+  logStep: vi.fn(),
+  logDryRunStep: vi.fn(),
+}));
+
+vi.mock('../explorer-windows', () => ({
+  getOpenExplorerPaths: vi.fn().mockResolvedValue([]),
+  closeExplorerWindows: vi.fn(),
+}));
+
 import * as workspaceStorage from '../workspace-storage';
 import * as processManager from '../process-manager';
 import * as systemSettings from '../system-settings';
