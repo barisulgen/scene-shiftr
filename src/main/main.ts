@@ -6,7 +6,7 @@ import { setNircmdPath } from './services/audio-controller';
 import { setAssetsPath } from './services/sound-player';
 import { createTray, updateTrayMenu, destroyTray } from './tray';
 import { setTrayRefreshCallback } from './tray-bridge';
-import { setDryRunCheck } from './services/workspace-manager';
+import { setDryRunCheck, getIsActivating } from './services/workspace-manager';
 import { ensureAudioModule } from './services/audio-controller';
 import { setLogBaseDir, rotateOldLogs } from './services/logger';
 import { getSettings, setActiveWorkspaceId, getActiveWorkspaceId } from './store';
@@ -37,8 +37,12 @@ function createWindow(): BrowserWindow {
     }
   });
 
-  // Hide to tray instead of closing
+  // Hide to tray instead of closing — block entirely during activation
   win.on('close', (e) => {
+    if (getIsActivating()) {
+      e.preventDefault();
+      return;
+    }
     e.preventDefault();
     win.hide();
   });
@@ -116,6 +120,7 @@ app.whenReady().then(async () => {
     }
   });
   ipcMain.handle('window:close', (e) => {
+    if (getIsActivating()) return;
     BrowserWindow.fromWebContents(e.sender)?.close();
   });
   ipcMain.handle('window:resize', (e, width: number, height: number) => {

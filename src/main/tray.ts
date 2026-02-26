@@ -59,6 +59,7 @@ export async function updateTrayMenu(mainWindow: BrowserWindow): Promise<void> {
     {
       label: 'Quit',
       click: () => {
+        if (workspaceManager.getIsActivating()) return;
         tray?.destroy();
         app.exit(0);
       },

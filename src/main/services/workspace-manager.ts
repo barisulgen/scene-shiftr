@@ -24,6 +24,11 @@ function isSafeUrl(url: string): boolean {
 // In-memory state
 let activeWorkspaceId: string | null = null;
 let openedApps: Set<string> = new Set(); // paths of apps opened by current workspace
+let isActivating = false;
+
+export function getIsActivating(): boolean {
+  return isActivating;
+}
 
 // Dry run check — injected so it's testable without requiring electron-store
 let isDryRunFn: () => boolean = () => false;
@@ -58,6 +63,8 @@ export async function activateWorkspace(
   workspace: Workspace,
   sender: ProgressSender | null
 ): Promise<void> {
+  isActivating = true;
+  try {
   const dryRun = isDryRunFn();
 
   if (dryRun) {
@@ -250,6 +257,9 @@ export async function activateWorkspace(
   await logger.logActivationComplete(Date.now() - startTime, succeeded, total, skipped);
 
   sendProgress(sender, 'Done');
+  } finally {
+    isActivating = false;
+  }
 }
 
 async function activateWorkspaceDryRun(
@@ -345,21 +355,26 @@ export async function deactivateWorkspace(
   // If already on the default workspace, do nothing
   if (activeWorkspaceId === defaultWs.id) return;
 
-  // Get the current workspace to enable smart switching
-  let currentWorkspace: Workspace | undefined;
+  isActivating = true;
   try {
-    currentWorkspace = await workspaceStorage.getWorkspace(activeWorkspaceId);
-  } catch {
-    // If current workspace can't be read, proceed without smart close
+    // Get the current workspace to enable smart switching
+    let currentWorkspace: Workspace | undefined;
+    try {
+      currentWorkspace = await workspaceStorage.getWorkspace(activeWorkspaceId);
+    } catch {
+      // If current workspace can't be read, proceed without smart close
+    }
+
+    const startTime = Date.now();
+    const closingName = currentWorkspace?.name || activeWorkspaceId;
+    await logger.logDeactivationStart(closingName, defaultWs.name);
+
+    await switchWorkspace(defaultWs, sender, currentWorkspace);
+
+    await logger.logDeactivationComplete(Date.now() - startTime);
+  } finally {
+    isActivating = false;
   }
-
-  const startTime = Date.now();
-  const closingName = currentWorkspace?.name || activeWorkspaceId;
-  await logger.logDeactivationStart(closingName, defaultWs.name);
-
-  await switchWorkspace(defaultWs, sender, currentWorkspace);
-
-  await logger.logDeactivationComplete(Date.now() - startTime);
 }
 
 export async function switchWorkspace(
@@ -367,6 +382,8 @@ export async function switchWorkspace(
   sender: ProgressSender | null,
   currentWorkspace?: Workspace
 ): Promise<void> {
+  isActivating = true;
+  try {
   const dryRun = isDryRunFn();
 
   if (dryRun) {
@@ -565,6 +582,9 @@ export async function switchWorkspace(
   await logger.logActivationComplete(Date.now() - startTime, succeeded, total, skipped);
 
   sendProgress(sender, 'Done');
+  } finally {
+    isActivating = false;
+  }
 }
 
 async function switchWorkspaceDryRun(
