@@ -5,6 +5,7 @@ import MainPanel from './components/layout/MainPanel';
 import StatusBar from './components/layout/StatusBar';
 import ForceCloseDialog from './components/common/ForceCloseDialog';
 import UnsavedChangesDialog from './components/common/UnsavedChangesDialog';
+import ActivationOverlay from './components/common/ActivationOverlay';
 import SplashScreen from './components/SplashScreen';
 import TitleBar from './components/layout/TitleBar';
 
@@ -65,6 +66,7 @@ function AppShell(): JSX.Element {
           onKeepEditing={cancelNavigation}
         />
       )}
+      <ActivationOverlay />
     </div>
   );
 }

@@ -63,6 +63,23 @@ const api = {
     ipcRenderer.on('play-sound', handler);
     return () => ipcRenderer.removeListener('play-sound', handler);
   },
+
+  // Activation overlay events
+  onOverlayStart: (cb: (data: unknown) => void) => {
+    const handler = (_e: Electron.IpcRendererEvent, data: unknown): void => cb(data);
+    ipcRenderer.on('activation:overlay-start', handler);
+    return () => ipcRenderer.removeListener('activation:overlay-start', handler);
+  },
+  onOverlayStep: (cb: (data: unknown) => void) => {
+    const handler = (_e: Electron.IpcRendererEvent, data: unknown): void => cb(data);
+    ipcRenderer.on('activation:overlay-step', handler);
+    return () => ipcRenderer.removeListener('activation:overlay-step', handler);
+  },
+  onOverlayComplete: (cb: (data: unknown) => void) => {
+    const handler = (_e: Electron.IpcRendererEvent, data: unknown): void => cb(data);
+    ipcRenderer.on('activation:overlay-complete', handler);
+    return () => ipcRenderer.removeListener('activation:overlay-complete', handler);
+  },
 };
 
 contextBridge.exposeInMainWorld('api', api);

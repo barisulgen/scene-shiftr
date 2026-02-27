@@ -1,6 +1,6 @@
 /// <reference types="electron-vite/node" />
 
-import type { Workspace, AppEntry, GlobalSettings } from '../../shared/types';
+import type { Workspace, AppEntry, GlobalSettings, OverlayStartPayload, OverlayStepPayload, OverlayCompletePayload } from '../../shared/types';
 
 interface SceneShiftrAPI {
   listWorkspaces: () => Promise<Workspace[]>;
@@ -33,6 +33,9 @@ interface SceneShiftrAPI {
   onForceClosePrompt: (cb: (appName: string) => void) => () => void;
   respondForceClose: (app: string, action: 'force' | 'skip') => Promise<void>;
   onPlaySound: (cb: (soundPath: string) => void) => () => void;
+  onOverlayStart: (cb: (data: OverlayStartPayload) => void) => () => void;
+  onOverlayStep: (cb: (data: OverlayStepPayload) => void) => () => void;
+  onOverlayComplete: (cb: (data: OverlayCompletePayload) => void) => () => void;
 }
 
 declare global {
