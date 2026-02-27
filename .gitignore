@@ -7,7 +7,8 @@ out
 CLAUDE.md
 
 # Docs/plans (design artifacts, not shipped)
-docs/
+docs/plans
+docs/legacy-future
 
 # Editor directories and files
 .vscode/*

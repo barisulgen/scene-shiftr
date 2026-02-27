@@ -56,6 +56,7 @@ npm run build
 # Package as Windows installer
 npm run package
 ```
+
 ---
 
 ## Project Structure
@@ -128,6 +129,7 @@ Scene Shiftr directly manipulates your OS — it changes audio devices, registry
 I welcome contributions! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to get started, our development process, and how to submit pull requests.
 
 Quick links:
+
 - [Report a bug](../../issues/new?template=bug_report.md)
 - [Request a feature](../../issues/new?template=feature_request.md)
 - [Contributing guide](CONTRIBUTING.md)
@@ -135,21 +137,45 @@ Quick links:
 
 ---
 
-## Roadmap
+# Roadmap
 
-- [✅] Dry run mode (preview what a workspace will do before activating)
-- [✅] Smart folder management (close other Explorer windows)
-- [✅] Custom title bar and splash screen
-- [✅] App scale setting
-- [✅] Emoji picker for workspace icons
-- [✅] Unsaved changes guard
-- [ ] System state debug panel (compare what the app thinks vs actual system state)
-- [ ] Auto-switch based on time of day or connected devices
-- [ ] Workspace export/import
-- [ ] Community workspace templates
-- [ ] Per-workspace window positions
-- [ ] Workspace usage stats
-- [ ] Theme editing
+> Check /docs/roadmap.md for detailed version
+
+## v0.1.0 ✅ — Alpha
+
+Workspace CRUD, app launch/close, audio switching, volume, wallpaper, folders/URLs, transition sounds, Spotify, tray, smart switching, safety whitelist, dry run.
+
+## v0.2.0 ✅ — Stability & Safety
+
+Default workspace, per-step error handling, JSON validation, resource validation, audio verification, activation queue, mid-activation protection, activation logging, infinite loop fix.
+
+## v0.3.0 — UI/UX Redesign
+
+Full visual overhaul (Linear/Spotify/Raycast inspired), activation animations + per-step progress, inline error states, form redesign with collapsible sections, app picker, sound preview, tray quick-switch, custom icons, keyboard navigation + accessibility.
+
+## v0.4.0 — Quality of Life
+
+Export/import, schema versioning, workspace duplication, workspace icons/colors, Explorer window cleanup, app launch arguments + delays, custom close timeouts, confirm-before-switch, debug panel, activation history, remember window size.
+
+## v0.5.0 — Automation & Triggers
+
+Global hotkeys, auto-switch on device connect, time-based schedules, auto-switch on app launch, startup workspace.
+
+## v0.6.0 — Power Features
+
+Monitor layout switching, per-workspace window positions, usage stats + dashboard, workspace templates, "create from current state" snapshot.
+
+## v0.7.0 — Polish & Hardening
+
+Bundle AudioDeviceCmdlets DLL, comprehensive error messages, undo last activation, toast notifications, performance audit, stress testing.
+
+## v1.0.0 — Public Release
+
+Full test suite passing, landing page, demo video, code-signed installer, auto-updater, onboarding wizard, in-app changelog, opt-in crash reporting.
+
+## Future
+
+Community templates, multiple profiles, portable mode, Mac support, plugin system, workspace chaining, cloud sync, CLI, focus assist (if Windows API exists).
 
 ---
 
