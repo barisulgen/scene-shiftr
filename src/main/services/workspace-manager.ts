@@ -102,6 +102,7 @@ interface ValidationResult {
   validFolders: string[];
   skippedFolders: string[];
   validAudioDevice: boolean;
+  audioDeviceName: string;
   skippedCount: number;
 }
 
@@ -114,6 +115,7 @@ async function validateResources(workspace: Workspace): Promise<ValidationResult
     validFolders: [],
     skippedFolders: [],
     validAudioDevice: true,
+    audioDeviceName: '',
     skippedCount: 0,
   };
 
@@ -155,12 +157,15 @@ async function validateResources(workspace: Workspace): Promise<ValidationResult
     }
   }
 
-  // Validate audio device
+  // Validate audio device and resolve name for display
   if (workspace.system.audioDevice) {
     const devices = await audioController.getAudioDevices();
-    const deviceExists = devices.some(d => d.id === workspace.system.audioDevice);
-    if (!deviceExists) {
+    const matchedDevice = devices.find(d => d.id === workspace.system.audioDevice);
+    if (matchedDevice) {
+      result.audioDeviceName = matchedDevice.name;
+    } else {
       result.validAudioDevice = false;
+      result.audioDeviceName = workspace.system.audioDevice;
       result.skippedCount++;
     }
   }
@@ -192,7 +197,7 @@ function buildActivateSteps(
 
   // Audio device
   if (workspace.system.audioDevice && validation.validAudioDevice) {
-    steps.push({ id: 'audio-device', label: `Switching audio \u2192 ${workspace.system.audioDevice}`, status: 'pending' });
+    steps.push({ id: 'audio-device', label: `Switching audio \u2192 ${validation.audioDeviceName}`, status: 'pending' });
   }
 
   // Volume
@@ -247,7 +252,7 @@ function buildActivateSteps(
 
   // Skipped: audio device
   if (workspace.system.audioDevice && !validation.validAudioDevice) {
-    steps.push({ id: 'audio-device-skipped', label: `Switching audio \u2192 ${workspace.system.audioDevice}`, status: 'skipped', error: 'Device not found' });
+    steps.push({ id: 'audio-device-skipped', label: `Switching audio \u2192 ${validation.audioDeviceName}`, status: 'skipped', error: 'Device not found' });
   }
 
   return steps;
@@ -293,7 +298,7 @@ function buildSwitchSteps(
 
   // Audio device
   if (newWorkspace.system.audioDevice && validation.validAudioDevice) {
-    steps.push({ id: 'audio-device', label: `Switching audio \u2192 ${newWorkspace.system.audioDevice}`, status: 'pending' });
+    steps.push({ id: 'audio-device', label: `Switching audio \u2192 ${validation.audioDeviceName}`, status: 'pending' });
   }
 
   // Volume
@@ -348,7 +353,7 @@ function buildSwitchSteps(
 
   // Skipped: audio device
   if (newWorkspace.system.audioDevice && !validation.validAudioDevice) {
-    steps.push({ id: 'audio-device-skipped', label: `Switching audio \u2192 ${newWorkspace.system.audioDevice}`, status: 'skipped', error: 'Device not found' });
+    steps.push({ id: 'audio-device-skipped', label: `Switching audio \u2192 ${validation.audioDeviceName}`, status: 'skipped', error: 'Device not found' });
   }
 
   return steps;
@@ -475,7 +480,7 @@ export async function activateWorkspace(
   try {
     if (workspace.system.audioDevice && validation.validAudioDevice) {
       total++;
-      sendProgress(sender, `Switching audio to ${workspace.system.audioDevice}...`);
+      sendProgress(sender, `Switching audio to ${validation.audioDeviceName}...`);
       sendOverlayStep(sender, 'audio-device', 'in-progress');
       const audioSuccess = await audioController.setAudioDevice(workspace.system.audioDevice);
       if (audioSuccess) {
