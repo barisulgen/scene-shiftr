@@ -70,6 +70,20 @@ export async function getCurrentDevice(): Promise<string> {
 }
 
 /**
+ * Returns the currently active playback device ID.
+ */
+export async function getCurrentDeviceId(): Promise<string> {
+  try {
+    const { stdout } = await execAsync(
+      'powershell -NoProfile -Command "[Console]::OutputEncoding = [System.Text.Encoding]::UTF8; (Get-AudioDevice -Playback).ID"'
+    );
+    return stdout.trim();
+  } catch {
+    return '';
+  }
+}
+
+/**
  * Sets the default audio device by ID using AudioDeviceCmdlets.
  * Returns true if the switch was confirmed, false if verification failed.
  */

@@ -93,7 +93,7 @@ app.whenReady().then(async () => {
     const existingDefault = await getDefaultWorkspace();
     if (!existingDefault) {
       const [audioDevice, volume, wallpaper] = await Promise.all([
-        audioController.getCurrentDevice().catch(() => ''),
+        audioController.getCurrentDeviceId().catch(() => ''),
         audioController.getVolume().catch(() => 50),
         displayController.getWallpaper().catch(() => ''),
       ]);
