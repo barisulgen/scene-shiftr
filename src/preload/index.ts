@@ -10,6 +10,7 @@ const api = {
     ipcRenderer.invoke('workspace:update', id, data),
   deleteWorkspace: (id: string) => ipcRenderer.invoke('workspace:delete', id),
   reorderWorkspaces: (ids: string[]) => ipcRenderer.invoke('workspace:reorder', ids),
+  resetWorkspaces: () => ipcRenderer.invoke('workspace:reset'),
 
   // Workspace actions
   activateWorkspace: (id: string) => ipcRenderer.invoke('workspace:activate', id),
@@ -30,6 +31,9 @@ const api = {
   openFileDialog: (filters?: Record<string, unknown>) =>
     ipcRenderer.invoke('dialog:open-file', filters),
   openFolderDialog: () => ipcRenderer.invoke('dialog:open-folder'),
+
+  // Shell
+  openLogsFolder: () => ipcRenderer.invoke('shell:open-logs'),
 
   // Settings
   getSettings: () => ipcRenderer.invoke('settings:get'),

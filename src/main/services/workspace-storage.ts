@@ -209,6 +209,26 @@ export async function deleteWorkspace(id: string): Promise<void> {
 }
 
 /**
+ * Delete ALL workspace JSON files from the storage directory.
+ * Used by the reset feature to start fresh.
+ */
+export async function deleteAllWorkspaces(): Promise<void> {
+  await ensureWorkspaceDir();
+
+  const dir = getStorageDir();
+  const entries = await fs.readdir(dir);
+  const jsonFiles = entries.filter((f) => f.endsWith('.json'));
+
+  for (const file of jsonFiles) {
+    try {
+      await fs.unlink(path.join(dir, file));
+    } catch {
+      // Ignore errors for individual files
+    }
+  }
+}
+
+/**
  * Reorder workspaces by updating each workspace's order field
  * to match its index in the provided array of IDs.
  */

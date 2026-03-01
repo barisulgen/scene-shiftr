@@ -1,7 +1,10 @@
 import { ipcMain, BrowserWindow } from 'electron';
 import * as storage from '../services/workspace-storage';
 import * as manager from '../services/workspace-manager';
+import * as audioController from '../services/audio-controller';
+import * as displayController from '../services/display-controller';
 import { refreshTrayMenu } from '../tray-bridge';
+import { setActiveWorkspaceId } from '../store';
 
 export function registerWorkspaceHandlers(): void {
   ipcMain.handle('workspace:list', () => storage.listWorkspaces());
@@ -39,5 +42,30 @@ export function registerWorkspaceHandlers(): void {
     const win = BrowserWindow.fromWebContents(e.sender);
     await manager.deactivateWorkspace(win?.webContents ?? null);
     refreshTrayMenu();
+  });
+
+  ipcMain.handle('workspace:reset', async () => {
+    // 1. Delete all existing workspace files
+    await storage.deleteAllWorkspaces();
+
+    // 2. Read current system state
+    const [audioDevice, volume, wallpaper] = await Promise.all([
+      audioController.getCurrentDevice(),
+      audioController.getVolume(),
+      displayController.getWallpaper(),
+    ]);
+
+    // 3. Create a new default workspace
+    const defaultWs = await storage.createDefaultWorkspace({
+      audioDevice,
+      volume,
+      wallpaper,
+    });
+
+    // 4. Set it as active
+    setActiveWorkspaceId(defaultWs.id);
+
+    refreshTrayMenu();
+    return defaultWs;
   });
 }

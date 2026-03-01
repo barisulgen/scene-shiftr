@@ -1,6 +1,11 @@
-import { ipcMain, dialog, BrowserWindow } from 'electron';
+import { ipcMain, dialog, shell, BrowserWindow, app } from 'electron';
+import * as path from 'path';
 
 export function registerShellHandlers(): void {
+  ipcMain.handle('shell:open-logs', async () => {
+    const logsDir = path.join(app.getPath('appData'), 'scene-shiftr', 'logs');
+    return shell.openPath(logsDir);
+  });
   ipcMain.handle('dialog:open-file', async (e, filters) => {
     const win = BrowserWindow.fromWebContents(e.sender);
     if (!win) return null;

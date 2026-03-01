@@ -7,6 +7,7 @@ interface SceneShiftrAPI {
   updateWorkspace: (id: string, data: Partial<Workspace>) => Promise<Workspace>;
   deleteWorkspace: (id: string) => Promise<void>;
   reorderWorkspaces: (ids: string[]) => Promise<void>;
+  resetWorkspaces: () => Promise<Workspace>;
   activateWorkspace: (id: string) => Promise<void>;
   deactivateWorkspace: () => Promise<void>;
   detectApps: () => Promise<AppEntry[]>;
@@ -20,6 +21,7 @@ interface SceneShiftrAPI {
   previewSound: (soundId: string) => Promise<void>;
   openFileDialog: (filters?: { name: string; extensions: string[] }[]) => Promise<string | null>;
   openFolderDialog: () => Promise<string | null>;
+  openLogsFolder: () => Promise<string>;
   getSettings: () => Promise<GlobalSettings>;
   updateSettings: (data: Partial<GlobalSettings>) => Promise<GlobalSettings>;
   windowMinimize: () => Promise<void>;
