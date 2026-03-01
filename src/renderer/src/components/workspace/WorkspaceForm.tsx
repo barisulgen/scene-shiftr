@@ -9,6 +9,18 @@ interface WorkspaceFormProps {
   workspace?: Workspace;
 }
 
+// Shared input style used by all text inputs, selects, etc.
+const inputStyle: React.CSSProperties = {
+  background: 'rgba(255,255,255,0.04)',
+  border: '1px solid rgba(255,255,255,0.08)',
+  borderRadius: '10px',
+  padding: '12px 16px',
+  color: 'var(--text-primary)',
+  fontSize: '14px',
+};
+
+const inputFocusBorder = 'rgba(232,99,107,0.3)';
+
 export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.Element {
   const { navigateAway, setHasUnsavedChanges } = useApp();
   const { createWorkspace, updateWorkspace } = useWorkspaces();
@@ -37,17 +49,17 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
   const [playlistUri, setPlaylistUriRaw] = useState(workspace?.audio.playlistUri ?? '');
 
   // Dirty-wrapping setters — these mark the form as having unsaved changes
-  const setName = (v: string) => { setNameRaw(v); markDirty(); };
-  const setIcon = (v: string) => { setIconRaw(v); markDirty(); };
-  const setAppsToOpen = (v: AppEntry[]) => { setAppsToOpenRaw(v); markDirty(); };
-  const setAppsToClose = (v: AppEntry[]) => { setAppsToCloseRaw(v); markDirty(); };
-  const setAudioDevice = (v: string | null) => { setAudioDeviceRaw(v); markDirty(); };
-  const setVolume = (v: number) => { setVolumeRaw(v); markDirty(); };
-  const setVolumeEnabled = (v: boolean) => { setVolumeEnabledRaw(v); markDirty(); };
-  const setTransitionSound = (v: string | null) => { setTransitionSoundRaw(v); markDirty(); };
-  const setMusicEnabled = (v: boolean) => { setMusicEnabledRaw(v); markDirty(); };
-  const setPlaylistUri = (v: string) => { setPlaylistUriRaw(v); markDirty(); };
-  const setCloseFolders = (v: boolean) => { setCloseFoldersRaw(v); markDirty(); };
+  const setName = (v: string): void => { setNameRaw(v); markDirty(); };
+  const setIcon = (v: string): void => { setIconRaw(v); markDirty(); };
+  const setAppsToOpen = (v: AppEntry[]): void => { setAppsToOpenRaw(v); markDirty(); };
+  const setAppsToClose = (v: AppEntry[]): void => { setAppsToCloseRaw(v); markDirty(); };
+  const setAudioDevice = (v: string | null): void => { setAudioDeviceRaw(v); markDirty(); };
+  const setVolume = (v: number): void => { setVolumeRaw(v); markDirty(); };
+  const setVolumeEnabled = (v: boolean): void => { setVolumeEnabledRaw(v); markDirty(); };
+  const setTransitionSound = (v: string | null): void => { setTransitionSoundRaw(v); markDirty(); };
+  const setMusicEnabled = (v: boolean): void => { setMusicEnabledRaw(v); markDirty(); };
+  const setPlaylistUri = (v: string): void => { setPlaylistUriRaw(v); markDirty(); };
+  const setCloseFolders = (v: boolean): void => { setCloseFoldersRaw(v); markDirty(); };
 
   const [saving, setSaving] = useState(false);
 
@@ -161,78 +173,70 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
     navigateAway('main');
   };
 
-  // --- Shared style constants ---
-  const inputStyle: React.CSSProperties = {
-    background: 'var(--bg-elevated)',
-    border: '1px solid var(--border-light)',
-    color: 'var(--text-primary)',
-  };
-
-  const inputClass =
-    'w-full py-2.5 px-3 rounded-lg text-sm placeholder:opacity-50 focus:outline-none focus:ring-1';
-
-  const cardStyle: React.CSSProperties = {
-    background: 'var(--bg-card)',
-    border: '1px solid var(--border)',
-  };
+  // Extract wallpaper filename for display
+  const wallpaperFileName = wallpaper
+    ? wallpaper.replace(/\\/g, '/').split('/').pop() ?? wallpaper
+    : null;
 
   return (
     <div className="flex flex-col h-full">
-      {/* Scrollable content */}
-      <div className="flex-1 overflow-y-auto px-8 py-6">
-        {/* ---- Header ---- */}
-        <div className="flex items-start justify-between mb-6">
-          <div>
-            <h1
-              className="text-xl font-bold mb-1"
-              style={{ color: 'var(--text-primary)' }}
-            >
-              {isEdit ? 'Edit Workspace' : 'Create Workspace'}
-            </h1>
-            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-              Configure apps, settings, and vibes for this scene.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={handleCancel}
-            className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 cursor-pointer transition-colors duration-150"
-            style={{ background: 'var(--bg-elevated)' }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'var(--bg-elevated)';
-            }}
+      {/* ---- Sticky Header ---- */}
+      <div
+        className="flex items-center justify-between px-8 py-4 shrink-0"
+        style={{
+          background: 'var(--bg-base)',
+          borderBottom: '1px solid rgba(255,255,255,0.06)',
+        }}
+      >
+        <h1
+          className="text-lg font-semibold"
+          style={{ color: 'var(--text-primary)' }}
+        >
+          {isEdit ? 'Edit Workspace' : 'Create Workspace'}
+        </h1>
+        <button
+          type="button"
+          onClick={handleCancel}
+          className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 cursor-pointer transition-colors duration-150"
+          style={{ background: 'rgba(255,255,255,0.04)' }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.08)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.04)';
+          }}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+            className="w-4 h-4"
+            style={{ color: 'var(--text-secondary)' }}
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-              className="w-4 h-4"
-              style={{ color: 'var(--text-secondary)' }}
-            >
-              <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
-            </svg>
-          </button>
-        </div>
+            <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
+          </svg>
+        </button>
+      </div>
 
-        <div className="max-w-3xl space-y-6">
-          {/* ---- 1. Workspace Name Section ---- */}
-          <section>
-            <label
-              className="block text-[10px] font-medium tracking-widest uppercase mb-1.5"
-              style={{ color: 'var(--text-muted)' }}
+      {/* ---- Scrollable Middle ---- */}
+      <div className="flex-1 overflow-y-auto px-8 py-6">
+        <div className="max-w-2xl">
+
+          {/* ======== GROUP 1 — IDENTITY ======== */}
+          <div className="mb-8">
+            <div
+              className="text-[10px] font-semibold uppercase mb-4"
+              style={{ color: '#5a5a6e', letterSpacing: '0.15em' }}
             >
-              Workspace Name
-            </label>
-            <div className="flex items-center gap-2">
+              Identity
+            </div>
+            <div className="flex items-center gap-3">
               {isDefaultWorkspace ? (
                 <div
                   className="w-10 h-10 rounded-lg flex items-center justify-center text-xl shrink-0"
                   style={{
-                    backgroundColor: 'var(--bg-elevated)',
-                    border: '1px solid var(--border-light)',
+                    background: 'rgba(255,255,255,0.04)',
+                    border: '1px solid rgba(255,255,255,0.08)',
                   }}
                 >
                   {'\u{1F3E0}'}
@@ -246,611 +250,540 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
                 onChange={(e) => setName(e.target.value)}
                 placeholder="My Workspace"
                 required
-                className={`${inputClass} flex-1`}
-                style={{
-                  ...inputStyle,
-                  '--tw-ring-color': 'var(--accent)',
-                } as React.CSSProperties}
+                className="flex-1 focus:outline-none"
+                style={inputStyle}
+                onFocus={(e) => { e.currentTarget.style.borderColor = inputFocusBorder; }}
+                onBlur={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; }}
               />
             </div>
-          </section>
+          </div>
 
-          {/* ---- 2. Apps & Programs Card ---- */}
+          {/* ======== GROUP 2 — WHAT HAPPENS ======== */}
           {!isDefaultWorkspace && (
-          <section className="rounded-xl p-5" style={cardStyle}>
-            {/* Card header */}
-            <div className="flex items-center gap-2 mb-4">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                className="w-5 h-5"
-                style={{ color: 'var(--accent)' }}
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M4.25 2A2.25 2.25 0 0 0 2 4.25v2.5A2.25 2.25 0 0 0 4.25 9h2.5A2.25 2.25 0 0 0 9 6.75v-2.5A2.25 2.25 0 0 0 6.75 2h-2.5Zm0 9A2.25 2.25 0 0 0 2 13.25v2.5A2.25 2.25 0 0 0 4.25 18h2.5A2.25 2.25 0 0 0 9 15.75v-2.5A2.25 2.25 0 0 0 6.75 11h-2.5Zm9-9A2.25 2.25 0 0 0 11 4.25v2.5A2.25 2.25 0 0 0 13.25 9h2.5A2.25 2.25 0 0 0 18 6.75v-2.5A2.25 2.25 0 0 0 15.75 2h-2.5Zm0 9A2.25 2.25 0 0 0 11 13.25v2.5A2.25 2.25 0 0 0 13.25 18h2.5A2.25 2.25 0 0 0 18 15.75v-2.5A2.25 2.25 0 0 0 15.75 11h-2.5Z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              <h2
-                className="text-sm font-semibold flex-1"
-                style={{ color: 'var(--text-primary)' }}
-              >
-                Apps &amp; Programs
-              </h2>
-              <span
-                className="text-xs px-2 py-0.5 rounded-full"
-                style={{
-                  background: 'var(--accent-soft)',
-                  color: 'var(--accent)',
-                }}
-              >
-                {appsToOpen.length + appsToClose.length} Selected
-              </span>
-            </div>
-
-            {/* Two columns */}
-            <div className="grid grid-cols-2 gap-4">
-              {/* Open these */}
-              <div>
-                <div className="flex items-center gap-1.5 mb-2">
-                  <span
-                    className="w-2 h-2 rounded-full"
-                    style={{ background: 'var(--accent)' }}
-                  />
-                  <span
-                    className="text-[10px] font-medium tracking-widest uppercase"
-                    style={{ color: 'var(--text-muted)' }}
-                  >
-                    Open These
-                  </span>
+            <div className="mb-8">
+              {/* Divider */}
+              <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }} />
+              <div className="pt-6">
+                <div
+                  className="text-[10px] font-semibold uppercase mb-4"
+                  style={{ color: '#5a5a6e', letterSpacing: '0.15em' }}
+                >
+                  What Happens
                 </div>
-                <AppSelector
-                  value={appsToOpen}
-                  onChange={setAppsToOpen}
-                  label="Select apps to open"
-                />
-              </div>
 
-              {/* Close these */}
-              <div>
-                <div className="flex items-center gap-1.5 mb-2">
-                  <span
-                    className="w-2 h-2 rounded-full"
-                    style={{ background: 'var(--accent)' }}
-                  />
-                  <span
-                    className="text-[10px] font-medium tracking-widest uppercase"
-                    style={{ color: 'var(--text-muted)' }}
-                  >
-                    Close These
-                  </span>
-                </div>
-                <AppSelector
-                  value={appsToClose}
-                  onChange={setAppsToClose}
-                  label="Select apps to close"
-                />
-              </div>
-            </div>
-          </section>
-          )}
-
-          {/* ---- 3. Folders & URLs ---- */}
-          {!isDefaultWorkspace && (
-          <div className="grid grid-cols-2 gap-4">
-            {/* Folders card */}
-            <section className="rounded-xl p-5" style={cardStyle}>
-              <div className="flex items-center gap-2 mb-3">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                  className="w-5 h-5"
-                  style={{ color: 'var(--accent)' }}
-                >
-                  <path d="M3.75 3A1.75 1.75 0 0 0 2 4.75v3.26a3.235 3.235 0 0 1 1.75-.51h12.5c.644 0 1.245.188 1.75.51V6.75A1.75 1.75 0 0 0 16.25 5h-4.836a.25.25 0 0 1-.177-.073L9.823 3.513A1.75 1.75 0 0 0 8.586 3H3.75ZM3.75 9A1.75 1.75 0 0 0 2 10.75v4.5c0 .966.784 1.75 1.75 1.75h12.5A1.75 1.75 0 0 0 18 15.25v-4.5A1.75 1.75 0 0 0 16.25 9H3.75Z" />
-                </svg>
-                <h2
-                  className="text-sm font-semibold flex-1"
-                  style={{ color: 'var(--text-primary)' }}
-                >
-                  Folders
-                </h2>
-                <button
-                  type="button"
-                  onClick={handleAddFolder}
-                  className="cursor-pointer transition-colors duration-150 rounded-full"
-                  style={{ color: 'var(--accent)' }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.color = 'var(--accent-hover)';
-                    e.currentTarget.style.transform = 'scale(1.1)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.color = 'var(--accent)';
-                    e.currentTarget.style.transform = 'scale(1)';
-                  }}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                    className="w-5 h-5"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm.75-11.25a.75.75 0 0 0-1.5 0v2.5h-2.5a.75.75 0 0 0 0 1.5h2.5v2.5a.75.75 0 0 0 1.5 0v-2.5h2.5a.75.75 0 0 0 0-1.5h-2.5v-2.5Z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </button>
-              </div>
-
-              {/* Close other Explorer windows toggle */}
-              <div
-                className="flex items-center justify-between py-2 px-1 mb-2 rounded-lg"
-              >
-                <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                  Close other folders
-                </span>
-                <ToggleSwitch checked={closeFolders} onChange={setCloseFolders} />
-              </div>
-
-              <div className="space-y-1.5">
-                {folders.length === 0 && (
-                  <p className="text-xs py-3 text-center" style={{ color: 'var(--text-muted)' }}>
-                    No folders added
-                  </p>
-                )}
-                {folders.map((folder, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg"
-                    style={{ background: 'var(--bg-elevated)' }}
-                  >
+                {/* --- Apps & Programs --- */}
+                <div className="mb-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    {/* Grid icon */}
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 16 16"
+                      viewBox="0 0 20 20"
                       fill="currentColor"
-                      className="w-3.5 h-3.5 shrink-0"
-                      style={{ color: 'var(--text-muted)' }}
+                      className="w-4 h-4"
+                      style={{ color: '#8888A0' }}
                     >
-                      <path d="M2 3.5A1.5 1.5 0 0 1 3.5 2h2.879a1.5 1.5 0 0 1 1.06.44l1.122 1.12A1.5 1.5 0 0 0 9.62 4H12.5A1.5 1.5 0 0 1 14 5.5v1.382a1.5 1.5 0 0 0-1-.382h-10a1.5 1.5 0 0 0-1 .382V3.5ZM2 9.607a1.5 1.5 0 0 1 1-1.415V13.5A1.5 1.5 0 0 0 4.5 15h7a1.5 1.5 0 0 0 1.5-1.5V8.192a1.5 1.5 0 0 1 1 1.415V13.5a3 3 0 0 1-3 3h-7a3 3 0 0 1-3-3V9.607Z" />
+                      <path
+                        fillRule="evenodd"
+                        d="M4.25 2A2.25 2.25 0 0 0 2 4.25v2.5A2.25 2.25 0 0 0 4.25 9h2.5A2.25 2.25 0 0 0 9 6.75v-2.5A2.25 2.25 0 0 0 6.75 2h-2.5Zm0 9A2.25 2.25 0 0 0 2 13.25v2.5A2.25 2.25 0 0 0 4.25 18h2.5A2.25 2.25 0 0 0 9 15.75v-2.5A2.25 2.25 0 0 0 6.75 11h-2.5Zm9-9A2.25 2.25 0 0 0 11 4.25v2.5A2.25 2.25 0 0 0 13.25 9h2.5A2.25 2.25 0 0 0 18 6.75v-2.5A2.25 2.25 0 0 0 15.75 2h-2.5Zm0 9A2.25 2.25 0 0 0 11 13.25v2.5A2.25 2.25 0 0 0 13.25 18h2.5A2.25 2.25 0 0 0 18 15.75v-2.5A2.25 2.25 0 0 0 15.75 11h-2.5Z"
+                        clipRule="evenodd"
+                      />
                     </svg>
+                    <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+                      Apps &amp; Programs
+                    </span>
                     <span
-                      className="flex-1 text-xs truncate"
-                      style={{ color: 'var(--text-secondary)' }}
+                      className="text-[10px] px-2 py-0.5 rounded-full font-medium"
+                      style={{
+                        background: 'rgba(255,255,255,0.06)',
+                        color: '#8888A0',
+                      }}
                     >
-                      {folder}
+                      {appsToOpen.length + appsToClose.length} Selected
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-6">
+                    {/* Open these column */}
+                    <div>
+                      <div className="flex items-center gap-1.5 mb-2">
+                        <span
+                          className="w-2 h-2 rounded-full"
+                          style={{ background: '#6382f1' }}
+                        />
+                        <span
+                          className="text-[10px] font-semibold uppercase"
+                          style={{ color: '#5a5a6e', letterSpacing: '0.15em' }}
+                        >
+                          Open These
+                        </span>
+                      </div>
+                      <AppSelector
+                        value={appsToOpen}
+                        onChange={setAppsToOpen}
+                        label=""
+                        variant="open"
+                      />
+                    </div>
+
+                    {/* Close these column */}
+                    <div>
+                      <div className="flex items-center gap-1.5 mb-2">
+                        <span
+                          className="w-2 h-2 rounded-full"
+                          style={{ background: 'var(--accent)' }}
+                        />
+                        <span
+                          className="text-[10px] font-semibold uppercase"
+                          style={{ color: '#5a5a6e', letterSpacing: '0.15em' }}
+                        >
+                          Close These
+                        </span>
+                      </div>
+                      <AppSelector
+                        value={appsToClose}
+                        onChange={setAppsToClose}
+                        label=""
+                        variant="close"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* --- Folders --- */}
+                <div className="mb-6">
+                  <div className="flex items-center gap-2 mb-3">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                      className="w-4 h-4"
+                      style={{ color: '#8888A0' }}
+                    >
+                      <path d="M3.75 3A1.75 1.75 0 0 0 2 4.75v3.26a3.235 3.235 0 0 1 1.75-.51h12.5c.644 0 1.245.188 1.75.51V6.75A1.75 1.75 0 0 0 16.25 5h-4.836a.25.25 0 0 1-.177-.073L9.823 3.513A1.75 1.75 0 0 0 8.586 3H3.75ZM3.75 9A1.75 1.75 0 0 0 2 10.75v4.5c0 .966.784 1.75 1.75 1.75h12.5A1.75 1.75 0 0 0 18 15.25v-4.5A1.75 1.75 0 0 0 16.25 9H3.75Z" />
+                    </svg>
+                    <span className="text-sm font-medium flex-1" style={{ color: 'var(--text-primary)' }}>
+                      Folders
                     </span>
                     <button
                       type="button"
-                      onClick={() => handleRemoveFolder(idx)}
-                      className="shrink-0 cursor-pointer transition-colors duration-150"
-                      style={{ color: 'var(--text-muted)' }}
+                      onClick={handleAddFolder}
+                      className="text-xs cursor-pointer transition-colors duration-150 px-2.5 py-1 rounded-lg"
+                      style={{
+                        color: '#8888A0',
+                        background: 'transparent',
+                        border: '1px solid rgba(255,255,255,0.08)',
+                      }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.color = 'var(--accent)';
+                        e.currentTarget.style.color = 'var(--text-primary)';
+                        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)';
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.color = 'var(--text-muted)';
+                        e.currentTarget.style.color = '#8888A0';
+                        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
                       }}
                     >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 16 16"
-                        fill="currentColor"
-                        className="w-3.5 h-3.5"
-                      >
-                        <path d="M5.28 4.22a.75.75 0 0 0-1.06 1.06L6.94 8l-2.72 2.72a.75.75 0 1 0 1.06 1.06L8 9.06l2.72 2.72a.75.75 0 1 0 1.06-1.06L9.06 8l2.72-2.72a.75.75 0 0 0-1.06-1.06L8 6.94 5.28 4.22Z" />
-                      </svg>
+                      + Add Folder
                     </button>
                   </div>
-                ))}
-              </div>
-            </section>
 
-            {/* URLs card */}
-            <section className="rounded-xl p-5" style={cardStyle}>
-              <div className="flex items-center gap-2 mb-3">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                  className="w-5 h-5"
-                  style={{ color: 'var(--accent)' }}
-                >
-                  <path d="M12.232 4.232a2.5 2.5 0 0 1 3.536 3.536l-1.225 1.224a.75.75 0 0 0 1.061 1.06l1.224-1.224a4 4 0 0 0-5.656-5.656l-3 3a4 4 0 0 0 .225 5.865.75.75 0 0 0 .977-1.138 2.5 2.5 0 0 1-.142-3.667l3-3Z" />
-                  <path d="M11.603 7.963a.75.75 0 0 0-.977 1.138 2.5 2.5 0 0 1 .142 3.667l-3 3a2.5 2.5 0 0 1-3.536-3.536l1.225-1.224a.75.75 0 0 0-1.061-1.06l-1.224 1.224a4 4 0 1 0 5.656 5.656l3-3a4 4 0 0 0-.225-5.865Z" />
-                </svg>
-                <h2
-                  className="text-sm font-semibold flex-1"
-                  style={{ color: 'var(--text-primary)' }}
-                >
-                  URLs
-                </h2>
-                <button
-                  type="button"
-                  onClick={handleAddUrl}
-                  disabled={!urlInput.trim()}
-                  className="cursor-pointer transition-colors duration-150 rounded-full disabled:opacity-40 disabled:cursor-not-allowed"
-                  style={{ color: 'var(--accent)' }}
-                  onMouseEnter={(e) => {
-                    if (!e.currentTarget.disabled) {
-                      e.currentTarget.style.color = 'var(--accent-hover)';
-                      e.currentTarget.style.transform = 'scale(1.1)';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.color = 'var(--accent)';
-                    e.currentTarget.style.transform = 'scale(1)';
-                  }}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                    className="w-5 h-5"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm.75-11.25a.75.75 0 0 0-1.5 0v2.5h-2.5a.75.75 0 0 0 0 1.5h2.5v2.5a.75.75 0 0 0 1.5 0v-2.5h2.5a.75.75 0 0 0 0-1.5h-2.5v-2.5Z"
-                      clipRule="evenodd"
+                  {/* Close other folders toggle */}
+                  <div className="flex items-center justify-between py-2 mb-2">
+                    <span className="text-xs" style={{ color: '#8888A0' }}>
+                      Close other folders
+                    </span>
+                    <ToggleSwitch checked={closeFolders} onChange={setCloseFolders} />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    {folders.length === 0 && (
+                      <p className="text-xs py-3 text-center" style={{ color: '#5a5a6e' }}>
+                        No folders added
+                      </p>
+                    )}
+                    {folders.map((folder, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-center gap-2 px-3 py-2 rounded-lg"
+                        style={{ background: 'rgba(255,255,255,0.04)' }}
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 16 16"
+                          fill="currentColor"
+                          className="w-3.5 h-3.5 shrink-0"
+                          style={{ color: '#5a5a6e' }}
+                        >
+                          <path d="M2 3.5A1.5 1.5 0 0 1 3.5 2h2.879a1.5 1.5 0 0 1 1.06.44l1.122 1.12A1.5 1.5 0 0 0 9.62 4H12.5A1.5 1.5 0 0 1 14 5.5v1.382a1.5 1.5 0 0 0-1-.382h-10a1.5 1.5 0 0 0-1 .382V3.5ZM2 9.607a1.5 1.5 0 0 1 1-1.415V13.5A1.5 1.5 0 0 0 4.5 15h7a1.5 1.5 0 0 0 1.5-1.5V8.192a1.5 1.5 0 0 1 1 1.415V13.5a3 3 0 0 1-3 3h-7a3 3 0 0 1-3-3V9.607Z" />
+                        </svg>
+                        <span
+                          className="flex-1 text-xs truncate"
+                          style={{ color: 'var(--text-secondary)' }}
+                        >
+                          {folder}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveFolder(idx)}
+                          className="shrink-0 cursor-pointer transition-colors duration-150"
+                          style={{ color: '#5a5a6e' }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.color = 'var(--text-primary)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.color = '#5a5a6e';
+                          }}
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 16 16"
+                            fill="currentColor"
+                            className="w-3.5 h-3.5"
+                          >
+                            <path d="M5.28 4.22a.75.75 0 0 0-1.06 1.06L6.94 8l-2.72 2.72a.75.75 0 1 0 1.06 1.06L8 9.06l2.72 2.72a.75.75 0 1 0 1.06-1.06L9.06 8l2.72-2.72a.75.75 0 0 0-1.06-1.06L8 6.94 5.28 4.22Z" />
+                          </svg>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* --- URLs --- */}
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                      className="w-4 h-4"
+                      style={{ color: '#8888A0' }}
+                    >
+                      <path d="M12.232 4.232a2.5 2.5 0 0 1 3.536 3.536l-1.225 1.224a.75.75 0 0 0 1.061 1.06l1.224-1.224a4 4 0 0 0-5.656-5.656l-3 3a4 4 0 0 0 .225 5.865.75.75 0 0 0 .977-1.138 2.5 2.5 0 0 1-.142-3.667l3-3Z" />
+                      <path d="M11.603 7.963a.75.75 0 0 0-.977 1.138 2.5 2.5 0 0 1 .142 3.667l-3 3a2.5 2.5 0 0 1-3.536-3.536l1.225-1.224a.75.75 0 0 0-1.061-1.06l-1.224 1.224a4 4 0 1 0 5.656 5.656l3-3a4 4 0 0 0-.225-5.865Z" />
+                    </svg>
+                    <span className="text-sm font-medium flex-1" style={{ color: 'var(--text-primary)' }}>
+                      URLs
+                    </span>
+                  </div>
+
+                  {/* URL input + Add button */}
+                  <div className="flex gap-2 mb-3">
+                    <input
+                      type="text"
+                      value={urlInput}
+                      onChange={(e) => setUrlInput(e.target.value)}
+                      onKeyDown={handleUrlKeyDown}
+                      placeholder="https://example.com"
+                      className="flex-1 focus:outline-none"
+                      style={inputStyle}
+                      onFocus={(e) => { e.currentTarget.style.borderColor = inputFocusBorder; }}
+                      onBlur={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; }}
                     />
-                  </svg>
-                </button>
+                    <button
+                      type="button"
+                      onClick={handleAddUrl}
+                      disabled={!urlInput.trim()}
+                      className="shrink-0 px-4 rounded-lg text-sm font-medium cursor-pointer transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
+                      style={{
+                        background: 'rgba(255,255,255,0.04)',
+                        border: '1px solid rgba(255,255,255,0.08)',
+                        color: '#8888A0',
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!e.currentTarget.disabled) {
+                          e.currentTarget.style.color = 'var(--text-primary)';
+                          e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.color = '#8888A0';
+                        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
+                      }}
+                    >
+                      Add
+                    </button>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    {urls.length === 0 && (
+                      <p className="text-xs py-3 text-center" style={{ color: '#5a5a6e' }}>
+                        No URLs added
+                      </p>
+                    )}
+                    {urls.map((url, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-center gap-2 px-3 py-2 rounded-lg"
+                        style={{ background: 'rgba(255,255,255,0.04)' }}
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 16 16"
+                          fill="currentColor"
+                          className="w-3.5 h-3.5 shrink-0"
+                          style={{ color: '#5a5a6e' }}
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M8.914 6.025a.75.75 0 0 1 1.06 0 3.5 3.5 0 0 1 0 4.95l-2 2a3.5 3.5 0 0 1-5.396-4.402.75.75 0 0 1 1.251.827 2 2 0 0 0 3.085 2.514l2-2a2 2 0 0 0 0-2.828.75.75 0 0 1 0-1.06Z"
+                            clipRule="evenodd"
+                          />
+                          <path
+                            fillRule="evenodd"
+                            d="M7.086 9.975a.75.75 0 0 1-1.06 0 3.5 3.5 0 0 1 0-4.95l2-2a3.5 3.5 0 0 1 5.396 4.402.75.75 0 0 1-1.251-.827 2 2 0 0 0-3.085-2.514l-2 2a2 2 0 0 0 0 2.828.75.75 0 0 1 0 1.06Z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                        <span
+                          className="flex-1 text-xs truncate"
+                          style={{ color: 'var(--text-secondary)' }}
+                        >
+                          {url}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveUrl(idx)}
+                          className="shrink-0 cursor-pointer transition-colors duration-150"
+                          style={{ color: '#5a5a6e' }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.color = 'var(--text-primary)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.color = '#5a5a6e';
+                          }}
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 16 16"
+                            fill="currentColor"
+                            className="w-3.5 h-3.5"
+                          >
+                            <path d="M5.28 4.22a.75.75 0 0 0-1.06 1.06L6.94 8l-2.72 2.72a.75.75 0 1 0 1.06 1.06L8 9.06l2.72 2.72a.75.75 0 1 0 1.06-1.06L9.06 8l2.72-2.72a.75.75 0 0 0-1.06-1.06L8 6.94 5.28 4.22Z" />
+                          </svg>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ======== GROUP 3 — SYSTEM & VIBES ======== */}
+          <div>
+            {/* Divider */}
+            <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }} />
+            <div className="pt-6">
+              <div
+                className="text-[10px] font-semibold uppercase mb-4"
+                style={{ color: '#5a5a6e', letterSpacing: '0.15em' }}
+              >
+                System &amp; Vibes
               </div>
 
-              {/* URL input */}
-              <div className="mb-3">
-                <input
-                  type="text"
-                  value={urlInput}
-                  onChange={(e) => setUrlInput(e.target.value)}
-                  onKeyDown={handleUrlKeyDown}
-                  placeholder="https://example.com"
-                  className={inputClass}
+              {/* Audio device */}
+              <div className="mb-4">
+                <label
+                  className="block text-xs mb-1.5"
+                  style={{ color: '#8888A0' }}
+                >
+                  Audio Device
+                </label>
+                <select
+                  value={audioDevice ?? ''}
+                  onChange={(e) => setAudioDevice(e.target.value || null)}
+                  className="w-full focus:outline-none"
                   style={{
                     ...inputStyle,
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    '--tw-ring-color': 'var(--accent)',
-                  } as React.CSSProperties}
-                />
+                  }}
+                  onFocus={(e) => { e.currentTarget.style.borderColor = inputFocusBorder; }}
+                  onBlur={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; }}
+                >
+                  <option value="">Don&apos;t change</option>
+                  {audioDevices.map((device) => (
+                    <option key={device.id} value={device.id}>
+                      {device.name}
+                    </option>
+                  ))}
+                </select>
               </div>
 
-              <div className="space-y-1.5">
-                {urls.length === 0 && (
-                  <p className="text-xs py-3 text-center" style={{ color: 'var(--text-muted)' }}>
-                    No URLs added
-                  </p>
-                )}
-                {urls.map((url, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg"
-                    style={{ background: 'var(--bg-elevated)' }}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 16 16"
-                      fill="currentColor"
-                      className="w-3.5 h-3.5 shrink-0"
-                      style={{ color: 'var(--text-muted)' }}
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M8.914 6.025a.75.75 0 0 1 1.06 0 3.5 3.5 0 0 1 0 4.95l-2 2a3.5 3.5 0 0 1-5.396-4.402.75.75 0 0 1 1.251.827 2 2 0 0 0 3.085 2.514l2-2a2 2 0 0 0 0-2.828.75.75 0 0 1 0-1.06Z"
-                        clipRule="evenodd"
-                      />
-                      <path
-                        fillRule="evenodd"
-                        d="M7.086 9.975a.75.75 0 0 1-1.06 0 3.5 3.5 0 0 1 0-4.95l2-2a3.5 3.5 0 0 1 5.396 4.402.75.75 0 0 1-1.251-.827 2 2 0 0 0-3.085-2.514l-2 2a2 2 0 0 0 0 2.828.75.75 0 0 1 0 1.06Z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    <span
-                      className="flex-1 text-xs truncate"
-                      style={{ color: 'var(--text-secondary)' }}
-                    >
-                      {url}
+              {/* Volume */}
+              <div className="mb-4">
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-xs" style={{ color: '#8888A0' }}>
+                    Volume
+                  </label>
+                  <label className="flex items-center gap-1.5 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={!volumeEnabled}
+                      onChange={(e) => setVolumeEnabled(!e.target.checked)}
+                      className="rounded w-3.5 h-3.5"
+                      style={{ accentColor: 'var(--accent)' }}
+                    />
+                    <span className="text-xs" style={{ color: '#8888A0' }}>
+                      Don&apos;t change
                     </span>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveUrl(idx)}
-                      className="shrink-0 cursor-pointer transition-colors duration-150"
-                      style={{ color: 'var(--text-muted)' }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.color = 'var(--accent)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.color = 'var(--text-muted)';
-                      }}
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 16 16"
-                        fill="currentColor"
-                        className="w-3.5 h-3.5"
-                      >
-                        <path d="M5.28 4.22a.75.75 0 0 0-1.06 1.06L6.94 8l-2.72 2.72a.75.75 0 1 0 1.06 1.06L8 9.06l2.72 2.72a.75.75 0 1 0 1.06-1.06L9.06 8l2.72-2.72a.75.75 0 0 0-1.06-1.06L8 6.94 5.28 4.22Z" />
-                      </svg>
-                    </button>
-                  </div>
-                ))}
+                  </label>
+                </div>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="range"
+                    min={0}
+                    max={100}
+                    value={volume}
+                    onChange={(e) => setVolume(Number(e.target.value))}
+                    disabled={!volumeEnabled}
+                    className="flex-1 h-1.5 rounded-full appearance-none disabled:opacity-40 disabled:cursor-not-allowed"
+                    style={{
+                      background: volumeEnabled
+                        ? `linear-gradient(to right, var(--accent) ${volume}%, var(--bg-elevated) ${volume}%)`
+                        : 'var(--bg-elevated)',
+                      accentColor: 'var(--accent)',
+                    }}
+                  />
+                  <span
+                    className="text-xs font-mono w-8 text-right"
+                    style={{
+                      color: volumeEnabled ? 'var(--text-secondary)' : '#5a5a6e',
+                    }}
+                  >
+                    {volumeEnabled ? `${volume}%` : '--'}
+                  </span>
+                </div>
               </div>
-            </section>
-          </div>
-          )}
 
-          {/* ---- 4. Display Card ---- */}
-          <section className="rounded-xl p-5" style={cardStyle}>
-            <div className="flex items-center gap-2 mb-5">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                className="w-5 h-5"
-                style={{ color: 'var(--accent)' }}
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M2 4.25A2.25 2.25 0 0 1 4.25 2h11.5A2.25 2.25 0 0 1 18 4.25v8.5A2.25 2.25 0 0 1 15.75 15h-3.105a3.501 3.501 0 0 0 1.1 1.677A.75.75 0 0 1 13.26 18H6.74a.75.75 0 0 1-.484-1.323A3.501 3.501 0 0 0 7.355 15H4.25A2.25 2.25 0 0 1 2 12.75v-8.5Zm1.5 0a.75.75 0 0 1 .75-.75h11.5a.75.75 0 0 1 .75.75v7.5a.75.75 0 0 1-.75.75H4.25a.75.75 0 0 1-.75-.75v-7.5Z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              <h2
-                className="text-sm font-semibold"
-                style={{ color: 'var(--text-primary)' }}
-              >
-                Display
-              </h2>
-            </div>
-
-            <div className="space-y-4">
               {/* Wallpaper */}
-              <div>
+              <div className="mb-4">
                 <label
-                  className="block text-[10px] font-medium tracking-widest uppercase mb-2"
-                  style={{ color: 'var(--text-muted)' }}
+                  className="block text-xs mb-1.5"
+                  style={{ color: '#8888A0' }}
                 >
                   Wallpaper
                 </label>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                   <button
                     type="button"
                     onClick={handleBrowseWallpaper}
-                    className="shrink-0 px-4 py-2.5 rounded-lg text-sm font-medium cursor-pointer transition-colors duration-150"
+                    className="shrink-0 px-4 py-2.5 rounded-lg text-sm cursor-pointer transition-colors duration-150"
                     style={{
-                      background: 'var(--bg-elevated)',
-                      border: '1px solid var(--border-light)',
-                      color: 'var(--text-secondary)',
+                      background: 'rgba(255,255,255,0.04)',
+                      border: '1px solid rgba(255,255,255,0.08)',
+                      color: '#8888A0',
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)';
-                      e.currentTarget.style.borderColor = 'var(--text-muted)';
                       e.currentTarget.style.color = 'var(--text-primary)';
+                      e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)';
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'var(--bg-elevated)';
-                      e.currentTarget.style.borderColor = 'var(--border-light)';
-                      e.currentTarget.style.color = 'var(--text-secondary)';
+                      e.currentTarget.style.color = '#8888A0';
+                      e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
                     }}
                   >
                     Browse...
                   </button>
                   {wallpaper ? (
-                    <>
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      <img
+                        src={`file://${wallpaper.replace(/\\/g, '/')}`}
+                        alt="Wallpaper preview"
+                        className="w-12 h-12 rounded-lg object-cover shrink-0"
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                      />
                       <span
-                        className="flex-1 text-xs truncate px-3 py-2.5 rounded-lg"
-                        style={{
-                          background: 'var(--bg-elevated)',
-                          color: 'var(--text-secondary)',
-                        }}
+                        className="text-xs truncate flex-1"
+                        style={{ color: 'var(--text-secondary)' }}
                       >
-                        {wallpaper}
+                        {wallpaperFileName}
                       </span>
                       <button
                         type="button"
                         onClick={() => { setWallpaper(null); markDirty(); }}
                         className="shrink-0 text-xs cursor-pointer transition-colors duration-150"
-                        style={{ color: 'var(--text-muted)' }}
+                        style={{ color: '#5a5a6e' }}
                         onMouseEnter={(e) => {
-                          e.currentTarget.style.color = 'var(--accent)';
+                          e.currentTarget.style.color = 'var(--text-primary)';
                         }}
                         onMouseLeave={(e) => {
-                          e.currentTarget.style.color = 'var(--text-muted)';
+                          e.currentTarget.style.color = '#5a5a6e';
                         }}
                       >
                         Clear
                       </button>
-                    </>
+                    </div>
                   ) : (
-                    <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                    <span className="text-xs" style={{ color: '#5a5a6e' }}>
                       Not set
                     </span>
                   )}
                 </div>
               </div>
 
-            </div>
-          </section>
-
-          {/* ---- 6. Sound Card ---- */}
-          <section className="rounded-xl p-5" style={cardStyle}>
-            <div className="flex items-center gap-2 mb-5">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                className="w-5 h-5"
-                style={{ color: 'var(--accent)' }}
-              >
-                <path d="M10 3.75a.75.75 0 0 0-1.264-.546L4.703 7H3.167a.75.75 0 0 0-.7.48A6.985 6.985 0 0 0 2 10c0 .887.165 1.737.468 2.52.111.29.39.48.7.48h1.535l4.033 3.796A.75.75 0 0 0 10 16.25V3.75ZM15.95 5.05a.75.75 0 0 0-1.06 1.061 5.5 5.5 0 0 1 0 7.778.75.75 0 0 0 1.06 1.06 7 7 0 0 0 0-9.899Z" />
-                <path d="M13.829 7.172a.75.75 0 0 0-1.061 1.06 2.5 2.5 0 0 1 0 3.536.75.75 0 0 0 1.06 1.06 4 4 0 0 0 0-5.656Z" />
-              </svg>
-              <h2
-                className="text-sm font-semibold"
-                style={{ color: 'var(--text-primary)' }}
-              >
-                Sound
-              </h2>
-            </div>
-
-            <div className="space-y-5">
-              {/* Audio Device + Volume — side by side */}
-              <div className="grid grid-cols-2 gap-4">
-                {/* Audio Device (left) */}
-                <div>
-                  <div className="text-sm mb-1" style={{ color: 'var(--text-primary)' }}>
-                    Audio Device
-                  </div>
-                  <div className="text-xs mb-2" style={{ color: 'var(--text-muted)' }}>
-                    Output device
-                  </div>
-                  <select
-                    value={audioDevice ?? ''}
-                    onChange={(e) => setAudioDevice(e.target.value || null)}
-                    className="w-full px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-1"
-                    style={{
-                      ...inputStyle,
-                      '--tw-ring-color': 'var(--accent)',
-                    } as React.CSSProperties}
-                  >
-                    <option value="">Don&apos;t change</option>
-                    {audioDevices.map((device) => (
-                      <option key={device.id} value={device.id}>
-                        {device.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Volume (right) */}
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <div className="text-sm" style={{ color: 'var(--text-primary)' }}>
-                      Volume
-                    </div>
-                    <label className="flex items-center gap-1.5 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={!volumeEnabled}
-                        onChange={(e) => setVolumeEnabled(!e.target.checked)}
-                        className="rounded w-3.5 h-3.5"
-                        style={{ accentColor: 'var(--accent)' }}
-                      />
-                      <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                        Don&apos;t change
-                      </span>
-                    </label>
-                  </div>
-                  <div className="text-xs mb-2" style={{ color: 'var(--text-muted)' }}>
-                    System volume level
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="range"
-                      min={0}
-                      max={100}
-                      value={volume}
-                      onChange={(e) => setVolume(Number(e.target.value))}
-                      disabled={!volumeEnabled}
-                      className="flex-1 h-1.5 rounded-full appearance-none disabled:opacity-40 disabled:cursor-not-allowed"
-                      style={{
-                        background: volumeEnabled
-                          ? `linear-gradient(to right, var(--accent) ${volume}%, var(--bg-elevated) ${volume}%)`
-                          : 'var(--bg-elevated)',
-                        accentColor: 'var(--accent)',
-                      }}
-                    />
-                    <span
-                      className="text-xs font-mono w-8 text-right"
-                      style={{
-                        color: volumeEnabled ? 'var(--text-secondary)' : 'var(--text-muted)',
-                      }}
-                    >
-                      {volumeEnabled ? volume : '--'}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
+              {/* Transition Sound + Playlist URI — only for non-default */}
               {!isDefaultWorkspace && (
-              <>
-              {/* Divider */}
-              <div className="border-t" style={{ borderColor: 'var(--border)' }} />
-              {/* Transition Sound */}
-              <div>
-                <label
-                  className="block text-[10px] font-medium tracking-widest uppercase mb-2"
-                  style={{ color: 'var(--text-muted)' }}
-                >
-                  Transition Sound
-                </label>
-                <TransitionSoundPicker value={transitionSound} onChange={setTransitionSound} />
-              </div>
-
-              {/* Divider */}
-              <div className="border-t" style={{ borderColor: 'var(--border)' }} />
-
-              {/* Music */}
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <div>
-                    <div className="text-sm" style={{ color: 'var(--text-primary)' }}>
-                      Auto-launch Music
-                    </div>
-                    <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                      Start a music app when scene activates
-                    </div>
-                  </div>
-                  <ToggleSwitch checked={musicEnabled} onChange={setMusicEnabled} />
-                </div>
-                <div className="space-y-3 mt-3" style={{ opacity: musicEnabled ? 1 : 0.4 }}>
-                  <div>
+                <>
+                  {/* Transition Sound */}
+                  <div className="mb-4">
                     <label
-                      className="block text-[10px] font-medium tracking-widest uppercase mb-1.5"
-                      style={{ color: 'var(--text-muted)' }}
+                      className="block text-xs mb-1.5"
+                      style={{ color: '#8888A0' }}
                     >
-                      Playlist URI
+                      Transition Sound
                     </label>
+                    <TransitionSoundPicker value={transitionSound} onChange={setTransitionSound} />
+                  </div>
+
+                  {/* Playlist URI */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="text-xs" style={{ color: '#8888A0' }}>
+                        Playlist URI
+                      </label>
+                      <ToggleSwitch checked={musicEnabled} onChange={setMusicEnabled} />
+                    </div>
                     <input
                       type="text"
                       value={playlistUri}
                       onChange={(e) => setPlaylistUri(e.target.value)}
                       disabled={!musicEnabled}
-                      placeholder="https://open.spotify.com/playlist/54f9OUIs5yrqYz0yJbmmYH"
-                      className={`${inputClass} disabled:cursor-not-allowed`}
-                      style={{
-                        ...inputStyle,
-                        '--tw-ring-color': 'var(--accent)',
-                      } as React.CSSProperties}
+                      placeholder="spotify:playlist:37i9dQZF1DXcBWIGoYBM5M"
+                      className="w-full focus:outline-none disabled:opacity-40 disabled:cursor-not-allowed"
+                      style={inputStyle}
+                      onFocus={(e) => { e.currentTarget.style.borderColor = inputFocusBorder; }}
+                      onBlur={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; }}
                     />
                   </div>
-                </div>
-              </div>
-              </>
+                </>
               )}
             </div>
-          </section>
+          </div>
+
         </div>
       </div>
 
-      {/* ---- Bottom Bar ---- */}
+      {/* ---- Sticky Footer ---- */}
       <div
-        className="flex items-center justify-end gap-3 px-8 py-4 border-t"
-        style={{ borderColor: 'var(--border)' }}
+        className="flex items-center justify-between px-8 py-4 shrink-0"
+        style={{
+          borderTop: '1px solid rgba(255,255,255,0.06)',
+        }}
       >
         <button
           type="button"
           onClick={handleCancel}
-          className="px-4 py-2 text-sm font-medium cursor-pointer transition-colors duration-150"
-          style={{ color: 'var(--text-secondary)' }}
+          className="px-4 py-2.5 rounded-lg text-sm font-medium cursor-pointer transition-colors duration-150"
+          style={{
+            background: 'transparent',
+            border: '1px solid rgba(255,255,255,0.08)',
+            color: '#9CA3AF',
+          }}
           onMouseEnter={(e) => {
+            e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)';
             e.currentTarget.style.color = 'var(--text-primary)';
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.color = 'var(--text-secondary)';
+            e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
+            e.currentTarget.style.color = '#9CA3AF';
           }}
         >
           Cancel
@@ -859,7 +792,7 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
           type="button"
           onClick={handleSave}
           disabled={!name.trim() || saving}
-          className="px-5 py-2.5 rounded-lg text-sm font-medium text-white cursor-pointer transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-6 py-2.5 rounded-lg text-sm font-medium text-white cursor-pointer transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
           style={{ background: 'var(--accent)' }}
           onMouseEnter={(e) => {
             if (!e.currentTarget.disabled) {
@@ -888,10 +821,10 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
 /* ---- EmojiPicker sub-component ---- */
 
 const EMOJI_OPTIONS = [
-  '🖥️', '🎮', '💼', '🎨', '🎵', '📚', '🏠', '🌙',
-  '☀️', '🚀', '💻', '🎯', '📷', '🎬', '✏️', '🔧',
-  '🎧', '📱', '🌍', '⚡', '🎭', '🏋️', '🎸', '🍿',
-  '📝', '🔬', '🎪', '🏖️', '🎤', '🧩', '🎲', '🌈',
+  '\u{1F5A5}\u{FE0F}', '\u{1F3AE}', '\u{1F4BC}', '\u{1F3A8}', '\u{1F3B5}', '\u{1F4DA}', '\u{1F3E0}', '\u{1F319}',
+  '\u{2600}\u{FE0F}', '\u{1F680}', '\u{1F4BB}', '\u{1F3AF}', '\u{1F4F7}', '\u{1F3AC}', '\u{270F}\u{FE0F}', '\u{1F527}',
+  '\u{1F3A7}', '\u{1F4F1}', '\u{1F30D}', '\u{26A1}', '\u{1F3AD}', '\u{1F3CB}\u{FE0F}', '\u{1F3B8}', '\u{1F37F}',
+  '\u{1F4DD}', '\u{1F52C}', '\u{1F3AA}', '\u{1F3D6}\u{FE0F}', '\u{1F3A4}', '\u{1F9E9}', '\u{1F3B2}', '\u{1F308}',
 ];
 
 function EmojiPicker({
@@ -921,26 +854,24 @@ function EmojiPicker({
         onClick={() => setIsOpen(!isOpen)}
         className="w-10 h-10 rounded-lg flex items-center justify-center text-xl shrink-0 cursor-pointer transition-colors duration-150"
         style={{
-          backgroundColor: 'var(--bg-elevated)',
-          border: '1px solid var(--border-light)',
+          background: 'rgba(255,255,255,0.04)',
+          border: '1px solid rgba(255,255,255,0.08)',
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)';
-          e.currentTarget.style.borderColor = 'var(--text-muted)';
+          e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)';
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = 'var(--bg-elevated)';
-          e.currentTarget.style.borderColor = 'var(--border-light)';
+          e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
         }}
       >
-        {value || '🖥️'}
+        {value || '\u{1F5A5}\u{FE0F}'}
       </button>
       {isOpen && (
         <div
           className="absolute top-full left-0 mt-2 p-2 rounded-xl shadow-2xl z-30 grid grid-cols-8 gap-1"
           style={{
             backgroundColor: 'var(--bg-card)',
-            border: '1px solid var(--border-light)',
+            border: '1px solid rgba(255,255,255,0.08)',
             width: '280px',
           }}
         >
@@ -1004,4 +935,3 @@ function ToggleSwitch({
     </button>
   );
 }
-

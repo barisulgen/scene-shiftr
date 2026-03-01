@@ -5,9 +5,36 @@ interface AppSelectorProps {
   value: AppEntry[];
   onChange: (apps: AppEntry[]) => void;
   label: string;
+  variant?: 'open' | 'close';
 }
 
-export default function AppSelector({ value, onChange, label }: AppSelectorProps): JSX.Element {
+// Shared input style matching WorkspaceForm
+const selectorInputStyle: React.CSSProperties = {
+  background: 'rgba(255,255,255,0.04)',
+  border: '1px solid rgba(255,255,255,0.08)',
+  borderRadius: '10px',
+  padding: '12px 16px',
+  color: 'var(--text-primary)',
+  fontSize: '14px',
+};
+
+const inputFocusBorder = 'rgba(232,99,107,0.3)';
+
+// Tag styles per variant
+const tagStyles: Record<'open' | 'close', { bg: string; color: string; border: string }> = {
+  open: {
+    bg: 'rgba(99,130,241,0.12)',
+    color: '#8ba4f6',
+    border: '1px solid rgba(99,130,241,0.15)',
+  },
+  close: {
+    bg: 'var(--accent-soft)',
+    color: 'var(--accent)',
+    border: '1px solid rgba(232,93,93,0.15)',
+  },
+};
+
+export default function AppSelector({ value, onChange, label, variant = 'open' }: AppSelectorProps): JSX.Element {
   const [detectedApps, setDetectedApps] = useState<AppEntry[]>([]);
   const [search, setSearch] = useState('');
   const [isOpen, setIsOpen] = useState(false);
@@ -58,6 +85,8 @@ export default function AppSelector({ value, onChange, label }: AppSelectorProps
     } else {
       onChange([...value, app]);
     }
+    setSearch('');
+    setIsOpen(false);
   };
 
   const removeApp = (app: AppEntry): void => {
@@ -82,183 +111,160 @@ export default function AppSelector({ value, onChange, label }: AppSelectorProps
     }
   };
 
+  const currentTagStyle = tagStyles[variant];
+
   return (
     <div ref={containerRef} className="space-y-2">
-      <label className="block text-sm" style={{ color: 'var(--text-muted)' }}>{label}</label>
+      {label && <label className="block text-sm" style={{ color: '#8888A0' }}>{label}</label>}
 
-      {/* Search input and browse button */}
-      <div className="flex gap-2 relative">
-        <div className="relative flex-1">
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              if (!isOpen) setIsOpen(true);
-            }}
-            onFocus={() => setIsOpen(true)}
-            placeholder="Search detected apps..."
-            className="w-full px-3 py-2 rounded-md text-sm placeholder:text-zinc-500 focus:outline-none focus:ring-1"
+      {/* Search input */}
+      <div className="relative">
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            if (!isOpen) setIsOpen(true);
+          }}
+          onFocus={() => setIsOpen(true)}
+          placeholder="Search detected apps..."
+          className="w-full focus:outline-none"
+          style={selectorInputStyle}
+          onFocusCapture={(e) => { e.currentTarget.style.borderColor = inputFocusBorder; }}
+          onBlur={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; }}
+        />
+        {loading && (
+          <div className="absolute right-4 top-1/2 -translate-y-1/2">
+            <div
+              className="w-4 h-4 rounded-full animate-spin"
+              style={{
+                borderWidth: '2px',
+                borderStyle: 'solid',
+                borderColor: 'rgba(255,255,255,0.08)',
+                borderTopColor: '#8888A0',
+              }}
+            />
+          </div>
+        )}
+
+        {/* Dropdown list */}
+        {isOpen && filteredApps.length > 0 && (
+          <div
+            className="max-h-48 overflow-y-auto rounded-lg absolute left-0 right-0 z-20 shadow-xl"
             style={{
-              backgroundColor: 'var(--bg-elevated)',
-              borderWidth: '1px',
-              borderStyle: 'solid',
-              borderColor: 'var(--border)',
-              color: 'var(--text-primary)',
-              // @ts-expect-error CSS custom property for Tailwind ring color
-              '--tw-ring-color': 'var(--accent)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              backgroundColor: 'var(--bg-card)',
+              top: '100%',
+              marginTop: '4px',
             }}
-          />
-          {loading && (
-            <div className="absolute right-3 top-1/2 -translate-y-1/2">
-              <div
-                className="w-4 h-4 rounded-full animate-spin"
-                style={{
-                  borderWidth: '2px',
-                  borderStyle: 'solid',
-                  borderColor: 'var(--border)',
-                  borderTopColor: 'var(--text-muted)',
-                }}
-              />
-            </div>
-          )}
-        </div>
-        <button
-          type="button"
-          onClick={handleBrowseExe}
-          className="shrink-0 px-3 py-2 rounded-md text-sm cursor-pointer transition-colors duration-150"
-          style={{
-            borderWidth: '1px',
-            borderStyle: 'solid',
-            borderColor: 'var(--border)',
-            color: 'var(--text-secondary)',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.borderColor = 'var(--text-muted)';
-            e.currentTarget.style.color = 'var(--text-primary)';
-            e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.borderColor = 'var(--border)';
-            e.currentTarget.style.color = 'var(--text-secondary)';
-            e.currentTarget.style.backgroundColor = 'transparent';
-          }}
-        >
-          Browse .exe
-        </button>
-
-      {/* Dropdown list — absolute positioned to overlay */}
-      {isOpen && filteredApps.length > 0 && (
-        <div
-          className="max-h-48 overflow-y-auto rounded-md absolute left-0 right-0 z-20 shadow-xl"
-          style={{
-            borderWidth: '1px',
-            borderStyle: 'solid',
-            borderColor: 'var(--border)',
-            backgroundColor: 'var(--bg-elevated)',
-            top: '100%',
-            marginTop: '4px',
-          }}
-        >
-          {filteredApps.map((app) => (
-            <button
-              key={app.path}
-              type="button"
-              onClick={() => toggleApp(app)}
-              title={app.path}
-              className="flex items-center gap-2 w-full px-3 py-1.5 text-left text-sm transition-colors duration-100"
-              style={{ backgroundColor: 'transparent' }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)')
-              }
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
-            >
-              <span
-                className="flex items-center justify-center w-4 h-4 rounded shrink-0"
-                style={
-                  isSelected(app)
-                    ? {
-                        backgroundColor: 'var(--accent)',
-                        borderWidth: '1px',
-                        borderStyle: 'solid',
-                        borderColor: 'var(--accent-hover)',
-                      }
-                    : {
-                        backgroundColor: 'var(--bg-card)',
-                        borderWidth: '1px',
-                        borderStyle: 'solid',
-                        borderColor: 'var(--border)',
-                      }
+          >
+            {filteredApps.map((app) => (
+              <button
+                key={app.path}
+                type="button"
+                onClick={() => toggleApp(app)}
+                title={app.path}
+                className="flex items-center gap-2 w-full px-3 py-1.5 text-left text-sm transition-colors duration-100"
+                style={{ backgroundColor: 'transparent' }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)')
                 }
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
               >
-                {isSelected(app) && (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 16 16"
-                    fill="currentColor"
-                    className="w-3 h-3 text-white"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M12.416 3.376a.75.75 0 0 1 .208 1.04l-5 7.5a.75.75 0 0 1-1.154.114l-3-3a.75.75 0 0 1 1.06-1.06l2.353 2.353 4.493-6.74a.75.75 0 0 1 1.04-.207Z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                )}
-              </span>
-              <span className="truncate" style={{ color: 'var(--text-primary)' }}>
-                {app.name}
-              </span>
-            </button>
-          ))}
-        </div>
-      )}
+                <span
+                  className="flex items-center justify-center w-4 h-4 rounded shrink-0"
+                  style={
+                    isSelected(app)
+                      ? {
+                          backgroundColor: 'var(--accent)',
+                          border: '1px solid var(--accent-hover)',
+                        }
+                      : {
+                          backgroundColor: 'rgba(255,255,255,0.04)',
+                          border: '1px solid rgba(255,255,255,0.08)',
+                        }
+                  }
+                >
+                  {isSelected(app) && (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 16 16"
+                      fill="currentColor"
+                      className="w-3 h-3 text-white"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M12.416 3.376a.75.75 0 0 1 .208 1.04l-5 7.5a.75.75 0 0 1-1.154.114l-3-3a.75.75 0 0 1 1.06-1.06l2.353 2.353 4.493-6.74a.75.75 0 0 1 1.04-.207Z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  )}
+                </span>
+                <span className="truncate" style={{ color: 'var(--text-primary)' }}>
+                  {app.name}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
 
-      {isOpen && !loading && filteredApps.length === 0 && search && (
-        <div
-          className="px-3 py-2 rounded-md text-sm absolute left-0 right-0 z-20 shadow-xl"
-          style={{
-            borderWidth: '1px',
-            borderStyle: 'solid',
-            borderColor: 'var(--border)',
-            backgroundColor: 'var(--bg-elevated)',
-            color: 'var(--text-muted)',
-            top: '100%',
-            marginTop: '4px',
-          }}
-        >
-          No apps found matching &quot;{search}&quot;
-        </div>
-      )}
+        {isOpen && !loading && filteredApps.length === 0 && search && (
+          <div
+            className="px-3 py-2 rounded-lg text-sm absolute left-0 right-0 z-20 shadow-xl"
+            style={{
+              border: '1px solid rgba(255,255,255,0.08)',
+              backgroundColor: 'var(--bg-card)',
+              color: '#5a5a6e',
+              top: '100%',
+              marginTop: '4px',
+            }}
+          >
+            No apps found matching &quot;{search}&quot;
+          </div>
+        )}
       </div>
 
-      {/* Selected apps as chips */}
+      {/* Browse .exe text link */}
+      <button
+        type="button"
+        onClick={handleBrowseExe}
+        className="text-xs cursor-pointer transition-colors duration-150 hover:underline"
+        style={{ color: '#5a5a6e', background: 'none', border: 'none', padding: 0 }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.color = '#8888A0';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.color = '#5a5a6e';
+        }}
+      >
+        Can&apos;t find it? Browse for .exe
+      </button>
+
+      {/* Selected apps as tags */}
       {value.length > 0 && (
         <div className="flex flex-wrap gap-1.5 pt-1">
           {value.map((app) => (
             <span
               key={app.path}
-              className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs"
               style={{
-                backgroundColor: 'var(--bg-elevated)',
-                borderWidth: '1px',
-                borderStyle: 'solid',
-                borderColor: 'var(--border)',
-                color: 'var(--text-secondary)',
+                backgroundColor: currentTagStyle.bg,
+                border: currentTagStyle.border,
+                color: currentTagStyle.color,
               }}
             >
               {app.name}
               <button
                 type="button"
                 onClick={() => removeApp(app)}
-                className="ml-0.5 transition-colors"
-                style={{ color: 'var(--text-muted)' }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.color = 'var(--text-primary)')
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.color = 'var(--text-muted)')
-                }
+                className="ml-0.5 transition-colors cursor-pointer"
+                style={{ color: currentTagStyle.color, opacity: 0.7 }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.opacity = '1';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.opacity = '0.7';
+                }}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
