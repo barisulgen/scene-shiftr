@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron';
+import { app, shell, BrowserWindow, ipcMain, nativeTheme } from 'electron';
 import { join } from 'path';
 import { registerAllHandlers } from './ipc';
 import { setStorageDir, getDefaultWorkspace, createDefaultWorkspace } from './services/workspace-storage';
@@ -66,6 +66,9 @@ function createWindow(): BrowserWindow {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 app.whenReady().then(async () => {
+  // Force dark theme for native controls (select dropdowns, checkboxes, etc.)
+  nativeTheme.themeSource = 'dark';
+
   // Set app user model id for windows
   if (process.platform === 'win32') {
     app.setAppUserModelId(!app.isPackaged ? process.execPath : 'com.scene-shiftr');
