@@ -27,6 +27,16 @@ body {
   color: var(--text-primary);
 }
 
+/* Force dark dropdown options for select elements */
+select {
+  color-scheme: dark;
+}
+
+option {
+  background-color: #1a1625;
+  color: #F5F5F5;
+}
+
 /* Custom scrollbar for dark theme */
 ::-webkit-scrollbar {
   width: 6px;
