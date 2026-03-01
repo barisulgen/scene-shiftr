@@ -77,17 +77,17 @@ export default function TransitionSoundPicker({
         <select
           value={selectValue}
           onChange={(e) => handleSelectChange(e.target.value)}
-          className="flex-1 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-1"
+          className="flex-1 focus:outline-none"
           style={{
             backgroundColor: 'var(--bg-elevated)',
-            borderWidth: '1px',
-            borderStyle: 'solid',
-            borderColor: 'var(--border)',
+            border: '1px solid var(--border)',
+            borderRadius: '10px',
+            padding: '12px 16px',
             color: 'var(--text-primary)',
-            colorScheme: 'dark',
-            // @ts-expect-error CSS custom property for Tailwind ring color
-            '--tw-ring-color': 'var(--accent)',
+            fontSize: '14px',
           }}
+          onFocus={(e) => { e.currentTarget.style.borderColor = 'rgba(232,99,107,0.3)'; }}
+          onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--border)'; }}
         >
           <option value="">None</option>
           {BUILT_IN_SOUNDS.map((sound) => (

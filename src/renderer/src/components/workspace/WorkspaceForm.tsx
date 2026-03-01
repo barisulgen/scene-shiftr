@@ -9,10 +9,20 @@ interface WorkspaceFormProps {
   workspace?: Workspace;
 }
 
-// Shared input style used by all text inputs, selects, etc.
+// Shared input style for text inputs
 const inputStyle: React.CSSProperties = {
   background: 'rgba(255,255,255,0.04)',
   border: '1px solid rgba(255,255,255,0.08)',
+  borderRadius: '10px',
+  padding: '12px 16px',
+  color: 'var(--text-primary)',
+  fontSize: '14px',
+};
+
+// Shared select style — uses solid bg so native dropdown options render dark
+const selectStyle: React.CSSProperties = {
+  backgroundColor: 'var(--bg-elevated)',
+  border: '1px solid var(--border)',
   borderRadius: '10px',
   padding: '12px 16px',
   color: 'var(--text-primary)',
@@ -594,12 +604,9 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
                     value={audioDevice ?? ''}
                     onChange={(e) => setAudioDevice(e.target.value || null)}
                     className="w-full focus:outline-none"
-                    style={{
-                      ...inputStyle,
-                      colorScheme: 'dark',
-                    }}
+                    style={selectStyle}
                     onFocus={(e) => { e.currentTarget.style.borderColor = inputFocusBorder; }}
-                    onBlur={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; }}
+                    onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--border)'; }}
                   >
                     <option value="">Don&apos;t change</option>
                     {audioDevices.map((device) => (
