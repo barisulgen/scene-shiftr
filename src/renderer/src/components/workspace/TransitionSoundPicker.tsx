@@ -84,6 +84,7 @@ export default function TransitionSoundPicker({
             borderStyle: 'solid',
             borderColor: 'var(--border)',
             color: 'var(--text-primary)',
+            colorScheme: 'dark',
             // @ts-expect-error CSS custom property for Tailwind ring color
             '--tw-ring-color': 'var(--accent)',
           }}
