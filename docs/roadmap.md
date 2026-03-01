@@ -53,37 +53,41 @@ What didn't make it:
 
 ## v0.3.0 — UI/UX Redesign
 
-Priority: make it look and feel premium.
-
 **Visual Overhaul**
 
 - [ ] Full UI redesign (Linear/Spotify/Raycast inspired, logo color palette)
-- [ ] Custom app icon and tray icon
-- [ ] Dark mode / light mode support (or pick one and commit)
+- [x] Custom app icon and tray icon
 
 **Main Window**
 
-- [ ] Main view — active and inactive states with clear visual distinction
-- [ ] Smooth activation animations and progress feedback (per-step progress bar, not just a spinner)
-- [ ] Activation error states — show which steps succeeded/failed/skipped inline, not just in logs
+- [x] Main view — active and inactive states with clear visual distinction
+- ~~[ ] Smooth activation animations and progress feedback (per-step progress bar, not just a spinner)~~
+- [x] Scene activate/deactivate progress tracking/loading overlay
+- [x] Activation error states — show which steps succeeded/failed/skipped inline, not just in logs
 
 **Forms & Settings**
 
-- [ ] Create/edit workspace form redesign
-- [ ] Collapsible sections with smart defaults (expanded if data, collapsed if empty)
-- [ ] Transition sound preview/play button in the form
-- [ ] App picker — browse/search installed apps instead of manually entering exe paths
-- [ ] Settings page redesign
+- [x] Create/edit workspace form redesign
+- [x] Collapsible sections with smart defaults (expanded if data, collapsed if empty)
+- [x] Transition sound preview/play button in the form
+- [x] App picker — browse/search installed apps instead of manually entering exe paths
+- [x] Settings page redesign
 
 **System Tray**
 
-- [ ] System tray popup redesign — quick-switch between workspaces without opening the main window
+- [x] System tray popup redesign — quick-switch between workspaces without opening the main window
 
 **Accessibility**
 
-- [ ] Full keyboard navigation — tab through all interactive elements, Enter to activate
 - [ ] Visible focus indicators on all controls
 - [ ] Sufficient color contrast ratios (WCAG AA minimum)
+
+---
+
+What didn't make it:
+
+- [ ] Dark/light mode switch support
+- [ ] Full keyboard navigation — tab through all interactive elements, Enter to activate
 
 ---
 

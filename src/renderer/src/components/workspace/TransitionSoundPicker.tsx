@@ -70,9 +70,6 @@ export default function TransitionSoundPicker({
 
   return (
     <div className="space-y-2">
-      <label className="block text-sm" style={{ color: 'var(--text-muted)' }}>
-        Transition Sound
-      </label>
       <div className="flex gap-2">
         <select
           value={selectValue}
