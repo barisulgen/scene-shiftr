@@ -17,22 +17,21 @@ Scene Shiftr turns that entire ritual into one click.
 ### What a Workspace Can Control
 
 - **Apps** — open and close specific programs
-- **System settings** — focus assist, audio output device, volume level
-- **Display** — wallpaper, multi-monitor layout
+- **Sound** — audio output device, volume level, transition sounds, auto-launch Spotify/music playlists
+- **Display** — wallpaper
 - **Folders & URLs** — open specific folders (with smart close), open websites
-- **Sound** — transition sounds, auto-launch Spotify/music playlists
-- **Dry Run Mode** — log all actions to JSON instead of executing them (for testing)
+- **Dry Run Mode** — log all actions to daily log files instead of executing them (for testing)
 
 ### Example
 
-> You right-click the tray icon, click "Gaming." A boot-up sound plays. Slack, Outlook, and VS Code close. Steam, Discord, and Spotify open. Audio switches to your headset at 70%. Focus assist turns on. Your gaming playlist starts. Took 3 seconds.
+> You right-click the tray icon, click "Gaming." A boot-up sound plays. Slack, Outlook, and VS Code close. Steam, Discord, and Spotify open. Audio switches to your headset at 70%. Your gaming playlist starts. Took 3 seconds.
 
 ## Tech Stack
 
 - **Electron** + **React 18** + **TypeScript**
 - **Vite** (via electron-vite) for build tooling
 - **TailwindCSS v4** for styling
-- **Vitest** for testing (162 tests)
+- **Vitest** for testing (121 tests)
 - **AudioDeviceCmdlets** (PowerShell module) for audio device switching
 - **nircmd** for volume control
 
@@ -89,13 +88,21 @@ When switching from Workspace A to Workspace B, apps that exist in both stay run
 
 Each workspace can open specific folders and optionally close all other Explorer windows. The "Close other folders" toggle uses the Shell.Application COM object to close windows individually — explorer.exe itself is never touched (it's on the safety whitelist).
 
-### State Snapshot
+### Default Workspace
 
-The system captures your "neutral" state (audio device, volume, focus assist, wallpaper, etc.) on the first workspace activation. Switching between workspaces preserves this original snapshot. "Close Workspace" restores everything back to how it was.
+On first launch, the app creates a Default workspace by capturing your current system state (audio device, volume, wallpaper). This is your baseline. "Deactivating" a workspace means activating the Default — there's always an active workspace.
+
+### Activation Overlay
+
+When you activate a workspace, a full-screen overlay shows every step in real time — closing apps, switching audio, setting wallpaper — with a circular progress ring and live status for each action. Resources are validated before activation: missing files are skipped, unavailable audio devices are logged.
+
+### Activation Logging
+
+Every activation and deactivation is logged to `%APPDATA%/scene-shiftr/logs/activation/` with timestamped entries for each step (success, failure, skipped). Log rotation keeps the last 20 daily files.
 
 ### Dry Run Mode
 
-Enable in Settings to log all workspace actions as timestamped JSON to `%APPDATA%/scene-shiftr/logs/` instead of executing them. Useful for testing workspace configurations without making system changes.
+Enable in Settings to log all actions to daily log files in `%APPDATA%/scene-shiftr/logs/dry-run/` instead of executing them. Useful for testing workspace configurations without making system changes.
 
 ### Custom Title Bar & Splash Screen
 
@@ -109,18 +116,20 @@ Scale the entire UI from 80% to 130% (cosmetic labels — internally 100%-150%).
 
 - Workspaces: `%APPDATA%/scene-shiftr/workspaces/{uuid}.json`
 - Settings: `%APPDATA%/scene-shiftr/settings.json`
-- State snapshot: `%APPDATA%/scene-shiftr/snapshot.json`
-- Dry run logs: `%APPDATA%/scene-shiftr/logs/dry-run-YYYY-MM-DD.json`
+- Activation logs: `%APPDATA%/scene-shiftr/logs/activation/YYYY-MM-DD.log`
+- Dry run logs: `%APPDATA%/scene-shiftr/logs/dry-run/YYYY-MM-DD.log`
 
 ## Safety
 
 Scene Shiftr directly manipulates your OS — it changes audio devices, registry values, wallpapers, and kills processes. I take this seriously:
 
 - **Process whitelist** — system-critical Windows processes (explorer.exe, csrss.exe, svchost.exe, dwm.exe, etc.) can never be killed, regardless of workspace configuration
-- **State snapshots** — your system state is captured before the first workspace activation and restored on deactivation
+- **Default workspace** — your baseline system state is always preserved and restorable via the Default workspace
+- **Resource validation** — exe paths, wallpaper files, folders, and audio devices are validated before activation. Missing resources are skipped, not crashed on
+- **Audio verification** — after switching audio devices, the app reads back the current device and retries once on mismatch
+- **Activation queue** — prevents double-activation if you click rapidly. Close button and tray quit are blocked during activation
 - **Graceful close** — apps are asked to close nicely before any force-close prompt
 - **Null = don't touch** — any setting left as `null` in a workspace config is left completely untouched
-- **No night light** — removed from V1 because Windows has no public API for it; all known methods use fragile registry manipulation that can corrupt system settings
 
 ---
 
@@ -149,9 +158,9 @@ Workspace CRUD, app launch/close, audio switching, volume, wallpaper, folders/UR
 
 Default workspace, per-step error handling, JSON validation, resource validation, audio verification, activation queue, mid-activation protection, activation logging, infinite loop fix.
 
-## v0.3.0 — UI/UX Redesign
+## v0.3.0 ✅ — UI/UX Redesign
 
-Full visual overhaul (Linear/Spotify/Raycast inspired), activation animations + per-step progress, inline error states, form redesign with collapsible sections, app picker, sound preview, tray quick-switch, custom icons, keyboard navigation + accessibility.
+Full-screen activation overlay with step-by-step progress, redesigned workspace form with sticky header/footer, settings auto-save, feedback popup, focus assist removal, form redesign with grouped sections.
 
 ## v0.4.0 — Quality of Life
 
