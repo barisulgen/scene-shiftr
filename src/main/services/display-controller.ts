@@ -29,4 +29,3 @@ export async function setWallpaper(imagePath: string): Promise<void> {
     // Best effort
   }
 }
-

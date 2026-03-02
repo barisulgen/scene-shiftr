@@ -486,12 +486,12 @@ export async function activateWorkspace(
       if (audioSuccess) {
         await logger.logStep('SET AUDIO DEVICE', workspace.system.audioDevice, 'SUCCESS');
         sendOverlayStep(sender, 'audio-device', 'success');
+        succeeded++;
       } else {
         await logger.logStep('SET AUDIO DEVICE', workspace.system.audioDevice, 'FAILED', 'Verification failed after retry');
         sendOverlayStep(sender, 'audio-device', 'failed', 'Verification failed after retry');
         failed++;
       }
-      succeeded++;
     }
     if (workspace.system.volume !== null) {
       total++;
@@ -897,12 +897,12 @@ async function switchWorkspaceInternal(
       if (audioSuccess) {
         await logger.logStep('SET AUDIO DEVICE', newWorkspace.system.audioDevice, 'SUCCESS');
         sendOverlayStep(sender, 'audio-device', 'success');
+        succeeded++;
       } else {
         await logger.logStep('SET AUDIO DEVICE', newWorkspace.system.audioDevice, 'FAILED', 'Verification failed after retry');
         sendOverlayStep(sender, 'audio-device', 'failed', 'Verification failed after retry');
         failed++;
       }
-      succeeded++;
     }
     if (newWorkspace.system.volume !== null) {
       total++;
