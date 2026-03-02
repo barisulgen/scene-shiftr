@@ -55,7 +55,7 @@ What didn't make it:
 
 **Visual Overhaul**
 
-- [ ] Full UI redesign (Linear/Spotify/Raycast inspired, logo color palette)
+- [x] Full UI redesign
 - [x] Custom app icon and tray icon
 
 **Main Window**
@@ -77,17 +77,13 @@ What didn't make it:
 
 - [x] System tray popup redesign — quick-switch between workspaces without opening the main window
 
-**Accessibility**
-
-- [ ] Visible focus indicators on all controls
-- [ ] Sufficient color contrast ratios (WCAG AA minimum)
-
 ---
 
 What didn't make it:
 
 - [ ] Dark/light mode switch support
 - [ ] Full keyboard navigation — tab through all interactive elements, Enter to activate
+- [ ] Sufficient color contrast ratios (WCAG AA minimum)
 
 ---
 

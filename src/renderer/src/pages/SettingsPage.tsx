@@ -78,7 +78,7 @@ export default function SettingsPage(): JSX.Element {
             style={{
               backgroundColor: 'var(--bg-card)',
               border: '1px solid var(--border)',
-              height: '94px',
+              height: '78px',
             }}
           >
             {/* Icon box */}
@@ -146,7 +146,7 @@ export default function SettingsPage(): JSX.Element {
             style={{
               backgroundColor: 'var(--bg-card)',
               border: '1px solid var(--border)',
-              height: '94px',
+              height: '78px',
             }}
           >
             {/* Icon box */}
@@ -209,11 +209,11 @@ export default function SettingsPage(): JSX.Element {
 
           {/* Card 3 — App Scale */}
           <div
-            className="rounded-xl p-5"
+            className="rounded-xl p-5 flex flex-col justify-center"
             style={{
               backgroundColor: 'var(--bg-card)',
               border: '1px solid var(--border)',
-              minHeight: '164px',
+              minHeight: '137px',
             }}
           >
             <div className="flex items-center justify-between gap-4">
@@ -276,7 +276,7 @@ export default function SettingsPage(): JSX.Element {
             style={{
               backgroundColor: 'var(--bg-card)',
               border: '1px solid var(--border)',
-              height: '94px',
+              height: '78px',
             }}
             onClick={() => window.open('https://github.com/barisulgen/scene-shiftr/releases', '_blank')}
             onMouseEnter={(e) => {
@@ -343,11 +343,11 @@ export default function SettingsPage(): JSX.Element {
 
           {/* Card — Graceful close timeout */}
           <div
-            className="rounded-xl p-5"
+            className="rounded-xl p-5 flex flex-col justify-center"
             style={{
               backgroundColor: 'var(--bg-card)',
               border: '1px solid var(--border)',
-              minHeight: '164px',
+              minHeight: '137px',
             }}
           >
             <div className="flex items-center gap-4">
@@ -431,11 +431,11 @@ export default function SettingsPage(): JSX.Element {
 
           {/* Card — Default transition sound */}
           <div
-            className="rounded-xl p-5"
+            className="rounded-xl p-5 flex flex-col justify-center"
             style={{
               backgroundColor: 'var(--bg-card)',
               border: '1px solid var(--border)',
-              minHeight: '164px',
+              minHeight: '137px',
             }}
           >
             <div className="flex items-center gap-4 mb-4">
@@ -486,11 +486,11 @@ export default function SettingsPage(): JSX.Element {
 
           {/* Card — Dry Run Mode */}
           <div
-            className="rounded-xl p-5"
+            className="rounded-xl p-5 flex flex-col justify-center"
             style={{
               backgroundColor: 'var(--bg-card)',
               border: '1px solid var(--border)',
-              minHeight: '164px',
+              minHeight: dryRun ? '137px' : '78px',
             }}
           >
             <div className="flex items-center gap-4">
@@ -522,57 +522,44 @@ export default function SettingsPage(): JSX.Element {
                   Dry Run Mode
                 </span>
                 <span className="block text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
-                  Log all actions to daily log files instead of executing them.
-                  Logs saved to %APPDATA%/scene-shiftr/logs/dry-run/
+                  Log all actions to daily log files instead of executing them.{' '}
+                  <button
+                    type="button"
+                    onClick={() => window.api.openLogsFolder()}
+                    className="cursor-pointer"
+                    style={{ color: 'var(--accent)', background: 'none', border: 'none', padding: 0, fontSize: 'inherit', fontFamily: 'inherit' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.textDecoration = 'underline'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.textDecoration = 'none'; }}
+                  >
+                    Open folder
+                  </button>
                 </span>
               </div>
-              {/* Toggle + Open logs button stacked on the right */}
-              <div className="flex flex-col items-end gap-2 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => {
-                    const next = !dryRun;
-                    setDryRun(next);
-                    autoSaveToggle('dryRun', next);
-                  }}
-                  className="relative w-9 h-5 rounded-full transition-colors duration-200 cursor-pointer"
-                  style={{
-                    backgroundColor: dryRun ? 'var(--accent)' : 'var(--bg-elevated)',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.opacity = '0.85';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.opacity = '1';
-                  }}
-                >
-                  <span
-                    className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform duration-200 ${
-                      dryRun ? 'translate-x-4' : 'translate-x-0'
-                    }`}
-                  />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => window.api.openLogsFolder()}
-                  className="px-4 py-2 rounded-lg text-xs font-medium cursor-pointer transition-colors duration-150"
-                  style={{
-                    backgroundColor: 'var(--bg-elevated)',
-                    border: '1px solid var(--border)',
-                    color: 'var(--text-secondary)',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)';
-                    e.currentTarget.style.color = 'var(--text-primary)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'var(--bg-elevated)';
-                    e.currentTarget.style.color = 'var(--text-secondary)';
-                  }}
-                >
-                  Open logs folder
-                </button>
-              </div>
+              {/* Toggle */}
+              <button
+                type="button"
+                onClick={() => {
+                  const next = !dryRun;
+                  setDryRun(next);
+                  autoSaveToggle('dryRun', next);
+                }}
+                className="relative w-9 h-5 rounded-full transition-colors duration-200 cursor-pointer shrink-0"
+                style={{
+                  backgroundColor: dryRun ? 'var(--accent)' : 'var(--bg-elevated)',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.opacity = '0.85';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.opacity = '1';
+                }}
+              >
+                <span
+                  className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform duration-200 ${
+                    dryRun ? 'translate-x-4' : 'translate-x-0'
+                  }`}
+                />
+              </button>
             </div>
             {dryRun && (
               <div
@@ -599,11 +586,11 @@ export default function SettingsPage(): JSX.Element {
 
           {/* Card — Reset all workspaces */}
           <div
-            className="rounded-xl p-5 flex items-center"
+            className="rounded-xl p-5 flex flex-col justify-center"
             style={{
               backgroundColor: 'var(--bg-card)',
               border: '1px solid var(--border)',
-              minHeight: '164px',
+              minHeight: '137px',
             }}
           >
             <div className="flex items-center gap-4">
