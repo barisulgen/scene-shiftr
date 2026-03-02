@@ -103,8 +103,8 @@ Priority: reduce friction and make daily use smoother.
 - [ ] Close all Explorer windows before opening workspace folders (via Shell.Application COM)
 - [ ] App launch arguments support (e.g. open Chrome with a specific profile or URL)
 - [ ] App launch delay — configurable per-app delay for apps that need time to initialize before the next one starts
-- [ ] Custom graceful close timeout per workspace
-- [ ] "Confirm before switching" setting
+- ~~[ ] Custom graceful close timeout per workspace~~
+- [x] "Confirm before switching" setting
 
 **Diagnostics**
 
