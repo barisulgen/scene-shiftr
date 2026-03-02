@@ -1,6 +1,6 @@
-import { useState, useRef, useEffect } from 'react';
-import { useApp } from '../../context/AppContext';
-import WorkspaceList from '../workspace/WorkspaceList';
+import { useState, useRef, useEffect } from "react";
+import { useApp } from "../../context/AppContext";
+import WorkspaceList from "../workspace/WorkspaceList";
 
 export default function Sidebar(): JSX.Element {
   const { setCurrentView, currentView } = useApp();
@@ -14,8 +14,8 @@ export default function Sidebar(): JSX.Element {
       }
     }
     if (showFeedback) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
     }
   }, [showFeedback]);
 
@@ -23,8 +23,8 @@ export default function Sidebar(): JSX.Element {
     <aside
       className="flex flex-col w-64 shrink-0"
       style={{
-        backgroundColor: 'var(--bg-card)',
-        borderRight: '1px solid var(--border)',
+        backgroundColor: "var(--bg-card)",
+        borderRight: "1px solid var(--border)",
       }}
     >
       {/* Workspace list area */}
@@ -32,7 +32,7 @@ export default function Sidebar(): JSX.Element {
         <div className="px-2 pb-2">
           <span
             className="text-xs font-semibold uppercase tracking-widest"
-            style={{ color: 'var(--text-muted)', letterSpacing: '0.1em' }}
+            style={{ color: "var(--text-muted)", letterSpacing: "0.1em" }}
           >
             Workspaces
           </span>
@@ -41,16 +41,19 @@ export default function Sidebar(): JSX.Element {
       </div>
 
       {/* Bottom actions */}
-      <div className="flex flex-col gap-1 px-3 pb-3" style={{ borderTop: '1px solid var(--border)' }}>
+      <div
+        className="flex flex-col gap-1 px-3 pb-3"
+        style={{ borderTop: "1px solid var(--border)" }}
+      >
         <button
-          onClick={() => setCurrentView('create')}
+          onClick={() => setCurrentView("create")}
           className="flex items-center gap-2 w-full px-3 py-2.5 rounded-md text-sm font-medium cursor-pointer transition-colors duration-150"
-          style={{ color: 'var(--accent)' }}
+          style={{ color: "var(--accent)" }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = 'var(--accent-soft)';
+            e.currentTarget.style.backgroundColor = "var(--accent-soft)";
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'transparent';
+            e.currentTarget.style.backgroundColor = "transparent";
           }}
         >
           <svg
@@ -64,23 +67,24 @@ export default function Sidebar(): JSX.Element {
           New Workspace
         </button>
         <button
-          onClick={() => setCurrentView(currentView === 'settings' ? 'main' : 'settings')}
+          onClick={() => setCurrentView(currentView === "settings" ? "main" : "settings")}
           className="flex items-center gap-2 w-full px-3 py-2.5 rounded-md text-sm font-medium cursor-pointer transition-colors duration-150 relative"
           style={{
-            color: currentView === 'settings' ? 'var(--text-primary)' : 'var(--text-secondary)',
-            backgroundColor: currentView === 'settings' ? 'var(--bg-card-hover)' : 'transparent',
-            borderLeft: currentView === 'settings' ? '3px solid var(--accent)' : '3px solid transparent',
+            color: currentView === "settings" ? "var(--text-primary)" : "var(--text-secondary)",
+            backgroundColor: currentView === "settings" ? "var(--bg-card-hover)" : "transparent",
+            borderLeft:
+              currentView === "settings" ? "3px solid var(--accent)" : "3px solid transparent",
           }}
           onMouseEnter={(e) => {
-            if (currentView !== 'settings') {
-              e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)';
-              e.currentTarget.style.color = 'var(--text-primary)';
+            if (currentView !== "settings") {
+              e.currentTarget.style.backgroundColor = "var(--bg-card-hover)";
+              e.currentTarget.style.color = "var(--text-primary)";
             }
           }}
           onMouseLeave={(e) => {
-            if (currentView !== 'settings') {
-              e.currentTarget.style.backgroundColor = 'transparent';
-              e.currentTarget.style.color = 'var(--text-secondary)';
+            if (currentView !== "settings") {
+              e.currentTarget.style.backgroundColor = "transparent";
+              e.currentTarget.style.color = "var(--text-secondary)";
             }
           }}
         >
@@ -98,24 +102,27 @@ export default function Sidebar(): JSX.Element {
           </svg>
           Settings
         </button>
-        <div ref={feedbackRef} className="relative">
+        <div
+          ref={feedbackRef}
+          className="relative"
+        >
           <button
             onClick={() => setShowFeedback(!showFeedback)}
             className="flex items-center gap-2 w-full px-3 py-2.5 rounded-md text-sm font-medium cursor-pointer transition-colors duration-150"
             style={{
-              color: showFeedback ? 'var(--text-primary)' : 'var(--text-secondary)',
-              backgroundColor: showFeedback ? 'var(--bg-card-hover)' : 'transparent',
+              color: showFeedback ? "var(--text-primary)" : "var(--text-secondary)",
+              backgroundColor: showFeedback ? "var(--bg-card-hover)" : "transparent",
             }}
             onMouseEnter={(e) => {
               if (!showFeedback) {
-                e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)';
-                e.currentTarget.style.color = 'var(--text-primary)';
+                e.currentTarget.style.backgroundColor = "var(--bg-card-hover)";
+                e.currentTarget.style.color = "var(--text-primary)";
               }
             }}
             onMouseLeave={(e) => {
               if (!showFeedback) {
-                e.currentTarget.style.backgroundColor = 'transparent';
-                e.currentTarget.style.color = 'var(--text-secondary)';
+                e.currentTarget.style.backgroundColor = "transparent";
+                e.currentTarget.style.color = "var(--text-secondary)";
               }
             }}
           >
@@ -125,7 +132,11 @@ export default function Sidebar(): JSX.Element {
               fill="currentColor"
               className="w-4 h-4"
             >
-              <path fillRule="evenodd" d="M1 8.74c0 .983.713 1.825 1.69 1.943.764.092 1.534.164 2.31.216v2.351a.75.75 0 0 0 1.28.53l2.51-2.51c.182-.181.427-.29.684-.31a41.72 41.72 0 0 0 2.836-.26c.977-.118 1.69-.96 1.69-1.943V4.26c0-.983-.713-1.825-1.69-1.943A44.73 44.73 0 0 0 8 2a44.73 44.73 0 0 0-5.31.317C1.713 2.435 1 3.277 1 4.26v4.48ZM5.5 6a.75.75 0 0 0 0 1.5h5a.75.75 0 0 0 0-1.5h-5Zm0 2.5a.75.75 0 0 0 0 1.5h2.5a.75.75 0 0 0 0-1.5H5.5Z" clipRule="evenodd" />
+              <path
+                fillRule="evenodd"
+                d="M1 8.74c0 .983.713 1.825 1.69 1.943.764.092 1.534.164 2.31.216v2.351a.75.75 0 0 0 1.28.53l2.51-2.51c.182-.181.427-.29.684-.31a41.72 41.72 0 0 0 2.836-.26c.977-.118 1.69-.96 1.69-1.943V4.26c0-.983-.713-1.825-1.69-1.943A44.73 44.73 0 0 0 8 2a44.73 44.73 0 0 0-5.31.317C1.713 2.435 1 3.277 1 4.26v4.48ZM5.5 6a.75.75 0 0 0 0 1.5h5a.75.75 0 0 0 0-1.5h-5Zm0 2.5a.75.75 0 0 0 0 1.5h2.5a.75.75 0 0 0 0-1.5H5.5Z"
+                clipRule="evenodd"
+              />
             </svg>
             Feedback
           </button>
@@ -133,42 +144,89 @@ export default function Sidebar(): JSX.Element {
             <div
               className="absolute bottom-full left-0 mb-2 w-64 rounded-xl p-4 shadow-2xl z-30"
               style={{
-                backgroundColor: 'var(--bg-card)',
-                border: '1px solid var(--border-light)',
+                backgroundColor: "var(--bg-card)",
+                border: "1px solid var(--border-light)",
               }}
             >
-              <p className="text-xs mb-3" style={{ color: 'var(--text-muted)' }}>
-                Thank you for using Scene Shiftr! Your feedback means the world to us. &#10084;
+              <p
+                className="text-xs mb-3"
+                style={{ color: "var(--text-muted)" }}
+              >
+                Thank you for using Scene Shiftr! &#10084;
               </p>
               <div className="space-y-2">
                 <button
-                  onClick={() => { window.open('https://github.com/barisulgen/scene-shiftr/issues/new/choose', '_blank'); setShowFeedback(false); }}
+                  onClick={() => {
+                    window.open(
+                      "https://github.com/barisulgen/scene-shiftr/issues/new/choose",
+                      "_blank",
+                    );
+                    setShowFeedback(false);
+                  }}
                   className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-xs font-medium cursor-pointer transition-colors duration-150"
-                  style={{ backgroundColor: 'var(--bg-elevated)', color: 'var(--text-primary)', border: '1px solid var(--border)' }}
-                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)'; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'var(--bg-elevated)'; }}
+                  style={{
+                    backgroundColor: "var(--bg-elevated)",
+                    color: "var(--text-primary)",
+                    border: "1px solid var(--border)",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = "var(--bg-card-hover)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = "var(--bg-elevated)";
+                  }}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-3.5 h-3.5 shrink-0">
-                    <path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z" />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 16 16"
+                    fill="currentColor"
+                    className="w-3.5 h-3.5 shrink-0"
+                  >
+                    <path d="M4.22 11.78a.75.75 0 0 1 0-1.06L9.44 5.5H5.75a.75.75 0 0 1 0-1.5h5.5a.75.75 0 0 1 .75.75v5.5a.75.75 0 0 1-1.5 0V6.56l-5.22 5.22a.75.75 0 0 1-1.06 0Z" />
                   </svg>
                   Report a bug/request a feature
                 </button>
                 <button
-                  onClick={() => { window.open('https://github.com/barisulgen/scene-shiftr', '_blank'); setShowFeedback(false); }}
+                  onClick={() => {
+                    window.open("https://github.com/barisulgen/scene-shiftr", "_blank");
+                    setShowFeedback(false);
+                  }}
                   className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-xs font-medium cursor-pointer transition-colors duration-150"
-                  style={{ backgroundColor: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border)' }}
-                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)'; e.currentTarget.style.color = 'var(--text-primary)'; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'var(--bg-elevated)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
+                  style={{
+                    backgroundColor: "var(--bg-elevated)",
+                    color: "var(--text-secondary)",
+                    border: "1px solid var(--border)",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = "var(--bg-card-hover)";
+                    e.currentTarget.style.color = "var(--text-primary)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = "var(--bg-elevated)";
+                    e.currentTarget.style.color = "var(--text-secondary)";
+                  }}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-3.5 h-3.5 shrink-0">
-                    <path d="M4.22 11.78a.75.75 0 0 1 0-1.06L9.44 5.5H5.75a.75.75 0 0 1 0-1.5h5.5a.75.75 0 0 1 .75.75v5.5a.75.75 0 0 1-1.5 0V6.56l-5.22 5.22a.75.75 0 0 1-1.06 0Z" />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 16 16"
+                    fill="currentColor"
+                    className="w-3.5 h-3.5 shrink-0"
+                  >
+                    <path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z" />
                   </svg>
-                  GitHub Repository
+                  GitHub Repo
                 </button>
               </div>
-              <div className="mt-3 pt-3" style={{ borderTop: '1px solid var(--border)' }}>
-                <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>
-                  Contact: <span style={{ color: 'var(--text-secondary)' }}>barisulgn@gmail.com</span>
+              <div
+                className="mt-3 pt-3"
+                style={{ borderTop: "1px solid var(--border)" }}
+              >
+                <p
+                  className="text-[10px]"
+                  style={{ color: "var(--text-muted)" }}
+                >
+                  Contact:{" "}
+                  <span style={{ color: "var(--text-secondary)" }}>barisulgn@gmail.com</span>
                 </p>
               </div>
             </div>
