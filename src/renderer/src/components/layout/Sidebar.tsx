@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect } from "react";
 import { useApp } from "../../context/AppContext";
+import { useWorkspaces } from "../../hooks/useWorkspaces";
 import WorkspaceList from "../workspace/WorkspaceList";
 
 export default function Sidebar(): JSX.Element {
   const { setCurrentView, currentView } = useApp();
+  const { importWorkspace } = useWorkspaces();
   const [showFeedback, setShowFeedback] = useState(false);
   const feedbackRef = useRef<HTMLDivElement>(null);
 
@@ -17,6 +19,7 @@ export default function Sidebar(): JSX.Element {
       document.addEventListener("mousedown", handleClickOutside);
       return () => document.removeEventListener("mousedown", handleClickOutside);
     }
+    return undefined;
   }, [showFeedback]);
 
   return (
@@ -65,6 +68,30 @@ export default function Sidebar(): JSX.Element {
             <path d="M8.75 3.75a.75.75 0 0 0-1.5 0v3.5h-3.5a.75.75 0 0 0 0 1.5h3.5v3.5a.75.75 0 0 0 1.5 0v-3.5h3.5a.75.75 0 0 0 0-1.5h-3.5v-3.5Z" />
           </svg>
           New Workspace
+        </button>
+        <button
+          onClick={() => importWorkspace()}
+          className="flex items-center gap-2 w-full px-3 py-2.5 rounded-md text-sm font-medium cursor-pointer transition-colors duration-150"
+          style={{ color: "var(--text-secondary)" }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "var(--bg-card-hover)";
+            e.currentTarget.style.color = "var(--text-primary)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "transparent";
+            e.currentTarget.style.color = "var(--text-secondary)";
+          }}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 16 16"
+            fill="currentColor"
+            className="w-4 h-4"
+          >
+            <path d="M2 3.5A1.5 1.5 0 0 1 3.5 2h2.879a1.5 1.5 0 0 1 1.06.44l1.122 1.12A1.5 1.5 0 0 0 9.62 4H12.5A1.5 1.5 0 0 1 14 5.5v1.401a2.986 2.986 0 0 0-1.5-.401h-9c-.546 0-1.059.146-1.5.401V3.5Z" />
+            <path d="M2 9.5v3A1.5 1.5 0 0 0 3.5 14h9a1.5 1.5 0 0 0 1.5-1.5v-3A1.5 1.5 0 0 0 12.5 8h-9A1.5 1.5 0 0 0 2 9.5Zm5.707-.293a1 1 0 0 0-1.414 0l-.043.043a1 1 0 0 0 .707 1.707H7v.543a1 1 0 0 0 2 0v-.543h.043a1 1 0 0 0 .707-1.707l-.043-.043a1 1 0 0 0-1.414 0L8 9.5l-.293-.293Z" />
+          </svg>
+          Import Workspace
         </button>
         <button
           onClick={() => setCurrentView(currentView === "settings" ? "main" : "settings")}

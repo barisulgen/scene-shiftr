@@ -11,6 +11,9 @@ const api = {
   deleteWorkspace: (id: string) => ipcRenderer.invoke('workspace:delete', id),
   reorderWorkspaces: (ids: string[]) => ipcRenderer.invoke('workspace:reorder', ids),
   resetWorkspaces: () => ipcRenderer.invoke('workspace:reset'),
+  exportWorkspace: (id: string) => ipcRenderer.invoke('workspace:export', id),
+  importWorkspace: () => ipcRenderer.invoke('workspace:import'),
+  duplicateWorkspace: (id: string) => ipcRenderer.invoke('workspace:duplicate', id),
 
   // Workspace actions
   activateWorkspace: (id: string) => ipcRenderer.invoke('workspace:activate', id),

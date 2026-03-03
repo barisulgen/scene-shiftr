@@ -59,6 +59,24 @@ function TrashIcon(): JSX.Element {
   );
 }
 
+function DuplicateIcon(): JSX.Element {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+      <path d="M7 3.5A1.5 1.5 0 0 1 8.5 2h3.879a1.5 1.5 0 0 1 1.06.44l3.122 3.12A1.5 1.5 0 0 1 17 6.622V12.5a1.5 1.5 0 0 1-1.5 1.5h-1v-3.379a3 3 0 0 0-.879-2.121L10.5 5.379A3 3 0 0 0 8.379 4.5H7v-1Z" />
+      <path d="M4.5 6A1.5 1.5 0 0 0 3 7.5v9A1.5 1.5 0 0 0 4.5 18h7a1.5 1.5 0 0 0 1.5-1.5v-5.879a1.5 1.5 0 0 0-.44-1.06L9.44 6.439A1.5 1.5 0 0 0 8.378 6H4.5Z" />
+    </svg>
+  );
+}
+
+function ExportIcon(): JSX.Element {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+      <path d="M13.75 7h-3v5.296l1.943-2.048a.75.75 0 0 1 1.114 1.004l-3.25 3.5a.75.75 0 0 1-1.114 0l-3.25-3.5a.75.75 0 1 1 1.114-1.004l1.943 2.048V7h-3a1.75 1.75 0 0 0-1.75 1.75v7.5c0 .966.784 1.75 1.75 1.75h7.5A1.75 1.75 0 0 0 15.5 16.25v-7.5A1.75 1.75 0 0 0 13.75 7Z" />
+      <path d="M10 1a.75.75 0 0 1 .75.75V7h-1.5V1.75A.75.75 0 0 1 10 1Z" />
+    </svg>
+  );
+}
+
 
 function HeadphonesIcon(): JSX.Element {
   return (
@@ -219,8 +237,14 @@ function VolumeBadge({ value }: { value: number }): JSX.Element {
 
 export default function WorkspaceDetail(): JSX.Element | null {
   const { activeWorkspaceId, status, setCurrentView } = useApp();
-  const { selectedWorkspace, activateWorkspace, deactivateWorkspace, deleteWorkspace } =
-    useWorkspaces();
+  const {
+    selectedWorkspace,
+    activateWorkspace,
+    deactivateWorkspace,
+    deleteWorkspace,
+    exportWorkspace,
+    duplicateWorkspace,
+  } = useWorkspaces();
   const [activating, setActivating] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [audioDeviceNames, setAudioDeviceNames] = useState<Record<string, string>>({});
@@ -274,6 +298,22 @@ export default function WorkspaceDetail(): JSX.Element | null {
       await deleteWorkspace(workspace.id);
     } catch (err) {
       console.error('Failed to delete workspace:', err);
+    }
+  };
+
+  const handleExport = async (): Promise<void> => {
+    try {
+      await exportWorkspace(workspace.id);
+    } catch (err) {
+      console.error('Failed to export workspace:', err);
+    }
+  };
+
+  const handleDuplicate = async (): Promise<void> => {
+    try {
+      await duplicateWorkspace(workspace.id);
+    } catch (err) {
+      console.error('Failed to duplicate workspace:', err);
     }
   };
 
@@ -341,8 +381,42 @@ export default function WorkspaceDetail(): JSX.Element | null {
               </div>
             </div>
           </div>
-          {/* Edit / Delete buttons */}
+          {/* Duplicate / Export / Edit / Delete buttons */}
           <div className="flex items-center gap-2">
+            {!workspace.isDefault && (
+              <button
+                onClick={handleDuplicate}
+                className="w-8 h-8 rounded-lg flex items-center justify-center cursor-pointer transition-colors duration-150"
+                style={{ backgroundColor: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}
+                title="Duplicate"
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)';
+                  e.currentTarget.style.color = 'var(--text-primary)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'var(--bg-elevated)';
+                  e.currentTarget.style.color = 'var(--text-secondary)';
+                }}
+              >
+                <DuplicateIcon />
+              </button>
+            )}
+            <button
+              onClick={handleExport}
+              className="w-8 h-8 rounded-lg flex items-center justify-center cursor-pointer transition-colors duration-150"
+              style={{ backgroundColor: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}
+              title="Export"
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)';
+                e.currentTarget.style.color = 'var(--text-primary)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--bg-elevated)';
+                e.currentTarget.style.color = 'var(--text-secondary)';
+              }}
+            >
+              <ExportIcon />
+            </button>
             <button
               onClick={handleEdit}
               className="w-8 h-8 rounded-lg flex items-center justify-center cursor-pointer transition-colors duration-150"

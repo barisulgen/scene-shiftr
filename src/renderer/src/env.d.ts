@@ -10,6 +10,9 @@ interface SceneShiftrAPI {
   deleteWorkspace: (id: string) => Promise<void>;
   reorderWorkspaces: (ids: string[]) => Promise<void>;
   resetWorkspaces: () => Promise<Workspace>;
+  exportWorkspace: (id: string) => Promise<boolean>;
+  importWorkspace: () => Promise<{ workspace: Workspace } | { error: string } | null>;
+  duplicateWorkspace: (id: string) => Promise<Workspace>;
   activateWorkspace: (id: string) => Promise<void>;
   deactivateWorkspace: () => Promise<void>;
   detectApps: () => Promise<AppEntry[]>;

@@ -65,6 +65,44 @@ export function useWorkspaces() {
     }
   };
 
+  const exportWorkspace = async (id: string) => {
+    try {
+      return await window.api.exportWorkspace(id);
+    } catch (err) {
+      console.error('Failed to export workspace:', err);
+      throw err;
+    }
+  };
+
+  const importWorkspace = async () => {
+    try {
+      const result = await window.api.importWorkspace();
+      if (!result) return null;
+      if ('error' in result) {
+        console.error('Import error:', result.error);
+        return result;
+      }
+      await refreshWorkspaces();
+      selectWorkspace(result.workspace.id);
+      return result;
+    } catch (err) {
+      console.error('Failed to import workspace:', err);
+      throw err;
+    }
+  };
+
+  const duplicateWorkspace = async (id: string) => {
+    try {
+      const ws = await window.api.duplicateWorkspace(id);
+      await refreshWorkspaces();
+      selectWorkspace(ws.id);
+      return ws;
+    } catch (err) {
+      console.error('Failed to duplicate workspace:', err);
+      throw err;
+    }
+  };
+
   const selectedWorkspace = workspaces.find((w) => w.id === selectedWorkspaceId) ?? null;
 
   return {
@@ -78,5 +116,8 @@ export function useWorkspaces() {
     reorderWorkspaces,
     activateWorkspace,
     deactivateWorkspace,
+    exportWorkspace,
+    importWorkspace,
+    duplicateWorkspace,
   };
 }
