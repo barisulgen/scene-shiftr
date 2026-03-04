@@ -9,16 +9,32 @@ import { setTrayRefreshCallback } from './tray-bridge';
 import { setDryRunCheck, getIsActivating } from './services/workspace-manager';
 import { ensureAudioModule } from './services/audio-controller';
 import { setLogBaseDir, rotateOldLogs } from './services/logger';
-import { getSettings, setActiveWorkspaceId, getActiveWorkspaceId } from './store';
+import { getSettings, updateSettings, setActiveWorkspaceId, getActiveWorkspaceId } from './store';
 import * as audioController from './services/audio-controller';
 import * as displayController from './services/display-controller';
 
 const isMinimized = process.argv.includes('--minimized');
 
+function isPositionOnScreen(x: number, y: number): boolean {
+  const { screen } = require('electron');
+  const displays = screen.getAllDisplays();
+  return displays.some((display: Electron.Display) => {
+    const { x: dx, y: dy, width, height } = display.bounds;
+    return x >= dx && x < dx + width && y >= dy && y < dy + height;
+  });
+}
+
 function createWindow(): BrowserWindow {
+  const settings = getSettings();
+  const savedX = settings.windowX;
+  const savedY = settings.windowY;
+  const hasValidPosition = savedX !== null && savedY !== null && isPositionOnScreen(savedX, savedY);
+
   const win = new BrowserWindow({
     width: 960,
     height: 700,
+    ...(hasValidPosition ? { x: savedX, y: savedY } : {}),
+    center: !hasValidPosition,
     resizable: false,
     show: false,
     frame: false,
@@ -29,6 +45,12 @@ function createWindow(): BrowserWindow {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,
     },
+  });
+
+  // Save window position when moved
+  win.on('moved', () => {
+    const [x, y] = win.getPosition();
+    updateSettings({ windowX: x, windowY: y });
   });
 
   win.on('ready-to-show', () => {

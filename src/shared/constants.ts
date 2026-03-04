@@ -8,6 +8,8 @@ export const DEFAULT_SETTINGS: GlobalSettings = {
   activeWorkspaceId: null,
   dryRun: false,
   appScale: 120,
+  windowX: null,
+  windowY: null,
 };
 
 export const BUILT_IN_SOUNDS = [

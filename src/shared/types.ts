@@ -42,6 +42,8 @@ export interface GlobalSettings {
   activeWorkspaceId: string | null;
   dryRun: boolean;
   appScale: number;
+  windowX: number | null;
+  windowY: number | null;
 }
 
 // Activation overlay types
