@@ -1,6 +1,6 @@
 {
   "name": "scene-shiftr",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Scene Shiftr - Windows desktop app",
   "main": "./out/main/main.js",
   "author": "",
