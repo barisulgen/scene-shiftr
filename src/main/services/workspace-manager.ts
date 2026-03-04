@@ -379,267 +379,267 @@ export async function activateWorkspace(
   if (isActivating) return;
   isActivating = true;
   try {
-  const dryRun = isDryRunFn();
+    const dryRun = isDryRunFn();
 
-  if (dryRun) {
-    await activateWorkspaceDryRun(workspace, sender);
-    return;
-  }
-
-  // Pre-validate resources
-  const validation = await validateResources(workspace);
-
-  // Log skipped resources
-  for (const app of validation.skippedAppsToOpen) {
-    await logger.logStep('OPEN APP', app.name, 'SKIPPED', `Path not found: ${app.path}`);
-  }
-  for (const folder of validation.skippedFolders) {
-    await logger.logStep('OPEN FOLDER', folder, 'SKIPPED', 'Path not found');
-  }
-  if (!validation.validWallpaper) {
-    await logger.logStep('SET WALLPAPER', workspace.display.wallpaper || '', 'SKIPPED', 'File not found');
-  }
-  if (!validation.validSound) {
-    await logger.logStep('PLAY SOUND', workspace.audio.transitionSound || '', 'SKIPPED', 'File not found');
-  }
-  if (!validation.validAudioDevice) {
-    await logger.logStep('SET AUDIO DEVICE', workspace.system.audioDevice || '', 'SKIPPED', 'Device not found');
-  }
-
-  // Build and send overlay steps
-  const overlaySteps = buildActivateSteps(workspace, validation);
-  sendOverlayStart(sender, workspace.name, workspace.icon, false, overlaySteps);
-
-  const startTime = Date.now();
-  let succeeded = 0;
-  let total = 0;
-  let skipped = validation.skippedCount;
-  let failed = 0;
-
-  await logger.logActivationStart(workspace.name);
-
-  // 1. Play transition sound (only if valid)
-  try {
-    if (workspace.audio.transitionSound && sender && validation.validSound) {
-      total++;
-      sendOverlayStep(sender, 'sound', 'in-progress');
-      soundPlayer.playSound(workspace.audio.transitionSound, sender);
-      await logger.logStep('PLAY SOUND', workspace.audio.transitionSound, 'SUCCESS');
-      sendOverlayStep(sender, 'sound', 'success');
-      succeeded++;
+    if (dryRun) {
+      await activateWorkspaceDryRun(workspace, sender);
+      return;
     }
-  } catch (err) {
-    console.error('Transition sound error:', err);
-    await logger.logStep('PLAY SOUND', workspace.audio.transitionSound || '', 'FAILED', err instanceof Error ? err.message : String(err));
-    sendOverlayStep(sender, 'sound', 'failed', err instanceof Error ? err.message : String(err));
-    failed++;
-  }
 
-  // 3. Close apps from close list
-  for (let i = 0; i < workspace.apps.close.length; i++) {
-    const app = workspace.apps.close[i];
-    total++;
-    const stepId = `close-${i}`;
+    // Pre-validate resources
+    const validation = await validateResources(workspace);
+
+    // Log skipped resources
+    for (const app of validation.skippedAppsToOpen) {
+      await logger.logStep('OPEN APP', app.name, 'SKIPPED', `Path not found: ${app.path}`);
+    }
+    for (const folder of validation.skippedFolders) {
+      await logger.logStep('OPEN FOLDER', folder, 'SKIPPED', 'Path not found');
+    }
+    if (!validation.validWallpaper) {
+      await logger.logStep('SET WALLPAPER', workspace.display.wallpaper || '', 'SKIPPED', 'File not found');
+    }
+    if (!validation.validSound) {
+      await logger.logStep('PLAY SOUND', workspace.audio.transitionSound || '', 'SKIPPED', 'File not found');
+    }
+    if (!validation.validAudioDevice) {
+      await logger.logStep('SET AUDIO DEVICE', workspace.system.audioDevice || '', 'SKIPPED', 'Device not found');
+    }
+
+    // Build and send overlay steps
+    const overlaySteps = buildActivateSteps(workspace, validation);
+    sendOverlayStart(sender, workspace.name, workspace.icon, false, overlaySteps);
+
+    const startTime = Date.now();
+    let succeeded = 0;
+    let total = 0;
+    let skipped = validation.skippedCount;
+    let failed = 0;
+
+    await logger.logActivationStart(workspace.name);
+
+    // 1. Play transition sound (only if valid)
     try {
-      const processName = getProcessName(app.path, app.name);
-      sendProgress(sender, `Closing ${app.name}...`);
-      sendOverlayStep(sender, stepId, 'in-progress');
-      await processManager.closeApp(processName);
-      await logger.logStep('CLOSE APP', processName, 'SUCCESS');
-      sendOverlayStep(sender, stepId, 'success');
-      succeeded++;
-    } catch (err) {
-      sendProgress(sender, `Failed to close ${app.name}, continuing...`);
-      console.error(`Close app error (${app.name}):`, err);
-      await logger.logStep('CLOSE APP', getProcessName(app.path, app.name), 'FAILED', err instanceof Error ? err.message : String(err));
-      sendOverlayStep(sender, stepId, 'failed', err instanceof Error ? err.message : String(err));
-      failed++;
-    }
-  }
-
-  // 4. Set wallpaper (only if valid)
-  try {
-    if (workspace.display.wallpaper && validation.validWallpaper) {
-      total++;
-      sendProgress(sender, 'Setting wallpaper...');
-      sendOverlayStep(sender, 'wallpaper', 'in-progress');
-      await displayController.setWallpaper(workspace.display.wallpaper);
-      await logger.logStep('SET WALLPAPER', workspace.display.wallpaper, 'SUCCESS');
-      sendOverlayStep(sender, 'wallpaper', 'success');
-      succeeded++;
-    }
-  } catch (err) {
-    sendProgress(sender, 'Failed to set wallpaper, continuing...');
-    console.error('Wallpaper error:', err);
-    await logger.logStep('SET WALLPAPER', workspace.display.wallpaper || '', 'FAILED', err instanceof Error ? err.message : String(err));
-    sendOverlayStep(sender, 'wallpaper', 'failed', err instanceof Error ? err.message : String(err));
-    failed++;
-  }
-
-  // 7. Audio device and volume (only switch device if valid)
-  try {
-    if (workspace.system.audioDevice && validation.validAudioDevice) {
-      total++;
-      sendProgress(sender, `Switching audio to ${validation.audioDeviceName}...`);
-      sendOverlayStep(sender, 'audio-device', 'in-progress');
-      const audioSuccess = await audioController.setAudioDevice(workspace.system.audioDevice);
-      if (audioSuccess) {
-        await logger.logStep('SET AUDIO DEVICE', workspace.system.audioDevice, 'SUCCESS');
-        sendOverlayStep(sender, 'audio-device', 'success');
+      if (workspace.audio.transitionSound && sender && validation.validSound) {
+        total++;
+        sendOverlayStep(sender, 'sound', 'in-progress');
+        soundPlayer.playSound(workspace.audio.transitionSound, sender);
+        await logger.logStep('PLAY SOUND', workspace.audio.transitionSound, 'SUCCESS');
+        sendOverlayStep(sender, 'sound', 'success');
         succeeded++;
-      } else {
-        await logger.logStep('SET AUDIO DEVICE', workspace.system.audioDevice, 'FAILED', 'Verification failed after retry');
-        sendOverlayStep(sender, 'audio-device', 'failed', 'Verification failed after retry');
-        failed++;
       }
+    } catch (err) {
+      console.error('Transition sound error:', err);
+      await logger.logStep('PLAY SOUND', workspace.audio.transitionSound || '', 'FAILED', err instanceof Error ? err.message : String(err));
+      sendOverlayStep(sender, 'sound', 'failed', err instanceof Error ? err.message : String(err));
+      failed++;
     }
-    if (workspace.system.volume !== null) {
+
+    // 3. Close apps from close list
+    for (let i = 0; i < workspace.apps.close.length; i++) {
+      const app = workspace.apps.close[i];
       total++;
-      sendOverlayStep(sender, 'volume', 'in-progress');
-      await audioController.setVolume(workspace.system.volume);
-      await logger.logStep('SET VOLUME', `${workspace.system.volume}%`, 'SUCCESS');
-      sendOverlayStep(sender, 'volume', 'success');
-      succeeded++;
-    }
-  } catch (err) {
-    sendProgress(sender, 'Failed to set audio, continuing...');
-    console.error('Audio error:', err);
-    if (workspace.system.audioDevice) {
-      await logger.logStep('SET AUDIO DEVICE', workspace.system.audioDevice, 'FAILED', err instanceof Error ? err.message : String(err));
-      sendOverlayStep(sender, 'audio-device', 'failed', err instanceof Error ? err.message : String(err));
-      failed++;
-    }
-    if (workspace.system.volume !== null) {
-      await logger.logStep('SET VOLUME', `${workspace.system.volume}%`, 'FAILED', err instanceof Error ? err.message : String(err));
-      sendOverlayStep(sender, 'volume', 'failed', err instanceof Error ? err.message : String(err));
-      failed++;
-    }
-  }
-
-  // 8. Launch apps from open list (only valid ones)
-  openedApps.clear();
-  for (let i = 0; i < validation.validAppsToOpen.length; i++) {
-    const app = validation.validAppsToOpen[i];
-    total++;
-    const stepId = `open-${i}`;
-    try {
-      sendProgress(sender, `Launching ${app.name}...`);
-      sendOverlayStep(sender, stepId, 'in-progress');
-      await processManager.launchApp(app);
-      openedApps.add(app.path);
-      await logger.logStep('OPEN APP', app.name, 'SUCCESS');
-      sendOverlayStep(sender, stepId, 'success');
-      succeeded++;
-    } catch (err) {
-      sendProgress(sender, `Failed to launch ${app.name}, continuing...`);
-      console.error(`Launch app error (${app.name}):`, err);
-      await logger.logStep('OPEN APP', app.name, 'FAILED', err instanceof Error ? err.message : String(err));
-      sendOverlayStep(sender, stepId, 'failed', err instanceof Error ? err.message : String(err));
-      failed++;
-    }
-  }
-
-  // 9. Close Explorer windows (if enabled), then open valid folders
-  let alreadyOpenFolders: Set<string> = new Set();
-  if (workspace.closeFolders) {
-    try {
-      total++;
-      sendProgress(sender, 'Closing Explorer windows...');
-      sendOverlayStep(sender, 'close-folders', 'in-progress');
-      const openPaths = await explorerWindows.getOpenExplorerPaths();
-      alreadyOpenFolders = new Set(openPaths.map((p) => p.toLowerCase()));
-      await explorerWindows.closeExplorerWindows(validation.validFolders);
-      await logger.logStep('CLOSE EXPLORER WINDOWS', `keeping ${validation.validFolders.length} folders`, 'SUCCESS');
-      sendOverlayStep(sender, 'close-folders', 'success');
-      succeeded++;
-    } catch (err) {
-      console.error('Close Explorer windows error:', err);
-      await logger.logStep('CLOSE EXPLORER WINDOWS', '', 'FAILED', err instanceof Error ? err.message : String(err));
-      sendOverlayStep(sender, 'close-folders', 'failed', err instanceof Error ? err.message : String(err));
-      failed++;
-    }
-  }
-  for (let i = 0; i < validation.validFolders.length; i++) {
-    const folder = validation.validFolders[i];
-    const stepId = `folder-${i}`;
-    // Skip folders already open (kept open by closeExplorerWindows)
-    if (alreadyOpenFolders.has(folder.toLowerCase())) {
-      skipped++;
-      await logger.logStep('OPEN FOLDER', folder, 'SKIPPED');
-      sendOverlayStep(sender, stepId, 'skipped');
-      continue;
-    }
-    total++;
-    try {
-      sendOverlayStep(sender, stepId, 'in-progress');
-      await shell.openPath(folder);
-      await logger.logStep('OPEN FOLDER', folder, 'SUCCESS');
-      sendOverlayStep(sender, stepId, 'success');
-      succeeded++;
-    } catch (err) {
-      console.error(`Open folder error (${folder}):`, err);
-      await logger.logStep('OPEN FOLDER', folder, 'FAILED', err instanceof Error ? err.message : String(err));
-      sendOverlayStep(sender, stepId, 'failed', err instanceof Error ? err.message : String(err));
-      failed++;
-    }
-  }
-
-  // 10. Open URLs
-  for (let i = 0; i < workspace.urls.length; i++) {
-    const url = workspace.urls[i];
-    total++;
-    const stepId = `url-${i}`;
-    try {
-      if (isSafeUrl(url)) {
+      const stepId = `close-${i}`;
+      try {
+        const processName = getProcessName(app.path, app.name);
+        sendProgress(sender, `Closing ${app.name}...`);
         sendOverlayStep(sender, stepId, 'in-progress');
-        await shell.openExternal(url);
-        await logger.logStep('OPEN URL', url, 'SUCCESS');
+        await processManager.closeApp(processName);
+        await logger.logStep('CLOSE APP', processName, 'SUCCESS');
         sendOverlayStep(sender, stepId, 'success');
         succeeded++;
-      } else {
-        console.error(`Blocked unsafe URL: ${url}`);
-        await logger.logStep('OPEN URL', url, 'FAILED', 'Blocked unsafe URL');
-        sendOverlayStep(sender, stepId, 'failed', 'Blocked unsafe URL');
+      } catch (err) {
+        sendProgress(sender, `Failed to close ${app.name}, continuing...`);
+        console.error(`Close app error (${app.name}):`, err);
+        await logger.logStep('CLOSE APP', getProcessName(app.path, app.name), 'FAILED', err instanceof Error ? err.message : String(err));
+        sendOverlayStep(sender, stepId, 'failed', err instanceof Error ? err.message : String(err));
         failed++;
       }
+    }
+
+    // 4. Set wallpaper (only if valid)
+    try {
+      if (workspace.display.wallpaper && validation.validWallpaper) {
+        total++;
+        sendProgress(sender, 'Setting wallpaper...');
+        sendOverlayStep(sender, 'wallpaper', 'in-progress');
+        await displayController.setWallpaper(workspace.display.wallpaper);
+        await logger.logStep('SET WALLPAPER', workspace.display.wallpaper, 'SUCCESS');
+        sendOverlayStep(sender, 'wallpaper', 'success');
+        succeeded++;
+      }
     } catch (err) {
-      console.error(`Open URL error (${url}):`, err);
-      await logger.logStep('OPEN URL', url, 'FAILED', err instanceof Error ? err.message : String(err));
-      sendOverlayStep(sender, stepId, 'failed', err instanceof Error ? err.message : String(err));
+      sendProgress(sender, 'Failed to set wallpaper, continuing...');
+      console.error('Wallpaper error:', err);
+      await logger.logStep('SET WALLPAPER', workspace.display.wallpaper || '', 'FAILED', err instanceof Error ? err.message : String(err));
+      sendOverlayStep(sender, 'wallpaper', 'failed', err instanceof Error ? err.message : String(err));
       failed++;
     }
-  }
 
-  // 11. Music — open playlist URI if set
-  try {
-    if (workspace.audio.playlistUri && isSafeUrl(workspace.audio.playlistUri)) {
-      total++;
-      sendOverlayStep(sender, 'music', 'in-progress');
-      await shell.openExternal(workspace.audio.playlistUri);
-      await logger.logStep('LAUNCH MUSIC', workspace.audio.playlistUri, 'SUCCESS');
-      sendOverlayStep(sender, 'music', 'success');
-      succeeded++;
+    // 7. Audio device and volume (only switch device if valid)
+    try {
+      if (workspace.system.audioDevice && validation.validAudioDevice) {
+        total++;
+        sendProgress(sender, `Switching audio to ${validation.audioDeviceName}...`);
+        sendOverlayStep(sender, 'audio-device', 'in-progress');
+        const audioSuccess = await audioController.setAudioDevice(workspace.system.audioDevice);
+        if (audioSuccess) {
+          await logger.logStep('SET AUDIO DEVICE', workspace.system.audioDevice, 'SUCCESS');
+          sendOverlayStep(sender, 'audio-device', 'success');
+          succeeded++;
+        } else {
+          await logger.logStep('SET AUDIO DEVICE', workspace.system.audioDevice, 'FAILED', 'Verification failed after retry');
+          sendOverlayStep(sender, 'audio-device', 'failed', 'Verification failed after retry');
+          failed++;
+        }
+      }
+      if (workspace.system.volume !== null) {
+        total++;
+        sendOverlayStep(sender, 'volume', 'in-progress');
+        await audioController.setVolume(workspace.system.volume);
+        await logger.logStep('SET VOLUME', `${workspace.system.volume}%`, 'SUCCESS');
+        sendOverlayStep(sender, 'volume', 'success');
+        succeeded++;
+      }
+    } catch (err) {
+      sendProgress(sender, 'Failed to set audio, continuing...');
+      console.error('Audio error:', err);
+      if (workspace.system.audioDevice) {
+        await logger.logStep('SET AUDIO DEVICE', workspace.system.audioDevice, 'FAILED', err instanceof Error ? err.message : String(err));
+        sendOverlayStep(sender, 'audio-device', 'failed', err instanceof Error ? err.message : String(err));
+        failed++;
+      }
+      if (workspace.system.volume !== null) {
+        await logger.logStep('SET VOLUME', `${workspace.system.volume}%`, 'FAILED', err instanceof Error ? err.message : String(err));
+        sendOverlayStep(sender, 'volume', 'failed', err instanceof Error ? err.message : String(err));
+        failed++;
+      }
     }
-  } catch (err) {
-    console.error('Music launch error:', err);
-    await logger.logStep('LAUNCH MUSIC', workspace.audio.playlistUri || '', 'FAILED', err instanceof Error ? err.message : String(err));
-    sendOverlayStep(sender, 'music', 'failed', err instanceof Error ? err.message : String(err));
-    failed++;
-  }
 
-  activeWorkspaceId = workspace.id;
-  setStoreActiveWorkspaceId(workspace.id);
+    // 8. Launch apps from open list (only valid ones)
+    openedApps.clear();
+    for (let i = 0; i < validation.validAppsToOpen.length; i++) {
+      const app = validation.validAppsToOpen[i];
+      total++;
+      const stepId = `open-${i}`;
+      try {
+        sendProgress(sender, `Launching ${app.name}...`);
+        sendOverlayStep(sender, stepId, 'in-progress');
+        await processManager.launchApp(app);
+        openedApps.add(app.path);
+        await logger.logStep('OPEN APP', app.name, 'SUCCESS');
+        sendOverlayStep(sender, stepId, 'success');
+        succeeded++;
+      } catch (err) {
+        sendProgress(sender, `Failed to launch ${app.name}, continuing...`);
+        console.error(`Launch app error (${app.name}):`, err);
+        await logger.logStep('OPEN APP', app.name, 'FAILED', err instanceof Error ? err.message : String(err));
+        sendOverlayStep(sender, stepId, 'failed', err instanceof Error ? err.message : String(err));
+        failed++;
+      }
+    }
 
-  await logger.logActivationComplete(Date.now() - startTime, succeeded, total, skipped);
+    // 9. Close Explorer windows (if enabled), then open valid folders
+    let alreadyOpenFolders: Set<string> = new Set();
+    if (workspace.closeFolders) {
+      try {
+        total++;
+        sendProgress(sender, 'Closing Explorer windows...');
+        sendOverlayStep(sender, 'close-folders', 'in-progress');
+        const openPaths = await explorerWindows.getOpenExplorerPaths();
+        alreadyOpenFolders = new Set(openPaths.map((p) => p.toLowerCase()));
+        await explorerWindows.closeExplorerWindows(validation.validFolders);
+        await logger.logStep('CLOSE EXPLORER WINDOWS', `keeping ${validation.validFolders.length} folders`, 'SUCCESS');
+        sendOverlayStep(sender, 'close-folders', 'success');
+        succeeded++;
+      } catch (err) {
+        console.error('Close Explorer windows error:', err);
+        await logger.logStep('CLOSE EXPLORER WINDOWS', '', 'FAILED', err instanceof Error ? err.message : String(err));
+        sendOverlayStep(sender, 'close-folders', 'failed', err instanceof Error ? err.message : String(err));
+        failed++;
+      }
+    }
+    for (let i = 0; i < validation.validFolders.length; i++) {
+      const folder = validation.validFolders[i];
+      const stepId = `folder-${i}`;
+      // Skip folders already open (kept open by closeExplorerWindows)
+      if (alreadyOpenFolders.has(folder.toLowerCase())) {
+        skipped++;
+        await logger.logStep('OPEN FOLDER', folder, 'SKIPPED');
+        sendOverlayStep(sender, stepId, 'skipped');
+        continue;
+      }
+      total++;
+      try {
+        sendOverlayStep(sender, stepId, 'in-progress');
+        await shell.openPath(folder);
+        await logger.logStep('OPEN FOLDER', folder, 'SUCCESS');
+        sendOverlayStep(sender, stepId, 'success');
+        succeeded++;
+      } catch (err) {
+        console.error(`Open folder error (${folder}):`, err);
+        await logger.logStep('OPEN FOLDER', folder, 'FAILED', err instanceof Error ? err.message : String(err));
+        sendOverlayStep(sender, stepId, 'failed', err instanceof Error ? err.message : String(err));
+        failed++;
+      }
+    }
 
-  // Send overlay complete
-  sendOverlayComplete(sender, succeeded, total, skipped, failed);
+    // 10. Open URLs
+    for (let i = 0; i < workspace.urls.length; i++) {
+      const url = workspace.urls[i];
+      total++;
+      const stepId = `url-${i}`;
+      try {
+        if (isSafeUrl(url)) {
+          sendOverlayStep(sender, stepId, 'in-progress');
+          await shell.openExternal(url);
+          await logger.logStep('OPEN URL', url, 'SUCCESS');
+          sendOverlayStep(sender, stepId, 'success');
+          succeeded++;
+        } else {
+          console.error(`Blocked unsafe URL: ${url}`);
+          await logger.logStep('OPEN URL', url, 'FAILED', 'Blocked unsafe URL');
+          sendOverlayStep(sender, stepId, 'failed', 'Blocked unsafe URL');
+          failed++;
+        }
+      } catch (err) {
+        console.error(`Open URL error (${url}):`, err);
+        await logger.logStep('OPEN URL', url, 'FAILED', err instanceof Error ? err.message : String(err));
+        sendOverlayStep(sender, stepId, 'failed', err instanceof Error ? err.message : String(err));
+        failed++;
+      }
+    }
 
-  if (validation.skippedCount > 0) {
-    sendProgress(sender, `Done (${validation.skippedCount} items skipped — check logs)`);
-  } else {
-    sendProgress(sender, 'Done');
-  }
+    // 11. Music — open playlist URI if set
+    try {
+      if (workspace.audio.playlistUri && isSafeUrl(workspace.audio.playlistUri)) {
+        total++;
+        sendOverlayStep(sender, 'music', 'in-progress');
+        await shell.openExternal(workspace.audio.playlistUri);
+        await logger.logStep('LAUNCH MUSIC', workspace.audio.playlistUri, 'SUCCESS');
+        sendOverlayStep(sender, 'music', 'success');
+        succeeded++;
+      }
+    } catch (err) {
+      console.error('Music launch error:', err);
+      await logger.logStep('LAUNCH MUSIC', workspace.audio.playlistUri || '', 'FAILED', err instanceof Error ? err.message : String(err));
+      sendOverlayStep(sender, 'music', 'failed', err instanceof Error ? err.message : String(err));
+      failed++;
+    }
+
+    activeWorkspaceId = workspace.id;
+    setStoreActiveWorkspaceId(workspace.id);
+
+    await logger.logActivationComplete(Date.now() - startTime, succeeded, total, skipped);
+
+    // Send overlay complete
+    sendOverlayComplete(sender, succeeded, total, skipped, failed);
+
+    if (validation.skippedCount > 0) {
+      sendProgress(sender, `Done (${validation.skippedCount} items skipped — check logs)`);
+    } else {
+      sendProgress(sender, 'Done');
+    }
   } finally {
     isActivating = false;
   }

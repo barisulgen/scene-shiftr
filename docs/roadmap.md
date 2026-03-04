@@ -84,42 +84,45 @@ What didn't make it:
 - [ ] Dark/light mode switch support
 - [ ] Full keyboard navigation — tab through all interactive elements, Enter to activate
 - [ ] Sufficient color contrast ratios (WCAG AA minimum)
+- [ ] Schema version field in workspace JSON for future migrations
 
 ---
 
 ## v0.4.0 — Quality of Life
 
-Priority: reduce friction and make daily use smoother.
-
 **Workspace Management**
 
-- [ ] Workspace export/import (single JSON file)
-- [ ] Schema version field in workspace JSON for future migrations
-- [ ] Workspace duplication — clone an existing workspace as a starting point
-- [ ] Workspace icons/colors — visual differentiation in the sidebar beyond just names
+- [x] Workspace export/import (single JSON file)
+- [x] Workspace duplication — clone an existing workspace as a starting point
+- [x] Workspace icons/colors — visual differentiation in the sidebar beyond just names
 
 **Activation Improvements**
 
-- [ ] Close all Explorer windows before opening workspace folders (via Shell.Application COM)
-- [ ] App launch arguments support (e.g. open Chrome with a specific profile or URL)
-- [ ] App launch delay — configurable per-app delay for apps that need time to initialize before the next one starts
-- ~~[ ] Custom graceful close timeout per workspace~~
+- [x] Close all Explorer windows before opening workspace folders (via Shell.Application COM)
 - [x] "Confirm before switching" setting
-
-**Diagnostics**
-
-- [ ] System state debug panel — shows actual system state vs what the app thinks
-- [ ] Activation history — searchable log of past activations with timestamps and outcomes
 
 **Window Behavior**
 
-- [ ] Remember window size and position across sessions
+- [x] Remember appscale and position across sessions
+
+**Other**
+
+- [x] Add screensaver settings (just like wallpaper)
+
+---
+
+What didn't make it:
+
+- [ ] Schema version field in workspace JSON for future migrations
+- [ ] Custom graceful close timeout per workspace
+- [ ] App launch delay — configurable per-app delay for apps that need time to initialize before the next one starts
+- [ ] App launch arguments support (e.g. open Chrome with a specific profile or URL)
+- [ ] System state debug panel — shows actual system state vs what the app thinks
+- [ ] Activation history — searchable log of past activations with timestamps and outcomes
 
 ---
 
 ## v0.5.0 — Automation & Triggers
-
-Priority: the app starts working for you instead of you working the app.
 
 - [ ] Hotkey support — global keyboard shortcuts to activate any workspace
 - [ ] Auto-switch on device connect — controller plugged in → Gaming, headset plugged in → Music (via Windows device event listener)
@@ -130,8 +133,6 @@ Priority: the app starts working for you instead of you working the app.
 ---
 
 ## v0.6.0 — Power Features
-
-Priority: advanced capabilities for users who want full control.
 
 **Display & Layout**
 
@@ -152,8 +153,6 @@ Priority: advanced capabilities for users who want full control.
 ---
 
 ## v0.7.0 — Polish & Hardening
-
-Priority: final pass before going public. Everything should feel rock-solid.
 
 - [ ] Bundle AudioDeviceCmdlets DLL — remove first-launch internet dependency (carried from v0.2.0)
 - [ ] Comprehensive error messages — every failure state has a user-friendly explanation and suggested fix

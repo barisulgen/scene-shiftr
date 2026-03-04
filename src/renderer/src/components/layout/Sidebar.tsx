@@ -1,7 +1,7 @@
-import { useState, useRef, useEffect } from "react";
-import { useApp } from "../../context/AppContext";
-import { useWorkspaces } from "../../hooks/useWorkspaces";
-import WorkspaceList from "../workspace/WorkspaceList";
+import { useState, useRef, useEffect } from 'react';
+import { useApp } from '../../context/AppContext';
+import { useWorkspaces } from '../../hooks/useWorkspaces';
+import WorkspaceList from '../workspace/WorkspaceList';
 
 export default function Sidebar(): JSX.Element {
   const { setCurrentView, currentView } = useApp();
@@ -16,8 +16,8 @@ export default function Sidebar(): JSX.Element {
       }
     }
     if (showFeedback) {
-      document.addEventListener("mousedown", handleClickOutside);
-      return () => document.removeEventListener("mousedown", handleClickOutside);
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
     }
     return undefined;
   }, [showFeedback]);
@@ -26,8 +26,8 @@ export default function Sidebar(): JSX.Element {
     <aside
       className="flex flex-col w-64 shrink-0"
       style={{
-        backgroundColor: "var(--bg-card)",
-        borderRight: "1px solid var(--border)",
+        backgroundColor: 'var(--bg-card)',
+        borderRight: '1px solid var(--border)',
       }}
     >
       {/* Workspace list area */}
@@ -35,7 +35,7 @@ export default function Sidebar(): JSX.Element {
         <div className="px-2 pb-2">
           <span
             className="text-xs font-semibold uppercase tracking-widest"
-            style={{ color: "var(--text-muted)", letterSpacing: "0.1em" }}
+            style={{ color: 'var(--text-muted)', letterSpacing: '0.1em' }}
           >
             Workspaces
           </span>
@@ -46,17 +46,17 @@ export default function Sidebar(): JSX.Element {
       {/* Bottom actions */}
       <div
         className="flex flex-col gap-1 px-3 py-2"
-        style={{ borderTop: "1px solid var(--border)" }}
+        style={{ borderTop: '1px solid var(--border)' }}
       >
         <button
-          onClick={() => setCurrentView("create")}
+          onClick={() => setCurrentView('create')}
           className="flex items-center gap-2 w-full px-3 py-1.5 rounded-md text-sm font-medium cursor-pointer transition-colors duration-150"
-          style={{ color: "var(--accent)" }}
+          style={{ color: 'var(--accent)' }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "var(--accent-soft)";
+            e.currentTarget.style.backgroundColor = 'var(--accent-soft)';
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "transparent";
+            e.currentTarget.style.backgroundColor = 'transparent';
           }}
         >
           <svg
@@ -72,14 +72,14 @@ export default function Sidebar(): JSX.Element {
         <button
           onClick={() => importWorkspace()}
           className="flex items-center gap-2 w-full px-3 py-1.5 rounded-md text-sm font-medium cursor-pointer transition-colors duration-150"
-          style={{ color: "var(--text-secondary)" }}
+          style={{ color: 'var(--text-secondary)' }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "var(--bg-card-hover)";
-            e.currentTarget.style.color = "var(--text-primary)";
+            e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)';
+            e.currentTarget.style.color = 'var(--text-primary)';
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "transparent";
-            e.currentTarget.style.color = "var(--text-secondary)";
+            e.currentTarget.style.backgroundColor = 'transparent';
+            e.currentTarget.style.color = 'var(--text-secondary)';
           }}
         >
           <svg
@@ -94,24 +94,24 @@ export default function Sidebar(): JSX.Element {
           Import Workspace
         </button>
         <button
-          onClick={() => setCurrentView(currentView === "settings" ? "main" : "settings")}
+          onClick={() => setCurrentView(currentView === 'settings' ? 'main' : 'settings')}
           className="flex items-center gap-2 w-full px-3 py-1.5 rounded-md text-sm font-medium cursor-pointer transition-colors duration-150 relative"
           style={{
-            color: currentView === "settings" ? "var(--text-primary)" : "var(--text-secondary)",
-            backgroundColor: currentView === "settings" ? "var(--bg-card-hover)" : "transparent",
+            color: currentView === 'settings' ? 'var(--text-primary)' : 'var(--text-secondary)',
+            backgroundColor: currentView === 'settings' ? 'var(--bg-card-hover)' : 'transparent',
             borderLeft:
-              currentView === "settings" ? "3px solid var(--accent)" : "3px solid transparent",
+              currentView === 'settings' ? '3px solid var(--accent)' : '3px solid transparent',
           }}
           onMouseEnter={(e) => {
-            if (currentView !== "settings") {
-              e.currentTarget.style.backgroundColor = "var(--bg-card-hover)";
-              e.currentTarget.style.color = "var(--text-primary)";
+            if (currentView !== 'settings') {
+              e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)';
+              e.currentTarget.style.color = 'var(--text-primary)';
             }
           }}
           onMouseLeave={(e) => {
-            if (currentView !== "settings") {
-              e.currentTarget.style.backgroundColor = "transparent";
-              e.currentTarget.style.color = "var(--text-secondary)";
+            if (currentView !== 'settings') {
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.color = 'var(--text-secondary)';
             }
           }}
         >
@@ -137,19 +137,19 @@ export default function Sidebar(): JSX.Element {
             onClick={() => setShowFeedback(!showFeedback)}
             className="flex items-center gap-2 w-full px-3 py-1.5 rounded-md text-sm font-medium cursor-pointer transition-colors duration-150"
             style={{
-              color: showFeedback ? "var(--text-primary)" : "var(--text-secondary)",
-              backgroundColor: showFeedback ? "var(--bg-card-hover)" : "transparent",
+              color: showFeedback ? 'var(--text-primary)' : 'var(--text-secondary)',
+              backgroundColor: showFeedback ? 'var(--bg-card-hover)' : 'transparent',
             }}
             onMouseEnter={(e) => {
               if (!showFeedback) {
-                e.currentTarget.style.backgroundColor = "var(--bg-card-hover)";
-                e.currentTarget.style.color = "var(--text-primary)";
+                e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)';
+                e.currentTarget.style.color = 'var(--text-primary)';
               }
             }}
             onMouseLeave={(e) => {
               if (!showFeedback) {
-                e.currentTarget.style.backgroundColor = "transparent";
-                e.currentTarget.style.color = "var(--text-secondary)";
+                e.currentTarget.style.backgroundColor = 'transparent';
+                e.currentTarget.style.color = 'var(--text-secondary)';
               }
             }}
           >
@@ -171,13 +171,13 @@ export default function Sidebar(): JSX.Element {
             <div
               className="absolute bottom-full left-0 mb-2 w-64 rounded-xl p-4 shadow-2xl z-30"
               style={{
-                backgroundColor: "var(--bg-card)",
-                border: "1px solid var(--border-light)",
+                backgroundColor: 'var(--bg-card)',
+                border: '1px solid var(--border-light)',
               }}
             >
               <p
                 className="text-xs mb-3"
-                style={{ color: "var(--text-muted)" }}
+                style={{ color: 'var(--text-muted)' }}
               >
                 Thank you for using Scene Shiftr! &#10084;
               </p>
@@ -185,22 +185,22 @@ export default function Sidebar(): JSX.Element {
                 <button
                   onClick={() => {
                     window.open(
-                      "https://github.com/barisulgen/scene-shiftr/issues/new/choose",
-                      "_blank",
+                      'https://github.com/barisulgen/scene-shiftr/issues/new/choose',
+                      '_blank',
                     );
                     setShowFeedback(false);
                   }}
                   className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-xs font-medium cursor-pointer transition-colors duration-150"
                   style={{
-                    backgroundColor: "var(--bg-elevated)",
-                    color: "var(--text-primary)",
-                    border: "1px solid var(--border)",
+                    backgroundColor: 'var(--bg-elevated)',
+                    color: 'var(--text-primary)',
+                    border: '1px solid var(--border)',
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = "var(--bg-card-hover)";
+                    e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)';
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = "var(--bg-elevated)";
+                    e.currentTarget.style.backgroundColor = 'var(--bg-elevated)';
                   }}
                 >
                   <svg
@@ -215,22 +215,22 @@ export default function Sidebar(): JSX.Element {
                 </button>
                 <button
                   onClick={() => {
-                    window.open("https://github.com/barisulgen/scene-shiftr", "_blank");
+                    window.open('https://github.com/barisulgen/scene-shiftr', '_blank');
                     setShowFeedback(false);
                   }}
                   className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-xs font-medium cursor-pointer transition-colors duration-150"
                   style={{
-                    backgroundColor: "var(--bg-elevated)",
-                    color: "var(--text-secondary)",
-                    border: "1px solid var(--border)",
+                    backgroundColor: 'var(--bg-elevated)',
+                    color: 'var(--text-secondary)',
+                    border: '1px solid var(--border)',
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = "var(--bg-card-hover)";
-                    e.currentTarget.style.color = "var(--text-primary)";
+                    e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)';
+                    e.currentTarget.style.color = 'var(--text-primary)';
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = "var(--bg-elevated)";
-                    e.currentTarget.style.color = "var(--text-secondary)";
+                    e.currentTarget.style.backgroundColor = 'var(--bg-elevated)';
+                    e.currentTarget.style.color = 'var(--text-secondary)';
                   }}
                 >
                   <svg
@@ -246,14 +246,14 @@ export default function Sidebar(): JSX.Element {
               </div>
               <div
                 className="mt-3 pt-3"
-                style={{ borderTop: "1px solid var(--border)" }}
+                style={{ borderTop: '1px solid var(--border)' }}
               >
                 <p
                   className="text-[10px]"
-                  style={{ color: "var(--text-muted)" }}
+                  style={{ color: 'var(--text-muted)' }}
                 >
-                  Contact:{" "}
-                  <span style={{ color: "var(--text-secondary)" }}>barisulgn@gmail.com</span>
+                  Contact:{' '}
+                  <span style={{ color: 'var(--text-secondary)' }}>barisulgn@gmail.com</span>
                 </p>
               </div>
             </div>

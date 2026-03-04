@@ -2,12 +2,10 @@ import { app, shell, BrowserWindow, ipcMain, nativeTheme } from 'electron';
 import { join } from 'path';
 import { registerAllHandlers } from './ipc';
 import { setStorageDir, getDefaultWorkspace, createDefaultWorkspace } from './services/workspace-storage';
-import { setNircmdPath } from './services/audio-controller';
 import { setAssetsPath } from './services/sound-player';
 import { createTray, updateTrayMenu, destroyTray } from './tray';
 import { setTrayRefreshCallback } from './tray-bridge';
 import { setDryRunCheck, getIsActivating } from './services/workspace-manager';
-import { ensureAudioModule } from './services/audio-controller';
 import { setLogBaseDir, rotateOldLogs } from './services/logger';
 import { getSettings, updateSettings, setActiveWorkspaceId, getActiveWorkspaceId } from './store';
 import * as audioController from './services/audio-controller';
@@ -99,7 +97,7 @@ app.whenReady().then(async () => {
   // Configure service paths
   const appDataDir = join(app.getPath('appData'), 'scene-shiftr');
   setStorageDir(join(appDataDir, 'workspaces'));
-  setNircmdPath(join(app.getAppPath(), 'tools', 'nircmd.exe'));
+  audioController.setNircmdPath(join(app.getAppPath(), 'tools', 'nircmd.exe'));
   setAssetsPath(join(app.getAppPath(), 'assets', 'sounds'));
   setLogBaseDir(join(appDataDir, 'logs'));
   setDryRunCheck(() => getSettings().dryRun);
@@ -108,7 +106,7 @@ app.whenReady().then(async () => {
   rotateOldLogs();
 
   // Ensure AudioDeviceCmdlets module is installed (background, non-blocking)
-  ensureAudioModule();
+  audioController.ensureAudioModule();
 
   // Register all IPC handlers
   registerAllHandlers();
