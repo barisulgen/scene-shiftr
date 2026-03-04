@@ -1,6 +1,7 @@
 import { ipcMain, BrowserWindow, dialog } from 'electron';
 import * as fs from 'fs/promises';
 import type { Workspace } from '../../shared/types';
+import { randomWorkspaceColor } from '../../shared/constants';
 import * as storage from '../services/workspace-storage';
 import * as manager from '../services/workspace-manager';
 import * as audioController from '../services/audio-controller';
@@ -79,6 +80,7 @@ export function registerWorkspaceHandlers(): void {
       exportVersion: '1.0',
       name: workspace.name,
       icon: workspace.icon,
+      color: workspace.color,
       apps: workspace.apps,
       folders: workspace.folders,
       closeFolders: workspace.closeFolders,
@@ -134,6 +136,7 @@ export function registerWorkspaceHandlers(): void {
     const workspaceData = {
       name,
       icon: (data.icon as string) || '\u{1F5A5}\u{FE0F}',
+      color: (data.color as string) || randomWorkspaceColor(),
       apps: (data.apps as Workspace['apps']) || { open: [], close: [] },
       folders: (data.folders as string[]) || [],
       closeFolders: (data.closeFolders as boolean) || false,
@@ -160,6 +163,7 @@ export function registerWorkspaceHandlers(): void {
     const duplicateData = {
       name: `${workspace.name} (copy)`,
       icon: workspace.icon,
+      color: workspace.color,
       apps: workspace.apps,
       folders: workspace.folders,
       closeFolders: workspace.closeFolders,

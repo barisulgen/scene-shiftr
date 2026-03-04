@@ -9,6 +9,13 @@ interface WorkspaceListItemProps {
   onSelect: (id: string) => void;
 }
 
+function hexToRgba(hex: string, alpha: number): string {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
 function getSubtitle(workspace: Workspace, isActive: boolean): string {
   if (workspace.isDefault) return isActive ? 'Active' : 'Default';
   if (isActive) return 'Active';
@@ -33,12 +40,15 @@ function SortableWorkspaceListItem({
   } = useSortable({ id: workspace.id });
 
   const subtitle = getSubtitle(workspace, isActive);
+  const wsColor = workspace.color || '#E8636B';
+  const selectedBg = hexToRgba(wsColor, 0.08);
+  const hoverBg = hexToRgba(wsColor, 0.05);
 
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
-    backgroundColor: isSelected ? 'var(--bg-card-hover)' : 'transparent',
-    borderLeft: isSelected ? '3px solid var(--accent)' : '3px solid transparent',
+    backgroundColor: isSelected ? selectedBg : 'transparent',
+    borderLeft: `3px solid ${wsColor}`,
   };
 
   return (
@@ -51,7 +61,7 @@ function SortableWorkspaceListItem({
       onClick={() => onSelect(workspace.id)}
       onMouseEnter={(e) => {
         if (!isSelected) {
-          e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)';
+          e.currentTarget.style.backgroundColor = hoverBg;
         }
       }}
       onMouseLeave={(e) => {
@@ -65,7 +75,10 @@ function SortableWorkspaceListItem({
       {/* Icon in colored square */}
       <div
         className="flex items-center justify-center w-9 h-9 rounded-lg shrink-0 text-base"
-        style={{ backgroundColor: 'var(--bg-elevated)' }}
+        style={{
+          backgroundColor: hexToRgba(wsColor, 0.1),
+          border: `1px solid ${hexToRgba(wsColor, 0.2)}`,
+        }}
       >
         {workspace.icon}
       </div>
@@ -80,7 +93,7 @@ function SortableWorkspaceListItem({
         </span>
         <span
           className="text-xs truncate"
-          style={{ color: isActive ? 'var(--accent)' : 'var(--text-muted)' }}
+          style={{ color: isActive ? wsColor : 'var(--text-muted)' }}
         >
           {subtitle}
         </span>
@@ -90,7 +103,7 @@ function SortableWorkspaceListItem({
       {isActive && (
         <span
           className="w-2 h-2 rounded-full shrink-0"
-          style={{ backgroundColor: 'var(--accent)' }}
+          style={{ backgroundColor: wsColor }}
         />
       )}
     </div>
@@ -103,13 +116,17 @@ export default function WorkspaceListItem({
   isActive,
   onSelect,
 }: WorkspaceListItemProps): JSX.Element {
+  const wsColor = workspace.color || '#E8636B';
+  const selectedBg = hexToRgba(wsColor, 0.08);
+  const hoverBg = hexToRgba(wsColor, 0.05);
+
   // Default workspace is not draggable — render without sortable wrapper
   if (workspace.isDefault) {
     const subtitle = getSubtitle(workspace, isActive);
 
     const style: React.CSSProperties = {
-      backgroundColor: isSelected ? 'var(--bg-card-hover)' : 'transparent',
-      borderLeft: isSelected ? '3px solid var(--accent)' : '3px solid transparent',
+      backgroundColor: isSelected ? selectedBg : 'transparent',
+      borderLeft: `3px solid ${wsColor}`,
     };
 
     return (
@@ -119,7 +136,7 @@ export default function WorkspaceListItem({
         onClick={() => onSelect(workspace.id)}
         onMouseEnter={(e) => {
           if (!isSelected) {
-            e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)';
+            e.currentTarget.style.backgroundColor = hoverBg;
           }
         }}
         onMouseLeave={(e) => {
@@ -131,7 +148,10 @@ export default function WorkspaceListItem({
         {/* Icon in colored square */}
         <div
           className="flex items-center justify-center w-9 h-9 rounded-lg shrink-0 text-base"
-          style={{ backgroundColor: 'var(--bg-elevated)' }}
+          style={{
+            backgroundColor: hexToRgba(wsColor, 0.1),
+            border: `1px solid ${hexToRgba(wsColor, 0.2)}`,
+          }}
         >
           {workspace.icon}
         </div>
@@ -146,7 +166,7 @@ export default function WorkspaceListItem({
           </span>
           <span
             className="text-xs truncate"
-            style={{ color: isActive ? 'var(--accent)' : 'var(--text-muted)' }}
+            style={{ color: isActive ? wsColor : 'var(--text-muted)' }}
           >
             {subtitle}
           </span>
@@ -156,7 +176,7 @@ export default function WorkspaceListItem({
         {isActive && (
           <span
             className="w-2 h-2 rounded-full shrink-0"
-            style={{ backgroundColor: 'var(--accent)' }}
+            style={{ backgroundColor: wsColor }}
           />
         )}
       </div>

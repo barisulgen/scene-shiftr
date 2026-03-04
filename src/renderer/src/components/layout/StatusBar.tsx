@@ -1,4 +1,5 @@
 import { useApp } from '../../context/AppContext';
+import packageJson from '../../../../../package.json';
 
 export default function StatusBar(): JSX.Element {
   const { status, activeWorkspaceId, workspaces } = useApp();
@@ -75,7 +76,7 @@ export default function StatusBar(): JSX.Element {
 
       {/* Right: version */}
       <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
-        v0.1.0 - Alpha
+        v{packageJson.version} - Beta
       </span>
     </footer>
   );

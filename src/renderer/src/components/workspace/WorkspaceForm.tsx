@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import type { Workspace, AppEntry } from '../../../../shared/types';
+import { WORKSPACE_COLORS, randomWorkspaceColor } from '../../../../shared/constants';
 import { useApp } from '../../context/AppContext';
 import { useWorkspaces } from '../../hooks/useWorkspaces';
 import AppSelector from './AppSelector';
@@ -55,6 +56,7 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
   const [audioDevices, setAudioDevices] = useState<{ id: string; name: string }[]>([]);
   const [wallpaper, setWallpaper] = useState<string | null>(workspace?.display.wallpaper ?? null);
   const [transitionSound, setTransitionSoundRaw] = useState<string | null>(workspace?.audio.transitionSound ?? null);
+  const [color, setColorRaw] = useState(workspace?.color ?? (isEdit ? '#E8636B' : randomWorkspaceColor()));
   const [musicEnabled, setMusicEnabledRaw] = useState(!!workspace?.audio.playlistUri);
   const [playlistUri, setPlaylistUriRaw] = useState(workspace?.audio.playlistUri ?? '');
 
@@ -70,6 +72,7 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
   const setMusicEnabled = (v: boolean): void => { setMusicEnabledRaw(v); markDirty(); };
   const setPlaylistUri = (v: string): void => { setPlaylistUriRaw(v); markDirty(); };
   const setCloseFolders = (v: boolean): void => { setCloseFoldersRaw(v); markDirty(); };
+  const setColor = (v: string): void => { setColorRaw(v); markDirty(); };
 
   const [saving, setSaving] = useState(false);
 
@@ -143,6 +146,7 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
     const data: Partial<Workspace> = {
       name: name.trim(),
       icon: icon || '\u{1F5A5}\u{FE0F}',
+      color,
       apps: { open: appsToOpen, close: appsToClose },
       folders,
       closeFolders,
@@ -232,13 +236,13 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
       <div className="flex-1 overflow-y-auto px-8 py-6">
         <div className="max-w-2xl">
 
-          {/* ======== GROUP 1 — IDENTITY ======== */}
+          {/* ======== GROUP 1 — NAME ======== */}
           <div className="mb-8">
             <div
               className="text-[10px] font-semibold uppercase mb-4"
               style={{ color: '#5a5a6e', letterSpacing: '0.15em' }}
             >
-              Identity
+              Name
             </div>
             <div className="flex items-center gap-3">
               {isDefaultWorkspace ? (
@@ -266,6 +270,41 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
                 onBlur={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; }}
               />
             </div>
+
+            {/* Color picker — hidden for default workspace */}
+            {!isDefaultWorkspace && (
+              <div className="mt-4">
+                <div
+                  className="text-[10px] font-semibold uppercase mb-2"
+                  style={{ color: '#5a5a6e', letterSpacing: '0.15em' }}
+                >
+                  Color
+                </div>
+                <div className="flex items-center gap-2">
+                  {WORKSPACE_COLORS.map((c) => (
+                    <button
+                      key={c}
+                      type="button"
+                      onClick={() => setColor(c)}
+                      className="shrink-0 rounded-full cursor-pointer transition-transform duration-100"
+                      style={{
+                        width: '24px',
+                        height: '24px',
+                        backgroundColor: c,
+                        border: color === c ? '2px solid #ffffff' : '2px solid transparent',
+                        transform: color === c ? 'scale(1.1)' : 'scale(1)',
+                      }}
+                      onMouseEnter={(e) => {
+                        if (color !== c) e.currentTarget.style.transform = 'scale(1.1)';
+                      }}
+                      onMouseLeave={(e) => {
+                        if (color !== c) e.currentTarget.style.transform = 'scale(1)';
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* ======== GROUP 2 — WHAT HAPPENS ======== */}

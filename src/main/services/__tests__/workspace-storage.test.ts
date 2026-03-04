@@ -37,6 +37,7 @@ function makeWorkspace(overrides: Partial<Workspace> = {}): Workspace {
     id: 'test-id-1',
     name: 'Test Workspace',
     icon: '🖥️',
+    color: '#E8636B',
     order: 0,
     isDefault: false,
     createdAt: '2025-01-01T00:00:00.000Z',

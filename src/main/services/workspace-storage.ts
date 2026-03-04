@@ -2,7 +2,7 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import type { Workspace } from '../../shared/types';
-import { createEmptyWorkspace } from '../../shared/constants';
+import { createEmptyWorkspace, randomWorkspaceColor } from '../../shared/constants';
 
 let storageDir = '';
 
@@ -96,6 +96,7 @@ export async function createWorkspace(
     ...createEmptyWorkspace(id, data.name ?? 'Untitled', order),
     ...data,
     id, // Always use generated id
+    color: data.color ?? randomWorkspaceColor(), // Random color if not provided
     order, // Always use computed order
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
@@ -154,6 +155,7 @@ export async function createDefaultWorkspace(systemState: {
     ...createEmptyWorkspace(id, 'Default', -1),
     isDefault: true,
     icon: '\u{1F3E0}',
+    color: '#E8636B',
     order: -1,
     createdAt: now,
     updatedAt: now,

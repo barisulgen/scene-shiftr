@@ -18,11 +18,21 @@ export const BUILT_IN_SOUNDS = [
   { id: 'builtin:chime', name: 'Chime' },
 ] as const;
 
+export const WORKSPACE_COLORS = [
+  '#E8636B', '#E89B5B', '#E8D45B', '#5BE88A',
+  '#5B8EE8', '#8B5BA0', '#E85BAE', '#5BD4E8',
+] as const;
+
+export function randomWorkspaceColor(): string {
+  return WORKSPACE_COLORS[Math.floor(Math.random() * WORKSPACE_COLORS.length)];
+}
+
 export function createEmptyWorkspace(id: string, name: string, order: number): Workspace {
   return {
     id,
     name,
     icon: '🖥️',
+    color: '#E8636B',
     order,
     isDefault: false,
     createdAt: new Date().toISOString(),

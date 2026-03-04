@@ -97,6 +97,13 @@ function SpeakerIcon(): JSX.Element {
 
 /* ─── Helpers ─── */
 
+function hexToRgba(hex: string, alpha: number): string {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
 function getFilename(path: string): string {
   const parts = path.replace(/\\/g, '/').split('/');
   return parts[parts.length - 1] || path;
@@ -334,7 +341,10 @@ export default function WorkspaceDetail(): JSX.Element | null {
             {/* Emoji container */}
             <div
               className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 text-4xl"
-              style={{ backgroundColor: 'var(--bg-card)' }}
+              style={{
+                backgroundColor: 'var(--bg-card)',
+                border: `1px solid ${hexToRgba(workspace.color || '#E8636B', 0.25)}`,
+              }}
             >
               {workspace.icon}
             </div>
@@ -511,7 +521,7 @@ export default function WorkspaceDetail(): JSX.Element | null {
               onClick={handleActivate}
               className="w-full h-12 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold text-white cursor-pointer transition-all duration-150 hover:brightness-110"
               style={{
-                background: 'var(--gradient-activate)',
+                background: `linear-gradient(135deg, ${workspace.color || '#E8636B'}, #7B8EF5)`,
               }}
               onMouseDown={(e) => {
                 e.currentTarget.style.transform = 'scale(0.97)';
