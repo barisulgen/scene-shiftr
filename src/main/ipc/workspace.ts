@@ -145,7 +145,7 @@ export function registerWorkspaceHandlers(): void {
         audioDevice: null,
         volume: null,
       },
-      display: (data.display as { wallpaper: string | null }) || { wallpaper: null },
+      display: (data.display as { wallpaper: string | null; screensaver: string | null }) || { wallpaper: null, screensaver: null },
       audio: (data.audio as { transitionSound: string | null; playlistUri: string | null }) || {
         transitionSound: null,
         playlistUri: null,

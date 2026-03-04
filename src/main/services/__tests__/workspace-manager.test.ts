@@ -110,6 +110,7 @@ function createTestWorkspace(overrides: Partial<Workspace> = {}): Workspace {
     },
     display: {
       wallpaper: null,
+      screensaver: null,
     },
     audio: {
       transitionSound: null,
@@ -188,6 +189,7 @@ describe('workspace-manager', () => {
       const workspace = createTestWorkspace({
         display: {
           wallpaper: 'C:\\Pictures\\work-wallpaper.jpg',
+          screensaver: null,
         },
       });
       const sender = createMockSender();
@@ -203,7 +205,7 @@ describe('workspace-manager', () => {
 
     it('does not set wallpaper if null', async () => {
       const workspace = createTestWorkspace({
-        display: { wallpaper: null },
+        display: { wallpaper: null, screensaver: null },
       });
       const sender = createMockSender();
 
@@ -341,6 +343,7 @@ describe('workspace-manager', () => {
         },
         display: {
           wallpaper: 'C:\\wallpaper.jpg',
+          screensaver: null,
         },
       });
       const sender = createMockSender();
@@ -558,6 +561,7 @@ describe('workspace-manager', () => {
         id: 'ws-new',
         display: {
           wallpaper: 'C:\\Pictures\\new-wallpaper.jpg',
+          screensaver: null,
         },
         system: {
           audioDevice: 'Headphones (USB)',

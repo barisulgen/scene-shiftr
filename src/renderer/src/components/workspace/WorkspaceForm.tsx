@@ -55,6 +55,7 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
   const [volumeEnabled, setVolumeEnabledRaw] = useState(workspace?.system.volume != null);
   const [audioDevices, setAudioDevices] = useState<{ id: string; name: string }[]>([]);
   const [wallpaper, setWallpaper] = useState<string | null>(workspace?.display.wallpaper ?? null);
+  const [screensaver, setScreensaver] = useState<string | null>(workspace?.display.screensaver ?? null);
   const [transitionSound, setTransitionSoundRaw] = useState<string | null>(workspace?.audio.transitionSound ?? null);
   const [color, setColorRaw] = useState(workspace?.color ?? (isEdit ? '#E8636B' : randomWorkspaceColor()));
   const [musicEnabled, setMusicEnabledRaw] = useState(!!workspace?.audio.playlistUri);
@@ -139,6 +140,21 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
     }
   };
 
+  const handleBrowseScreensaver = async (): Promise<void> => {
+    try {
+      const filePath = await window.api.openFileDialog([
+        { name: 'Screensavers', extensions: ['scr'] },
+        { name: 'All Files', extensions: ['*'] },
+      ]);
+      if (filePath) {
+        setScreensaver(filePath);
+        markDirty();
+      }
+    } catch (err) {
+      console.error('Failed to open file dialog:', err);
+    }
+  };
+
   const handleSave = async (): Promise<void> => {
     if (!name.trim()) return;
     setSaving(true);
@@ -157,6 +173,7 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
       },
       display: {
         wallpaper,
+        screensaver,
       },
       audio: {
         transitionSound,
@@ -190,6 +207,11 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
   // Extract wallpaper filename for display
   const wallpaperFileName = wallpaper
     ? wallpaper.replace(/\\/g, '/').split('/').pop() ?? wallpaper
+    : null;
+
+  // Extract screensaver filename for display
+  const screensaverFileName = screensaver
+    ? screensaver.replace(/\\/g, '/').split('/').pop() ?? screensaver
     : null;
 
   return (
@@ -389,25 +411,31 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
                   </div>
                 </div>
 
-                {/* --- Folders --- */}
-                <div className="mb-6">
-                  <div className="flex items-center gap-2 mb-3">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                      className="w-4 h-4"
-                      style={{ color: '#8888A0' }}
-                    >
-                      <path d="M3.75 3A1.75 1.75 0 0 0 2 4.75v3.26a3.235 3.235 0 0 1 1.75-.51h12.5c.644 0 1.245.188 1.75.51V6.75A1.75 1.75 0 0 0 16.25 5h-4.836a.25.25 0 0 1-.177-.073L9.823 3.513A1.75 1.75 0 0 0 8.586 3H3.75ZM3.75 9A1.75 1.75 0 0 0 2 10.75v4.5c0 .966.784 1.75 1.75 1.75h12.5A1.75 1.75 0 0 0 18 15.25v-4.5A1.75 1.75 0 0 0 16.25 9H3.75Z" />
-                    </svg>
-                    <span className="text-sm font-medium flex-1" style={{ color: 'var(--text-primary)' }}>
-                      Folders
-                    </span>
+                {/* --- Folders + URLs side by side --- */}
+                <div className="grid grid-cols-2 gap-6">
+                  {/* Folders */}
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                        className="w-4 h-4"
+                        style={{ color: '#8888A0' }}
+                      >
+                        <path d="M3.75 3A1.75 1.75 0 0 0 2 4.75v3.26a3.235 3.235 0 0 1 1.75-.51h12.5c.644 0 1.245.188 1.75.51V6.75A1.75 1.75 0 0 0 16.25 5h-4.836a.25.25 0 0 1-.177-.073L9.823 3.513A1.75 1.75 0 0 0 8.586 3H3.75ZM3.75 9A1.75 1.75 0 0 0 2 10.75v4.5c0 .966.784 1.75 1.75 1.75h12.5A1.75 1.75 0 0 0 18 15.25v-4.5A1.75 1.75 0 0 0 16.25 9H3.75Z" />
+                      </svg>
+                      <span className="text-sm font-medium flex-1" style={{ color: 'var(--text-primary)' }}>
+                        Folders
+                      </span>
+                      <span className="text-xs shrink-0" style={{ color: '#8888A0' }}>Close other folders</span>
+                      <ToggleSwitch checked={closeFolders} onChange={setCloseFolders} />
+                    </div>
+
                     <button
                       type="button"
                       onClick={handleAddFolder}
-                      className="text-xs cursor-pointer transition-colors duration-150 px-2.5 py-1 rounded-lg"
+                      className="text-xs cursor-pointer transition-colors duration-150 px-2.5 py-1 rounded-lg mt-1 mb-2"
                       style={{
                         color: '#8888A0',
                         background: 'transparent',
@@ -424,184 +452,176 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
                     >
                       + Add Folder
                     </button>
-                  </div>
 
-                  {/* Close other folders toggle */}
-                  <div className="flex items-center justify-between py-2 mb-2">
-                    <span className="text-xs" style={{ color: '#8888A0' }}>
-                      Close other folders
-                    </span>
-                    <ToggleSwitch checked={closeFolders} onChange={setCloseFolders} />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    {folders.length === 0 && (
-                      <p className="text-xs py-3 text-center" style={{ color: '#5a5a6e' }}>
-                        No folders added
-                      </p>
-                    )}
-                    {folders.map((folder, idx) => (
-                      <div
-                        key={idx}
-                        className="flex items-center gap-2 px-3 py-2 rounded-lg"
-                        style={{ background: 'rgba(255,255,255,0.04)' }}
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 16 16"
-                          fill="currentColor"
-                          className="w-3.5 h-3.5 shrink-0"
-                          style={{ color: '#5a5a6e' }}
-                        >
-                          <path d="M2 3.5A1.5 1.5 0 0 1 3.5 2h2.879a1.5 1.5 0 0 1 1.06.44l1.122 1.12A1.5 1.5 0 0 0 9.62 4H12.5A1.5 1.5 0 0 1 14 5.5v1.382a1.5 1.5 0 0 0-1-.382h-10a1.5 1.5 0 0 0-1 .382V3.5ZM2 9.607a1.5 1.5 0 0 1 1-1.415V13.5A1.5 1.5 0 0 0 4.5 15h7a1.5 1.5 0 0 0 1.5-1.5V8.192a1.5 1.5 0 0 1 1 1.415V13.5a3 3 0 0 1-3 3h-7a3 3 0 0 1-3-3V9.607Z" />
-                        </svg>
-                        <span
-                          className="flex-1 text-xs truncate"
-                          style={{ color: 'var(--text-secondary)' }}
-                        >
-                          {folder}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveFolder(idx)}
-                          className="shrink-0 cursor-pointer transition-colors duration-150"
-                          style={{ color: '#5a5a6e' }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.color = 'var(--text-primary)';
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.color = '#5a5a6e';
-                          }}
+                    <div className="space-y-1.5">
+                      {folders.length === 0 && (
+                        <p className="text-xs py-3 text-center" style={{ color: '#5a5a6e' }}>
+                          No folders added
+                        </p>
+                      )}
+                      {folders.map((folder, idx) => (
+                        <div
+                          key={idx}
+                          className="flex items-center gap-2 px-3 py-2 rounded-lg"
+                          style={{ background: 'rgba(255,255,255,0.04)' }}
                         >
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 16 16"
                             fill="currentColor"
-                            className="w-3.5 h-3.5"
+                            className="w-3.5 h-3.5 shrink-0"
+                            style={{ color: '#5a5a6e' }}
                           >
-                            <path d="M5.28 4.22a.75.75 0 0 0-1.06 1.06L6.94 8l-2.72 2.72a.75.75 0 1 0 1.06 1.06L8 9.06l2.72 2.72a.75.75 0 1 0 1.06-1.06L9.06 8l2.72-2.72a.75.75 0 0 0-1.06-1.06L8 6.94 5.28 4.22Z" />
+                            <path d="M2 3.5A1.5 1.5 0 0 1 3.5 2h2.879a1.5 1.5 0 0 1 1.06.44l1.122 1.12A1.5 1.5 0 0 0 9.62 4H12.5A1.5 1.5 0 0 1 14 5.5v1.382a1.5 1.5 0 0 0-1-.382h-10a1.5 1.5 0 0 0-1 .382V3.5ZM2 9.607a1.5 1.5 0 0 1 1-1.415V13.5A1.5 1.5 0 0 0 4.5 15h7a1.5 1.5 0 0 0 1.5-1.5V8.192a1.5 1.5 0 0 1 1 1.415V13.5a3 3 0 0 1-3 3h-7a3 3 0 0 1-3-3V9.607Z" />
                           </svg>
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* --- URLs --- */}
-                <div>
-                  <div className="flex items-center gap-2 mb-3">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                      className="w-4 h-4"
-                      style={{ color: '#8888A0' }}
-                    >
-                      <path d="M12.232 4.232a2.5 2.5 0 0 1 3.536 3.536l-1.225 1.224a.75.75 0 0 0 1.061 1.06l1.224-1.224a4 4 0 0 0-5.656-5.656l-3 3a4 4 0 0 0 .225 5.865.75.75 0 0 0 .977-1.138 2.5 2.5 0 0 1-.142-3.667l3-3Z" />
-                      <path d="M11.603 7.963a.75.75 0 0 0-.977 1.138 2.5 2.5 0 0 1 .142 3.667l-3 3a2.5 2.5 0 0 1-3.536-3.536l1.225-1.224a.75.75 0 0 0-1.061-1.06l-1.224 1.224a4 4 0 1 0 5.656 5.656l3-3a4 4 0 0 0-.225-5.865Z" />
-                    </svg>
-                    <span className="text-sm font-medium flex-1" style={{ color: 'var(--text-primary)' }}>
-                      URLs
-                    </span>
-                  </div>
-
-                  {/* URL input + Add button */}
-                  <div className="flex gap-2 mb-3">
-                    <input
-                      type="text"
-                      value={urlInput}
-                      onChange={(e) => setUrlInput(e.target.value)}
-                      onKeyDown={handleUrlKeyDown}
-                      placeholder="https://example.com"
-                      className="flex-1 focus:outline-none"
-                      style={inputStyle}
-                      onFocus={(e) => { e.currentTarget.style.borderColor = inputFocusBorder; }}
-                      onBlur={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; }}
-                    />
-                    <button
-                      type="button"
-                      onClick={handleAddUrl}
-                      disabled={!urlInput.trim()}
-                      className="shrink-0 px-4 rounded-lg text-sm font-medium cursor-pointer transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
-                      style={{
-                        background: 'rgba(255,255,255,0.04)',
-                        border: '1px solid rgba(255,255,255,0.08)',
-                        color: '#8888A0',
-                      }}
-                      onMouseEnter={(e) => {
-                        if (!e.currentTarget.disabled) {
-                          e.currentTarget.style.color = 'var(--text-primary)';
-                          e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)';
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.color = '#8888A0';
-                        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
-                      }}
-                    >
-                      Add
-                    </button>
+                          <span
+                            className="flex-1 text-xs truncate"
+                            style={{ color: 'var(--text-secondary)' }}
+                          >
+                            {folder}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveFolder(idx)}
+                            className="shrink-0 cursor-pointer transition-colors duration-150"
+                            style={{ color: '#5a5a6e' }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.color = 'var(--text-primary)';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.color = '#5a5a6e';
+                            }}
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 16 16"
+                              fill="currentColor"
+                              className="w-3.5 h-3.5"
+                            >
+                              <path d="M5.28 4.22a.75.75 0 0 0-1.06 1.06L6.94 8l-2.72 2.72a.75.75 0 1 0 1.06 1.06L8 9.06l2.72 2.72a.75.75 0 1 0 1.06-1.06L9.06 8l2.72-2.72a.75.75 0 0 0-1.06-1.06L8 6.94 5.28 4.22Z" />
+                            </svg>
+                          </button>
+                        </div>
+                      ))}
+                    </div>
                   </div>
 
-                  <div className="space-y-1.5">
-                    {urls.length === 0 && (
-                      <p className="text-xs py-3 text-center" style={{ color: '#5a5a6e' }}>
-                        No URLs added
-                      </p>
-                    )}
-                    {urls.map((url, idx) => (
-                      <div
-                        key={idx}
-                        className="flex items-center gap-2 px-3 py-2 rounded-lg"
-                        style={{ background: 'rgba(255,255,255,0.04)' }}
+                  {/* URLs */}
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                        className="w-4 h-4"
+                        style={{ color: '#8888A0' }}
                       >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 16 16"
-                          fill="currentColor"
-                          className="w-3.5 h-3.5 shrink-0"
-                          style={{ color: '#5a5a6e' }}
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M8.914 6.025a.75.75 0 0 1 1.06 0 3.5 3.5 0 0 1 0 4.95l-2 2a3.5 3.5 0 0 1-5.396-4.402.75.75 0 0 1 1.251.827 2 2 0 0 0 3.085 2.514l2-2a2 2 0 0 0 0-2.828.75.75 0 0 1 0-1.06Z"
-                            clipRule="evenodd"
-                          />
-                          <path
-                            fillRule="evenodd"
-                            d="M7.086 9.975a.75.75 0 0 1-1.06 0 3.5 3.5 0 0 1 0-4.95l2-2a3.5 3.5 0 0 1 5.396 4.402.75.75 0 0 1-1.251-.827 2 2 0 0 0-3.085-2.514l-2 2a2 2 0 0 0 0 2.828.75.75 0 0 1 0 1.06Z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                        <span
-                          className="flex-1 text-xs truncate"
-                          style={{ color: 'var(--text-secondary)' }}
-                        >
-                          {url}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveUrl(idx)}
-                          className="shrink-0 cursor-pointer transition-colors duration-150"
-                          style={{ color: '#5a5a6e' }}
-                          onMouseEnter={(e) => {
+                        <path d="M12.232 4.232a2.5 2.5 0 0 1 3.536 3.536l-1.225 1.224a.75.75 0 0 0 1.061 1.06l1.224-1.224a4 4 0 0 0-5.656-5.656l-3 3a4 4 0 0 0 .225 5.865.75.75 0 0 0 .977-1.138 2.5 2.5 0 0 1-.142-3.667l3-3Z" />
+                        <path d="M11.603 7.963a.75.75 0 0 0-.977 1.138 2.5 2.5 0 0 1 .142 3.667l-3 3a2.5 2.5 0 0 1-3.536-3.536l1.225-1.224a.75.75 0 0 0-1.061-1.06l-1.224 1.224a4 4 0 1 0 5.656 5.656l3-3a4 4 0 0 0-.225-5.865Z" />
+                      </svg>
+                      <span className="text-sm font-medium flex-1" style={{ color: 'var(--text-primary)' }}>
+                        URLs
+                      </span>
+                    </div>
+
+                    {/* URL input + Add button */}
+                    <div className="flex gap-2 mb-3">
+                      <input
+                        type="text"
+                        value={urlInput}
+                        onChange={(e) => setUrlInput(e.target.value)}
+                        onKeyDown={handleUrlKeyDown}
+                        placeholder="https://example.com"
+                        className="flex-1 focus:outline-none"
+                        style={inputStyle}
+                        onFocus={(e) => { e.currentTarget.style.borderColor = inputFocusBorder; }}
+                        onBlur={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; }}
+                      />
+                      <button
+                        type="button"
+                        onClick={handleAddUrl}
+                        disabled={!urlInput.trim()}
+                        className="shrink-0 px-4 rounded-lg text-sm font-medium cursor-pointer transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
+                        style={{
+                          background: 'rgba(255,255,255,0.04)',
+                          border: '1px solid rgba(255,255,255,0.08)',
+                          color: '#8888A0',
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!e.currentTarget.disabled) {
                             e.currentTarget.style.color = 'var(--text-primary)';
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.color = '#5a5a6e';
-                          }}
+                            e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.color = '#8888A0';
+                          e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
+                        }}
+                      >
+                        Add
+                      </button>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      {urls.length === 0 && (
+                        <p className="text-xs py-3 text-center" style={{ color: '#5a5a6e' }}>
+                          No URLs added
+                        </p>
+                      )}
+                      {urls.map((url, idx) => (
+                        <div
+                          key={idx}
+                          className="flex items-center gap-2 px-3 py-2 rounded-lg"
+                          style={{ background: 'rgba(255,255,255,0.04)' }}
                         >
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 16 16"
                             fill="currentColor"
-                            className="w-3.5 h-3.5"
+                            className="w-3.5 h-3.5 shrink-0"
+                            style={{ color: '#5a5a6e' }}
                           >
-                            <path d="M5.28 4.22a.75.75 0 0 0-1.06 1.06L6.94 8l-2.72 2.72a.75.75 0 1 0 1.06 1.06L8 9.06l2.72 2.72a.75.75 0 1 0 1.06-1.06L9.06 8l2.72-2.72a.75.75 0 0 0-1.06-1.06L8 6.94 5.28 4.22Z" />
+                            <path
+                              fillRule="evenodd"
+                              d="M8.914 6.025a.75.75 0 0 1 1.06 0 3.5 3.5 0 0 1 0 4.95l-2 2a3.5 3.5 0 0 1-5.396-4.402.75.75 0 0 1 1.251.827 2 2 0 0 0 3.085 2.514l2-2a2 2 0 0 0 0-2.828.75.75 0 0 1 0-1.06Z"
+                              clipRule="evenodd"
+                            />
+                            <path
+                              fillRule="evenodd"
+                              d="M7.086 9.975a.75.75 0 0 1-1.06 0 3.5 3.5 0 0 1 0-4.95l2-2a3.5 3.5 0 0 1 5.396 4.402.75.75 0 0 1-1.251-.827 2 2 0 0 0-3.085-2.514l-2 2a2 2 0 0 0 0 2.828.75.75 0 0 1 0 1.06Z"
+                              clipRule="evenodd"
+                            />
                           </svg>
-                        </button>
-                      </div>
-                    ))}
+                          <span
+                            className="flex-1 text-xs truncate"
+                            style={{ color: 'var(--text-secondary)' }}
+                          >
+                            {url}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveUrl(idx)}
+                            className="shrink-0 cursor-pointer transition-colors duration-150"
+                            style={{ color: '#5a5a6e' }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.color = 'var(--text-primary)';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.color = '#5a5a6e';
+                            }}
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 16 16"
+                              fill="currentColor"
+                              className="w-3.5 h-3.5"
+                            >
+                              <path d="M5.28 4.22a.75.75 0 0 0-1.06 1.06L6.94 8l-2.72 2.72a.75.75 0 1 0 1.06 1.06L8 9.06l2.72 2.72a.75.75 0 1 0 1.06-1.06L9.06 8l2.72-2.72a.75.75 0 0 0-1.06-1.06L8 6.94 5.28 4.22Z" />
+                            </svg>
+                          </button>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -647,8 +667,8 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
                   </select>
                 </div>
 
-                {/* Volume */}
-                <div>
+                {/* Volume — padded to align slider with the audio device dropdown */}
+                <div className="pt-[3px]">
                   <div className="flex items-center justify-between mb-1.5">
                     <label className="text-xs" style={{ color: '#8888A0' }}>
                       Volume
@@ -666,7 +686,7 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
                       </span>
                     </label>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 mt-1">
                     <input
                       type="range"
                       min={0}
@@ -694,82 +714,22 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
                 </div>
               </div>
 
-              {/* Wallpaper */}
-              <div className="mb-4">
-                <label
-                  className="block text-xs mb-1.5"
-                  style={{ color: '#8888A0' }}
-                >
-                  Wallpaper
-                </label>
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={handleBrowseWallpaper}
-                    className="shrink-0 px-4 py-2.5 rounded-lg text-sm cursor-pointer transition-colors duration-150"
-                    style={{
-                      background: 'rgba(255,255,255,0.04)',
-                      border: '1px solid rgba(255,255,255,0.08)',
-                      color: '#8888A0',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.color = 'var(--text-primary)';
-                      e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.color = '#8888A0';
-                      e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
-                    }}
-                  >
-                    Browse...
-                  </button>
-                  {wallpaper ? (
-                    <div className="flex items-center gap-2 flex-1 min-w-0">
-                      <img
-                        src={`file://${wallpaper.replace(/\\/g, '/')}`}
-                        alt="Wallpaper preview"
-                        className="w-12 h-12 rounded-lg object-cover shrink-0"
-                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                      />
-                      <span
-                        className="text-xs truncate flex-1"
-                        style={{ color: 'var(--text-secondary)' }}
-                      >
-                        {wallpaperFileName}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => { setWallpaper(null); markDirty(); }}
-                        className="shrink-0 text-xs cursor-pointer transition-colors duration-150"
-                        style={{ color: '#5a5a6e' }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.color = 'var(--text-primary)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.color = '#5a5a6e';
-                        }}
-                      >
-                        Clear
-                      </button>
-                    </div>
-                  ) : (
-                    <span className="text-xs" style={{ color: '#5a5a6e' }}>
-                      Not set
-                    </span>
-                  )}
-                </div>
-              </div>
-
               {/* Transition Sound + Playlist URI — only for non-default */}
               {!isDefaultWorkspace && (
                 <>
                   {/* Transition Sound */}
                   <div className="mb-4">
+                    <label
+                      className="block text-xs mb-1.5"
+                      style={{ color: '#8888A0' }}
+                    >
+                      Transition Sound
+                    </label>
                     <TransitionSoundPicker value={transitionSound} onChange={setTransitionSound} />
                   </div>
 
                   {/* Playlist URI */}
-                  <div>
+                  <div className="mb-4">
                     <div className="flex items-center justify-between mb-1.5">
                       <label className="text-xs" style={{ color: '#8888A0' }}>
                         Playlist URI
@@ -790,6 +750,137 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
                   </div>
                 </>
               )}
+
+              {/* Wallpaper + Screensaver — side by side */}
+              <div className="grid grid-cols-2 gap-4">
+                {/* Wallpaper */}
+                <div>
+                  <label
+                    className="block text-xs mb-1.5"
+                    style={{ color: '#8888A0' }}
+                  >
+                    Wallpaper
+                  </label>
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={handleBrowseWallpaper}
+                      className="shrink-0 px-4 py-2.5 rounded-lg text-sm cursor-pointer transition-colors duration-150"
+                      style={{
+                        background: 'rgba(255,255,255,0.04)',
+                        border: '1px solid rgba(255,255,255,0.08)',
+                        color: '#8888A0',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.color = 'var(--text-primary)';
+                        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.color = '#8888A0';
+                        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
+                      }}
+                    >
+                      Browse...
+                    </button>
+                    {wallpaper ? (
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                        <img
+                          src={`file://${wallpaper.replace(/\\/g, '/')}`}
+                          alt="Wallpaper preview"
+                          className="w-12 h-12 rounded-lg object-cover shrink-0"
+                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                        />
+                        <span
+                          className="text-xs truncate flex-1"
+                          style={{ color: 'var(--text-secondary)' }}
+                        >
+                          {wallpaperFileName}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => { setWallpaper(null); markDirty(); }}
+                          className="shrink-0 text-xs cursor-pointer transition-colors duration-150"
+                          style={{ color: '#5a5a6e' }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.color = 'var(--text-primary)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.color = '#5a5a6e';
+                          }}
+                        >
+                          Clear
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="text-xs" style={{ color: '#5a5a6e' }}>
+                        Not set
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Screensaver — not shown for default workspace */}
+                {!isDefaultWorkspace && (
+                  <div>
+                    <label
+                      className="block text-xs mb-1.5"
+                      style={{ color: '#8888A0' }}
+                    >
+                      Screensaver
+                    </label>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={handleBrowseScreensaver}
+                        className="shrink-0 px-4 py-2.5 rounded-lg text-sm cursor-pointer transition-colors duration-150"
+                        style={{
+                          background: 'rgba(255,255,255,0.04)',
+                          border: '1px solid rgba(255,255,255,0.08)',
+                          color: '#8888A0',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.color = 'var(--text-primary)';
+                          e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.color = '#8888A0';
+                          e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
+                        }}
+                      >
+                        Browse...
+                      </button>
+                      {screensaver ? (
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <span
+                            className="text-xs truncate flex-1"
+                            style={{ color: 'var(--text-secondary)' }}
+                          >
+                            {screensaverFileName}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => { setScreensaver(null); markDirty(); }}
+                            className="shrink-0 text-xs cursor-pointer transition-colors duration-150"
+                            style={{ color: '#5a5a6e' }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.color = 'var(--text-primary)';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.color = '#5a5a6e';
+                            }}
+                          >
+                            Clear
+                          </button>
+                        </div>
+                      ) : (
+                        <span className="text-xs" style={{ color: '#5a5a6e' }}>
+                          Not set
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 

@@ -20,6 +20,7 @@ export interface Workspace {
   };
   display: {
     wallpaper: string | null;
+    screensaver: string | null;
   };
   audio: {
     transitionSound: string | null;

@@ -165,6 +165,7 @@ export async function createDefaultWorkspace(systemState: {
     },
     display: {
       wallpaper: systemState.wallpaper || null,
+      screensaver: null,
     },
   };
 

@@ -47,6 +47,7 @@ export function createEmptyWorkspace(id: string, name: string, order: number): W
     },
     display: {
       wallpaper: null,
+      screensaver: null,
     },
     audio: {
       transitionSound: null,
