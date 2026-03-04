@@ -269,18 +269,9 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
                 onFocus={(e) => { e.currentTarget.style.borderColor = inputFocusBorder; }}
                 onBlur={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; }}
               />
-            </div>
-
-            {/* Color picker — hidden for default workspace */}
-            {!isDefaultWorkspace && (
-              <div className="mt-4">
-                <div
-                  className="text-[10px] font-semibold uppercase mb-2"
-                  style={{ color: '#5a5a6e', letterSpacing: '0.15em' }}
-                >
-                  Color
-                </div>
-                <div className="flex items-center gap-2">
+              {/* Color swatches — inline, right of name input */}
+              {!isDefaultWorkspace && (
+                <div className="flex items-center gap-1.5 shrink-0">
                   {WORKSPACE_COLORS.map((c) => (
                     <button
                       key={c}
@@ -288,14 +279,14 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
                       onClick={() => setColor(c)}
                       className="shrink-0 rounded-full cursor-pointer transition-transform duration-100"
                       style={{
-                        width: '24px',
-                        height: '24px',
+                        width: '20px',
+                        height: '20px',
                         backgroundColor: c,
                         border: color === c ? '2px solid #ffffff' : '2px solid transparent',
-                        transform: color === c ? 'scale(1.1)' : 'scale(1)',
+                        transform: color === c ? 'scale(1.15)' : 'scale(1)',
                       }}
                       onMouseEnter={(e) => {
-                        if (color !== c) e.currentTarget.style.transform = 'scale(1.1)';
+                        if (color !== c) e.currentTarget.style.transform = 'scale(1.15)';
                       }}
                       onMouseLeave={(e) => {
                         if (color !== c) e.currentTarget.style.transform = 'scale(1)';
@@ -303,8 +294,8 @@ export default function WorkspaceForm({ workspace }: WorkspaceFormProps): JSX.El
                     />
                   ))}
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
           {/* ======== GROUP 2 — WHAT HAPPENS ======== */}
